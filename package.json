@@ -1,8 +1,8 @@
 {
-  "name": "npm-module-boilerplate",
+  "name": "awilix",
   "version": "0.0.1",
   "description": "A boilerplate for authoring npm modules",
-  "main": "lib/npm-module-boilerplate.js",
+  "main": "lib/awilix.js",
   "engines": {
     "node": ">=4.0.0"
   },
@@ -14,16 +14,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jeffijoe/npm-module-boilerplate.git"
+    "url": "git+https://github.com/jeffijoe/awilix.git"
   },
   "keywords": [
+    "dependency-injection",
+    "di",
+    "container",
+    "soc",
+    "service-locator"
   ],
   "author": "Jeff Hansen <jeff@jeffijoe.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jeffijoe/npm-module-boilerplate/issues"
+    "url": "https://github.com/jeffijoe/awilix/issues"
   },
-  "homepage": "https://github.com/jeffijoe/npm-module-boilerplate#readme",
+  "homepage": "https://github.com/jeffijoe/awilix#readme",
   "devDependencies": {
     "chai": "^3.5.0",
     "eslint": "^2.2.0",
@@ -33,5 +38,6 @@
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
+    "glob": "^7.0.0"
   }
 }
