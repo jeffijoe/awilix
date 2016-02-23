@@ -29,16 +29,10 @@ Well, let me tell you!
     * If you decide to clone, remove the `.git` folder so you don't get unnecessary git history.
 2. Find and replace all occurences of `npm-module-boilerplate` and replace
    it with your module name.
-    * Here's a `bash` script (works on Git Bash for Windows as well):
-
-      ```bash
-      find ./ -type f -print0 | xargs -0 sed -i 's/npm-module-boilerplate/your-awesome-module/g'
-      ```
-
 3. Edit `package.json`, `LICENSE.md` and `README.md` for your own needs.
 4. `npm install` and start coding! open 2 terminals, one for linting (`npm run lint-watch`) and one for testing (`npm run test-watch`) - at least that's what I do. ;)
-5. Write your code in `lib/your-awesome-module.js` (this is the main file)
-6. Write your tests in `test/lib/your-awesome-module.spec.js` (.. or, don't?)
+5. Write your code in `lib/npm-module-boilerplate.js` (this is the main file)
+6. Write your tests in `test/lib/npm-module-boilerplate.spec.js` (.. or, don't?)
 7. Profit!
 
 # Author
