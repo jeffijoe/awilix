@@ -1,7 +1,7 @@
 {
   "name": "awilix",
   "version": "0.0.1",
-  "description": "A boilerplate for authoring npm modules",
+  "description": "Simple dependency injection container + helper utilities to facilitate wiring of modules",
   "main": "lib/awilix.js",
   "engines": {
     "node": ">=4.0.0"
