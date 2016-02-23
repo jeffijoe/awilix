@@ -28,7 +28,7 @@ Well, let me tell you!
 1. Clone this repo, or download it as a zip
     * If you decide to clone, remove the `.git` folder so you don't get unnecessary git history.
 2. Find and replace all occurences of `npm-module-boilerplate` and replace
-   it with your module name.
+   it with your module name - filenames, too!.
 3. Edit `package.json`, `LICENSE.md` and `README.md` for your own needs.
 4. `npm install` and start coding! open 2 terminals, one for linting (`npm run lint-watch`) and one for testing (`npm run test-watch`) - at least that's what I do. ;)
 5. Write your code in `lib/npm-module-boilerplate.js` (this is the main file)
