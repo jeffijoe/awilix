@@ -1,0 +1,41 @@
+{
+  "name": "npm-module-boilerplate",
+  "version": "0.0.1",
+  "description": "A boilerplate for authoring npm modules",
+  "main": "lib/npm-module-boilerplate.js",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "scripts": {
+    "test": "mocha test/**/*.js --require test/index.js",
+    "test-watch": "npm run test -- --watch",
+    "lint": "esw lib/ test/",
+    "lint-watch": "npm run lint -- --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeffijoe/npm-module-boilerplate.git"
+  },
+  "keywords": [
+    "env",
+    "environment",
+    "yaml"
+  ],
+  "author": "Jeff Hansen <jeff@jeffijoe.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jeffijoe/npm-module-boilerplate/issues"
+  },
+  "homepage": "https://github.com/jeffijoe/npm-module-boilerplate#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "eslint": "^2.2.0",
+    "eslint-watch": "^2.1.7",
+    "mocha": "^2.4.5",
+    "sinon": "^1.17.3",
+    "sinon-chai": "^2.8.0"
+  },
+  "dependencies": {
+    "js-yaml": "^3.5.3"
+  }
+}
