@@ -14,7 +14,7 @@ npm install -s awilix
 
 ## Usage
 
-Todo..
+Todo...
 
 ## Testing
 
