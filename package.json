@@ -17,9 +17,6 @@
     "url": "git+https://github.com/jeffijoe/npm-module-boilerplate.git"
   },
   "keywords": [
-    "env",
-    "environment",
-    "yaml"
   ],
   "author": "Jeff Hansen <jeff@jeffijoe.com>",
   "license": "MIT",
@@ -36,6 +33,5 @@
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
-    "js-yaml": "^3.5.3"
   }
 }
