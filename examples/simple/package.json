@@ -1,0 +1,14 @@
+{
+  "name": "awilix-example",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jeff Hansen <jeff@jeffijoe.com>",
+  "license": "MIT",
+  "dependencies": {
+    "awilix": "../../"
+  }
+}

@@ -15,21 +15,20 @@ describe('loadModules', function() {
     const container = {
 
     };
+    const moduleLookupResult = Object.keys(modules).map(key => ({
+      name: key.replace('.js', ''),
+      path: key
+    }));
     const deps = {
       container,
       listModules: spy(
-        () => Promise.resolve(
-          Object.keys(modules).map(key => ({
-            name: key.replace('.js', ''),
-            path: key
-          }))
-        )
+        () => Promise.resolve(moduleLookupResult)
       ),
       require: spy(path => modules[path])
     };
     const opts = {};
     return loadModules(deps, 'anything', opts).then(result => {
-      result.should.equal(container);
+      result.should.deep.equal({ loadedModules: moduleLookupResult });
       Object.keys(modules).map(x => modules[x]).forEach(m => {
         if (m.default) m = m.default;
         m.should.have.been.calledWith(container);

@@ -11,7 +11,7 @@
     "test-watch": "npm run test -- --watch",
     "lint": "esw lib/ test/",
     "lint-watch": "npm run lint -- --watch",
-    "cover": "istanbul cover ./node_modules/mocha/bin/_mocha -- test/**/*.js --require test/index.js",
+    "cover": "istanbul cover  -x \"**example/**\" ./node_modules/mocha/bin/_mocha -- test/**/*.js --require test/index.js",
     "coveralls": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- test/**/*.js --require test/index.js && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "repository": {
