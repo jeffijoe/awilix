@@ -1,3 +1,5 @@
+'use strict';
+
 const createContainer = require('../../lib/createContainer');
 
 describe('createContainer', function() {

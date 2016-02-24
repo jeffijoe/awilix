@@ -2,7 +2,9 @@
 
 [![npm version](https://badge.fury.io/js/awilix.svg)](https://badge.fury.io/js/awilix)
 [![Dependency Status](https://david-dm.org/jeffijoe/awilix.svg)](https://david-dm.org/jeffijoe/awilix)
+[![devDependency Status](https://david-dm.org/jeffijoe/awilix/dev-status.svg)](https://david-dm.org/jeffijoe/awilix#info=devDependencies)
 [![Build Status](https://travis-ci.org/jeffijoe/awilix.svg?branch=master)](https://travis-ci.org/jeffijoe/awilix)
+[![Coverage Status](https://coveralls.io/repos/github/jeffijoe/awilix/badge.svg?branch=master)](https://coveralls.io/github/jeffijoe/awilix?branch=master)
 
 Simple dependency injection container for node.js
 

@@ -4,3 +4,7 @@ node_js:
 
 # Lint errors should trigger a failure.
 before_script: npm run lint
+
+# Code coverage
+after_success:
+  npm run coveralls

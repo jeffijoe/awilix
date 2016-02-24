@@ -45,4 +45,20 @@ describe('listModules', function() {
       createContainerSpec.path.should.contain('createContainer.js');
     });
   });
+
+  it('handles errors from glob', function() {
+    const success = sinon.spy(() => { throw new Error('Dont!'); });
+    const fail = sinon.spy(err => {
+      expect(err).to.exist;
+    });
+    const throwErr = function() {
+      const args = arguments;
+      args[args.length - 1](new Error('Oh shit..'));
+    };
+
+    return listModules([null], { glob: throwErr }).then(success, fail).then(() => {
+      success.should.not.have.been.called;
+      fail.should.have.been.calledOnce;
+    });
+  });
 });
