@@ -7,12 +7,12 @@
 [![Coverage Status](https://coveralls.io/repos/github/jeffijoe/awilix/badge.svg?branch=master)](https://coveralls.io/github/jeffijoe/awilix?branch=master)
 [![Code Climate](https://codeclimate.com/github/jeffijoe/awilix/badges/gpa.svg)](https://codeclimate.com/github/jeffijoe/awilix)
 
-Simple dependency injection container for node.js
+Simple **Inversion of Control** (IoC) container for Node with dependency resolution support. Make IoC great again!
 
 ## Installation
 
 ```
-npm install -s awilix
+npm install awilix --save
 ```
 
 ## Usage

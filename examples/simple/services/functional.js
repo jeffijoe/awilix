@@ -34,8 +34,7 @@ module.exports.default = function (container) {
   // So we get the container as the first argument, now
   // lets register this module's "public API".
   //
-  // `register` does nothing special, it just assigns the
-  // values of the given object onto the container.
+  // `register` will make this module available on the container.
   //
   // To actually "inject" the container into our function,
   // we have to bind it. We can bind multiple
@@ -43,7 +42,7 @@ module.exports.default = function (container) {
   container.register({
     // `functionalService` is what others
     // will grab from the container. So
-    // to use it, they's write
+    // to use it, they'd write
     // `container.functionalService.getStuffAndDeleteSecret`,
     // which is super cool!
     functionalService: container.bindAll({

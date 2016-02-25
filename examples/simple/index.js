@@ -11,8 +11,7 @@ container.loadModules([
   'services/*.js',
   'repositories/*.js'
 ]).then(result => {
-  console.log('Loaded modules:', result.loadedModules);
-  console.log('Container:', container);
+  console.log('Registered modules:', container.registeredModules);
 
   // Let's do something!
   return container.classicalService.actAllCool().then(r => {

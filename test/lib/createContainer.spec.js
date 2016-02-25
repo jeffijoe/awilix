@@ -41,7 +41,7 @@ describe('createContainer', function() {
   });
 
   describe('register', function() {
-    it('registers the given objects values', function() {
+    it('registers the given hash on the container object itself', function() {
       const container = createContainer();
 
       const service1 = { stuff: true };
@@ -50,6 +50,17 @@ describe('createContainer', function() {
       });
 
       container.service1.should.equal(service1);
+    });
+
+    it('registers the given hash in container.registeredModules', function() {
+      const container = createContainer();
+
+      const service1 = { stuff: true };
+      container.register({
+        service1
+      });
+
+      container.registeredModules.service1.should.equal(service1);
     });
   });
 });
