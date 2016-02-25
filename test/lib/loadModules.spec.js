@@ -36,4 +36,26 @@ describe('loadModules', function() {
       });
     });
   });
+
+  it('does not die when the default export is not a function', function() {
+    const container = createContainer();
+    const modules = {
+      ['1.js']: undefined,
+      ['2.js']: { },
+      ['3.js']: { default: undefined },
+      ['4.js']: { default: { } }
+    };
+    const moduleLookupResult = lookupResultFor(modules);
+    const deps = {
+      container,
+      listModules: spy(
+        () => Promise.resolve(moduleLookupResult)
+      ),
+      require: spy(path => modules[path])
+    };
+    const opts = {};
+    return loadModules(deps, 'anything', opts).then(result => {
+      Object.keys(container.registeredModules).length.should.equal(0);
+    });
+  });
 });
