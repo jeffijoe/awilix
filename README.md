@@ -61,7 +61,7 @@ function getTodos(container, searchText) {
   return todos.getTodos({ searchText: searchText }).then(result => {
     // Do something useful with the result here.. Or not.
     return result;
-  })
+  });
 }
 
 // Export it so we can test it.
@@ -104,7 +104,7 @@ export class TodosRepository {
     return this.db.sql(`select * from todos where text like '%${query.searchText}%'`).then(result => {
       // Transform DB result to todos..
       return result.map(todo => {...});
-    })
+    });
   }
 }
 
@@ -119,7 +119,7 @@ export default function (container) {
     container.register({
       todos: new TodosRepository(container.db)
     })
-  })
+  });
 }
 ```
 
@@ -182,13 +182,18 @@ container.loadModules([
     // Success! To the pub!
     console.log(todos);
   });
-})
+});
 ```
 
 Note how in `getTodos`, **we did not specify the container as the first argument!** The observant reader may have remembered that we used a little
 function called `bindAll` in `todosService.js`,
 
-That's it for the
+That's it for the mini-guide. Be sure to read the short API docs below
+so you know what's possible.
+
+## API
+
+Todo..
 
 ## Contributing
 
