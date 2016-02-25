@@ -15,6 +15,8 @@ Simple **Inversion of Control** (IoC) container for Node with dependency resolut
 npm install awilix --save
 ```
 
+*Requires Node v4 or above, and possibly npm v3.*
+
 ## Quick start
 
 Awilix has a pretty simple API. At minimum, you need to do 2 things:
