@@ -193,7 +193,35 @@ so you know what's possible.
 
 ## API
 
-Todo...
+
+#### The `awilix` object
+
+When importing `awilix`, you get the following stuff:
+
+* `createContainer`
+* `listModules`
+* `AwilixResolutionError`
+
+These are documented below.
+
+#### `createContainer(): AwilixContainer`
+
+Creates a new Awilix container. The container stuff is documented further down.
+
+#### listModules(globPatterns: string|[string], opts: { cwd: string }): Promise<[{name, path}]>
+
+Returns a promise for a list of {name, path} pairs,
+where the name is the module name, and path is the actual
+full path to the module.
+
+* `globPatterns`: a glob pattern string, or an array of them.
+* `opts.cwd`: The current working directory passed to `glob`. Defaults to `process.cwd()`.
+* returns: an array of objects with:
+  - `name`: The module name - e.g. `db`
+  - `path`: The path to the module, relative to `options.cwd`
+
+... still not done...
+
 
 ## Contributing
 
