@@ -191,6 +191,29 @@ function called `bindAll` in `todosService.js`.
 That's it for the mini-guide. Be sure to read the short API docs below
 so you know what's possible.
 
+## The Awilix Container Pattern (ACP)
+
+So in the above example, you might have noticed a pattern:
+
+```js
+module.exports = function(container) {
+  container.register({
+    someStuff: 'yay',
+    someFunction: container.bind(someFunction),
+    someObject: container.bindAll({
+      moreFunctions: moreFunctions
+    })
+  })
+}
+```
+
+This is what I refer to as the **Awilix Container Pattern (ACP)**, and is what the `loadModules` API uses to let you register your stuff with the container in a "discovery-based" manner.
+
+An ACP function **MAY**:
+
+* return a `Promise`
+* use `container.dependsOn` to declare dependencies up-front (see corresponding section)
+
 ## API
 
 ### The `awilix` object
@@ -213,6 +236,7 @@ Returns a promise for a list of `{name, path}` pairs,
 where the name is the module name, and path is the actual
 full path to the module.
 
+This is used internally, but is useful for other things as well.
 
 Args:
 
@@ -220,7 +244,7 @@ Args:
 * `opts.cwd`: The current working directory passed to `glob`. Defaults to `process.cwd()`.
 * **returns**: a `Promise` for an array of objects with:
   - `name`: The module name - e.g. `db`
-  - `path`: The path to the module, relative to `options.cwd`
+  - `path`: The path to the module relative to `options.cwd` - e.g. `lib/db.js`
 
 ### `AwilixResolutionError`
 
@@ -248,7 +272,6 @@ Args:
 Example:
 
 ```js
-
 container.one = 1;
 const myFunction = (container, arg1, arg2) => arg1 + arg2 + container.one;
 
@@ -271,7 +294,6 @@ Args:
 Example:
 
 ```js
-
 const obj = {
   method1: (container, arg1, arg2) => arg1 + arg2,
   method2: (container, arg1, arg2) => arg1 - arg2
@@ -283,6 +305,118 @@ boundObj === obj;
 
 obj.method1(1, 2);
 // << 3
+```
+
+#### `container.register()`
+
+Given an object, registers one or more things with the container. The values can be anything, and therefore are *not bound automatically*.
+
+Args:
+
+* `obj`: Object with things to register. Key is the what others will address the module as, value is the module itself.
+* **returns**: The `container`.
+
+Example:
+
+```js
+const addTodo = (container, text) => { /* ...*/ };
+const connect = container => awesomeDb.connect(container.DB_HOST);
+
+container.register({
+  // Any value goes.
+  DB_HOST: 'localhost',
+  // using bindAll
+  todoService: container.bindAll({
+    addTodo: addTodo
+  }),
+  // Not bound.
+  log: function(text) {
+    console.log('AWILIX DEMO:', text);
+  },
+
+  connect: container.bind(connect)
+});
+
+// Exposed on the container as well as `registeredModules`.
+container.todoService === container.registeredModules.todoService;
+// << true
+
+container.todoService.addTodo('follow and start awilix repo');
+console.log(container.DB_HOST);
+// << localhost
+
+container.log('Hello!');
+// << AWILIX DEMO: Hello!
+
+connect();
+```
+
+#### `container.loadModules()`
+
+Given an array of globs, returns a `Promise` when loading is done.
+
+Awilix will use `require` on the loaded modules, and call their default exported function (if it *is* a function, that is..) with the container as the first parameter (this is the *Awilix Container Pattern (ACP)*). This function then gets to do the registration of one or more modules.
+
+Args:
+
+* `dependencies`: Array of strings that map to the module being grabbed off the container - e.g. `'db'` when using `container.db`.
+* **returns**: A dependency token (an internal thing, don't mind this).
+
+Example:
+
+```js
+// repositories/todosRepository.js
+class TodosRepository {
+  constructor(dependencies) {
+    // We save the reference here, so it *has* to exist at construction-time!
+    this.db = dependencies.db;
+  }
+}
+
+// We are not using any named exports, so we
+// don't have to use module.exports.default.
+module.exports = container => {
+  container.dependsOn(['db'], () => {
+    container.register({
+      todos: new TodosRepository(container)
+    })
+  });
+}
+```
+
+#### `container.dependsOn()`
+
+Used in conjunction with `loadModules`, makes it easy to state up-front what
+your module needs, and then get notified once it's ready. This is useful for doing constructor injection where you grab the dependencies off the container
+at construction time rather than at function-call-time.
+
+*I recommend using the functional approach as it's less complex, but if you must, this method works perfectly fine as well. It's just a bit more verbose.*
+
+Args:
+
+* `dependencies`: Array of strings that map to the module being grabbed off the container - e.g. `'db'` when using `container.db`.
+* **returns**: A dependency token (an internal thing, don't mind this).
+
+Example:
+
+```js
+// repositories/todosRepository.js
+class TodosRepository {
+  constructor(dependencies) {
+    // We save the reference here, so it *has* to exist at construction-time!
+    this.db = dependencies.db;
+  }
+}
+
+// We are not using any named exports, so we
+// don't have to use module.exports.default.
+module.exports = container => {
+  container.dependsOn(['db'], () => {
+    container.register({
+      todos: new TodosRepository(container)
+    })
+  });
+}
 ```
 
 ## Contributing
