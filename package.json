@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "mocha test/**/*.js --require test/index.js",
-    "test-watch": "npm run test -- --watch",
+    "test-watch": "npm run test -- --watch --reporter nyan",
     "lint": "esw lib/ test/",
     "lint-watch": "npm run lint -- --watch",
     "cover": "istanbul cover  -x \"**example/**\" ./node_modules/mocha/bin/_mocha -- test/**/*.js --require test/index.js",
