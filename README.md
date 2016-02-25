@@ -193,8 +193,7 @@ so you know what's possible.
 
 ## API
 
-
-#### The `awilix` object
+### The `awilix` object
 
 When importing `awilix`, you get the following stuff:
 
@@ -204,24 +203,87 @@ When importing `awilix`, you get the following stuff:
 
 These are documented below.
 
-#### `createContainer()`
+### `createContainer()`
 
 Creates a new Awilix container. The container stuff is documented further down.
 
-#### `listModules()`
+### `listModules()`
 
-Returns a promise for a list of {name, path} pairs,
+Returns a promise for a list of `{name, path}` pairs,
 where the name is the module name, and path is the actual
 full path to the module.
 
+
+Args:
+
 * `globPatterns`: a glob pattern string, or an array of them.
 * `opts.cwd`: The current working directory passed to `glob`. Defaults to `process.cwd()`.
-* returns: a `Promise` for an array of objects with:
+* **returns**: a `Promise` for an array of objects with:
   - `name`: The module name - e.g. `db`
   - `path`: The path to the module, relative to `options.cwd`
 
-... still not done...
+### `AwilixResolutionError`
 
+This is a special error thrown when Awilix is unable to resolve all dependencies (due to `dependOn`). You can catch this error and use `err instanceof AwilixResolutionError` if you wish. It will tell you what
+dependencies it could not find.
+
+### The `AwilixContainer` object
+
+The container returned from `createContainer` has some methods and properties.
+
+#### `container.registeredModules`
+
+A hash that contains all registered modules. Anything in there will also be present on the `container` itself.
+
+#### `container.bind()`
+
+Creates a new function where the first parameter of the given function will always be the container it was bound to.
+
+Args:
+
+* `fn`: The function to bind.
+* `ctx`: The `this`-context for the function.
+* **returns**: The bound function.
+
+Example:
+
+```js
+
+container.one = 1;
+const myFunction = (container, arg1, arg2) => arg1 + arg2 + container.one;
+
+const bound = container.bind(myFunction);
+
+bound(2, 3);
+// << 6
+```
+
+#### `container.bindAll()`
+
+Given an object, binds all it's functions to the container and
+assigns it to the given object. The object is returned.
+
+Args:
+
+* `obj`: Object with functions to bind.
+* **returns**: The input `obj`
+
+Example:
+
+```js
+
+const obj = {
+  method1: (container, arg1, arg2) => arg1 + arg2,
+  method2: (container, arg1, arg2) => arg1 - arg2
+};
+
+const boundObj = container.bindAll(obj);
+boundObj === obj;
+// << true
+
+obj.method1(1, 2);
+// << 3
+```
 
 ## Contributing
 
