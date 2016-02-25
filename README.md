@@ -204,11 +204,11 @@ When importing `awilix`, you get the following stuff:
 
 These are documented below.
 
-#### `createContainer(): AwilixContainer`
+##### `createContainer(): AwilixContainer`
 
 Creates a new Awilix container. The container stuff is documented further down.
 
-#### listModules(globPatterns: string|[string], opts: { cwd: string }): Promise<[{name, path}]>
+##### `listModules(globPatterns: string|[string], opts: { cwd: string }): Promise<[{name, path}]>`
 
 Returns a promise for a list of {name, path} pairs,
 where the name is the module name, and path is the actual
