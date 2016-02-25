@@ -394,7 +394,7 @@ at construction time rather than at function-call-time.
 
 Args:
 
-* `dependencies`: Array of strings that map to the module being grabbed off the container - e.g. `'db'` when using `container.db`.
+* `dependencies`: Array of strings that map to the modules being grabbed off the container - e.g. `'db'` when using `container.db`.
 * **returns**: A dependency token (an internal thing, don't mind this).
 
 Example:
