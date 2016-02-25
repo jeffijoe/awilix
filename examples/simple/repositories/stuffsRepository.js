@@ -14,7 +14,8 @@ StuffRepository.prototype.getStuff = function(someArg) {
 // Register the repository with the container.
 module.exports.default = function (container) {
   container.register({
-    // No dependencies.
+    // No dependencies, so we don't have to use dependsOn
+    // or bindAll.
     stuffs: new StuffRepository()
   });
 }
