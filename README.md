@@ -186,14 +186,14 @@ container.loadModules([
 ```
 
 Note how in `getTodos`, **we did not specify the container as the first argument!** The observant reader may have remembered that we used a little
-function called `bindAll` in `todosService.js`,
+function called `bindAll` in `todosService.js`.
 
 That's it for the mini-guide. Be sure to read the short API docs below
 so you know what's possible.
 
 ## API
 
-Todo..
+Todo...
 
 ## Contributing
 
