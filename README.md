@@ -361,29 +361,22 @@ Awilix will use `require` on the loaded modules, and call their default exported
 
 Args:
 
-* `dependencies`: Array of strings that map to the module being grabbed off the container - e.g. `'db'` when using `container.db`.
-* **returns**: A dependency token (an internal thing, don't mind this).
+* `globPatterns`: Array of glob patterns that match JS files to load.
+* `opts.cwd`: The `cwd` being passed to `glob`. Defaults to `process.cwd()`.
+* **returns**: A `Promise` for when we're done. This won't be resolved until all modules are ready.
 
 Example:
 
 ```js
-// repositories/todosRepository.js
-class TodosRepository {
-  constructor(dependencies) {
-    // We save the reference here, so it *has* to exist at construction-time!
-    this.db = dependencies.db;
-  }
-}
-
-// We are not using any named exports, so we
-// don't have to use module.exports.default.
-module.exports = container => {
-  container.dependsOn(['db'], () => {
-    container.register({
-      todos: new TodosRepository(container)
-    })
-  });
-}
+// index.js
+container.loadModules([
+  'services/*.js',
+  'repositories/*.js',
+  'db/db.js'
+]).then(() => {
+  console.log('We are ready!');
+  container.todoService.addTodo('go to the pub');
+});
 ```
 
 #### `container.dependsOn()`
