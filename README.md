@@ -238,7 +238,8 @@ Returns a promise for a list of `{name, path}` pairs,
 where the name is the module name, and path is the actual
 full path to the module.
 
-This is used internally, but is useful for other things as well.
+This is used internally, but is useful for other things as well, e.g.
+dynamically loading an `api` folder.
 
 Args:
 
@@ -247,6 +248,19 @@ Args:
 * **returns**: a `Promise` for an array of objects with:
   - `name`: The module name - e.g. `db`
   - `path`: The path to the module relative to `options.cwd` - e.g. `lib/db.js`
+
+Example:
+
+```js
+const listModules = require('awilix').listModules;
+
+listModules([
+  'services/*.js'
+]).then(result => {
+  console.log(result);
+  // << [{ name: 'someService', path: 'path/to/services/someService.js' }]
+})
+```
 
 ### `AwilixResolutionError`
 
