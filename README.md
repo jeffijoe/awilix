@@ -211,12 +211,39 @@ module.exports = function(container) {
 
 This is what I refer to as the **Awilix Container Pattern (ACP)**, and is what the `loadModules` API uses to let you register your stuff with the container in a "discovery-based" manner.
 
-To make a module eligible for loading through `loadModules`, it needs  default export a function that takes the container as the first parameter. The function is reponsible for registering things with the container using `container.register`.
+To make a module eligible for loading through `loadModules`, it needs a default exported function that takes the container as the first parameter. The function is reponsible for registering things with the container using `container.register`.
 
 An ACP function **MAY**:
 
 * return a `Promise`
 * use `container.dependsOn` to declare dependencies up-front (see corresponding section)
+
+Example in ES5:
+
+```js
+// When the module does not export anything else..
+module.exports = function(container) {
+
+}
+
+// When the module exports more than default.
+module.exports.default = function(container) {
+
+}
+```
+
+Example in ES6:
+
+```js
+export default function(container) {
+
+}
+
+// With an arrow function
+export default container => {
+
+};
+```
 
 ## API
 
