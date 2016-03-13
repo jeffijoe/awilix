@@ -261,6 +261,11 @@ These are documented below.
 
 Creates a new Awilix container. The container stuff is documented further down.
 
+Args:
+
+* `options`: Options object. Optional.
+  - `options.require`: The function to use when requiring modules. Defaults to `require`. Useful when using something like [`require-stack`](https://npmjs.org/package/require-stack). Optional.
+
 ### `listModules()`
 
 Returns a promise for a list of `{name, path}` pairs,
