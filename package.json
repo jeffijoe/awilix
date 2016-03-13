@@ -42,7 +42,6 @@
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
-    "glob": "^7.0.0",
-    "require-stack": "^1.0.1"
+    "glob": "^7.0.0"
   }
 }
