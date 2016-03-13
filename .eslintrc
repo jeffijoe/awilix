@@ -141,7 +141,6 @@
     "max-nested-callbacks": [0, 2],
     "max-params": [0, 3],
     "max-statements": [0, 10],
-    "new-cap": [2, { capIsNewExceptions: ['T']}],
     "new-parens": 2,
     "one-var": 0,
     "operator-assignment": [0, "always"],

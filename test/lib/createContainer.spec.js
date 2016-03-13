@@ -8,6 +8,14 @@ describe('createContainer', function() {
     container.bind.should.exist;
   });
 
+  it('uses the passed require function for loadModules', function() {
+    const requireSpy = sinon.spy();
+    const container = createContainer({ require: requireSpy });
+    return container.loadModules(['lib/*.js']).then((r) => {
+      requireSpy.should.have.been.called;
+    });
+  });
+
   describe('bind', function() {
     it('returns a bound method taking the container as the first parameter', function() {
       const container = createContainer();

@@ -34,14 +34,15 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "coveralls": "^2.11.6",
-    "eslint": "^2.2.0",
-    "eslint-watch": "^2.1.7",
+    "eslint": "^2.4.0",
+    "eslint-watch": "^2.1.10",
     "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
-    "glob": "^7.0.0"
+    "glob": "^7.0.0",
+    "require-stack": "^1.0.1"
   }
 }
