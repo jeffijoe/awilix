@@ -2,73 +2,74 @@
 
 const createContainer = require('../../lib/createContainer');
 
+class Test {
+  constructor({ repo }) {
+    this.repo = repo;
+  }
+
+  stuff() {
+    return this.repo.getStuff();
+  }
+}
+
+class Repo {
+  getStuff() {
+    return 'stuff'
+  }
+}
+
 describe('createContainer', function() {
-  it('creates a container with a bind method', function() {
+  it('returns an object', function() {
     const container = createContainer();
-    container.bind.should.exist;
+    container.should.be.an.object;
   });
 
-  it('uses the passed require function for loadModules', function() {
-    const requireSpy = sinon.spy();
-    const container = createContainer({ require: requireSpy });
-    return container.loadModules(['lib/*.js']).then((r) => {
-      requireSpy.should.have.been.called;
-    });
-  });
-
-  describe('bind', function() {
-    it('returns a bound method taking the container as the first parameter', function() {
+  describe('container', function() {
+    it('lets me register something and resolve it', function() {
       const container = createContainer();
-      const bind = container.bind;
-      const fn = sinon.spy(c => c);
-      const bound = bind(fn);
-      bound(1, 2, 3);
-      fn.should.have.been.calledWith(container, 1, 2, 3);
-    });
-  });
-
-  describe('bindAll', function() {
-    it('binds all methods on the given object and returns it', function() {
-      const method1 = sinon.spy();
-      const method2 = sinon.spy();
-      const obj = {
-        method1,
-        method2,
-        primitive: 123
-      };
-
-      const container = createContainer();
-      const boundObj = container.bindAll(obj);
-      boundObj.should.equal(boundObj);
-      boundObj.method1(1);
-      boundObj.method2(2);
-      boundObj.primitive.should.equal(123);
-      method1.should.have.been.calledWith(container, 1);
-      method2.should.have.been.calledWith(container, 2);
-    });
-  });
-
-  describe('register', function() {
-    it('registers the given hash on the container object itself', function() {
-      const container = createContainer();
-
-      const service1 = { stuff: true };
-      container.register({
-        service1
+      container.registerValue({ someValue: 42 });
+      container.registerFactory({
+        test: (deps) => {
+          return {
+            someValue: deps.someValue
+          };
+        }
       });
 
-      container.service1.should.equal(service1);
+      const test = container.cradle.test;
+      expect(test).to.be.ok;
+      test.someValue.should.equal(42);
     });
 
-    it('registers the given hash in container.registeredModules', function() {
-      const container = createContainer();
+    describe('register*', function() {
+      it('supports multiple registrations in a single call', function() {
+        const container = createContainer();
+        container.registerValue({
+          universe: 42,
+          leet: 1337
+        });
 
-      const service1 = { stuff: true };
-      container.register({
-        service1
+        container.registerFactory({
+          service: ({ func, universe }) => ({ method: () => func(universe) }),
+          func: () => (answer) => 'Hello world, the answer is ' + answer
+        });
+
+        Object.keys(container.registrations).length.should.equal(4);
+
+        container.resolve('service').method().should.equal('Hello world, the answer is 42');
       });
+    });
 
-      container.registeredModules.service1.should.equal(service1);
+    describe('registerClass', function() {
+      it('supports classes', function() {
+        const container = createContainer();
+        container.registerClass({
+          test: Test,
+          repo: Repo
+        });
+
+        container.resolve('test').stuff().should.equal('stuff');
+      });
     });
   });
 });

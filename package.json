@@ -42,6 +42,8 @@
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
-    "glob": "^7.0.4"
+    "camel-case": "^3.0.0",
+    "glob": "^7.0.4",
+    "is-plain-object": "^2.0.1"
   }
 }

@@ -8,10 +8,6 @@ class AnotherService {
 
 module.exports.AnotherService = AnotherService;
 
-module.exports.default = function(container) {
-  return container.dependsOn(['answerRepository'], () => {
-    container.register({
-      anotherService: new AnotherService(container.answerRepository)
-    });
-  });
+module.exports.default = function(deps) {
+  return new AnotherService(deps.answerRepository);
 };

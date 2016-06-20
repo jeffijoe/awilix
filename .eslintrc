@@ -22,7 +22,8 @@
     "regexYFlag": true,
     "superInFunctions": true,
     "templateStrings": true,
-    "unicodeCodePointEscapes": true
+    "unicodeCodePointEscapes": true,
+    "experimentalObjectRestSpread ": true
   },
   "rules": {
     "no-alert": 2,
@@ -109,7 +110,6 @@
     "no-unreachable": 2,
     "no-unused-expressions": 2,
     "no-unused-vars": [0, {"vars": "all", "args": "after-used"}],
-    "no-use-before-define": 2,
     "no-void": 0,
     "no-var": 0,
     "no-warning-comments": [0, { "terms": ["todo", "fixme", "xxx"], "location": "start" }],
