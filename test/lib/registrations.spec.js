@@ -11,7 +11,7 @@ describe('registrations', function() {
   let container;
   beforeEach(function() {
     container = createContainer();
-  })
+  });
 
   describe('valueRegistration', function() {
     it('creates a registration with a resolve method', function() {

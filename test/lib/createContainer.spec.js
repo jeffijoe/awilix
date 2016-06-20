@@ -14,7 +14,7 @@ class Test {
 
 class Repo {
   getStuff() {
-    return 'stuff'
+    return 'stuff';
   }
 }
 
