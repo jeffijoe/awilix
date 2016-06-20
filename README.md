@@ -1,3 +1,5 @@
+> Hi! This is the `next` branch where I am working on the future of Awilix. The API will be different but for the better. **Spoiler**: Proxies will make IoC even greater!
+
 # Awilix
 
 [![npm version](https://badge.fury.io/js/awilix.svg)](https://badge.fury.io/js/awilix)
