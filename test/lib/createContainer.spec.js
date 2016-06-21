@@ -1,6 +1,8 @@
 'use strict';
 
 const createContainer = require('../../lib/createContainer');
+const { catchError } = require('../helpers/errorHelpers');
+const AwilixResolutionError = require('../../lib/AwilixResolutionError');
 
 class Test {
   constructor({ repo }) {
@@ -69,6 +71,71 @@ describe('createContainer', function() {
         });
 
         container.resolve('test').stuff().should.equal('stuff');
+      });
+    });
+
+    describe('resolve', function() {
+      it('resolves the dependency chain and supports all registrations', function() {
+        class TestClass {
+          constructor({ factory }) {
+            this.factoryResult = factory();
+          }
+        }
+
+        const factorySpy = sinon.spy((cradle) => 'factory ' + cradle.value);
+        const container = createContainer();
+        container.registerValue({ value: 42 });
+        container.registerFactory({ factory: (cradle) => () => factorySpy(cradle) });
+        container.registerClass({ theClass: TestClass });
+
+        const root = container.resolve('theClass');
+        root.factoryResult.should.equal('factory 42');
+      });
+
+      it('throws an AwilixResolutionError when there are unregistered dependencies', function() {
+        const container = createContainer();
+        const err = catchError(() => container.resolve('nope'));
+        err.should.be.an.instanceOf(AwilixResolutionError);
+        err.message.should.match(/nope/i);
+      });
+
+      it('throws an AwilixResolutionError with a resolution path when resolving an unregistered dependency', function() {
+        const container = createContainer();
+        container.registerFactory({
+          first: (cradle) => cradle.second,
+          second: (cradle) => cradle.third,
+          third: (cradle) => cradle.unregistered
+        });
+
+        const err = catchError(() => container.resolve('first'));
+        err.message.should.contain('first -> second -> third');
+      });
+
+      it('does not screw up the resolution stack when called twice', function() {
+        const container = createContainer();
+        container.registerFactory({
+          first: (cradle) => cradle.second,
+          otherFirst: (cradle) => cradle.second,
+          second: (cradle) => cradle.third,
+          third: (cradle) => cradle.unregistered
+        });
+
+        const err1 = catchError(() => container.resolve('first'));
+        const err2 = catchError(() => container.resolve('otherFirst'));
+        err1.message.should.contain('first -> second -> third');
+        err2.message.should.contain('otherFirst -> second -> third');
+      });
+
+      it('throws an AwilixResolutionError when there are cyclic dependencies', function() {
+        const container = createContainer();
+        container.registerFactory({
+          first: (cradle) => cradle.second,
+          second: (cradle) => cradle.third,
+          third: (cradle) => cradle.second
+        });
+
+        const err = catchError(() => container.resolve('first'));
+        err.message.should.contain('first -> second -> third -> second');
       });
     });
   });
