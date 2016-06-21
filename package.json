@@ -44,6 +44,7 @@
   "dependencies": {
     "camel-case": "^3.0.0",
     "glob": "^7.0.4",
+    "is-class": "0.0.4",
     "is-plain-object": "^2.0.1"
   }
 }

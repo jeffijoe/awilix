@@ -13,10 +13,14 @@ const lookupResultFor = modules => Object.keys(modules).map(key => ({
 describe('loadModules', function() {
   it('registers loaded modules with the container using the name of the file', function() {
     const container = createContainer();
+
+    class SomeClass {}
+
     const modules = {
       ['nope.js']: undefined,
       ['standard.js']: spy(() => 42),
-      ['default.js']: { default: spy(() => 1337) }
+      ['default.js']: { default: spy(() => 1337) },
+      ['someClass.js']: SomeClass
     };
     const moduleLookupResult = lookupResultFor(modules);
     const deps = {
@@ -26,12 +30,12 @@ describe('loadModules', function() {
       ),
       require: spy(path => modules[path])
     };
-    const opts = {};
-    return loadModules(deps, 'anything', opts).then(result => {
+    return loadModules(deps, 'anything').then(result => {
       result.should.deep.equal({ loadedModules: moduleLookupResult });
-      Object.keys(container.registrations).length.should.equal(2);
+      Object.keys(container.registrations).length.should.equal(3);
       container.resolve('standard').should.equal(42);
       container.resolve('default').should.equal(1337);
+      container.resolve('someClass').should.be.an.instanceOf(SomeClass);
     });
   });
 
