@@ -351,7 +351,7 @@ Clone repo, run `npm i` to install all dependencies, and then `npm run test-watc
 For code coverage, run `npm run coverage`.
 
 If you submit a PR, please aim for 100% code coverage and no linting errors.
-Travis will fail if there are linting errors. Thank you for your considering contributing. :)
+Travis will fail if there are linting errors. Thank you for considering contributing. :)
 
 ## What's in a name?
 
