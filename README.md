@@ -21,7 +21,7 @@ Simple **Inversion of Control** (IoC) container for Node with dependency resolut
   - [`createContainer()`](#createcontainer)
   - [`listModules()`](#listmodules)
   - [`AwilixResolutionError`](#awilixresolutionerror)
-  - [`The `AwilixContainer` object`](#the-awilixcontainer-object)
+  - [`The `AwilixContainer` object](#the-awilixcontainer-object)
     + [`container.cradle`](#containercradle)
     + [`container.registrations`](#containerregistrations)
     + [`container.registerValue()`](#containerregistervalue)
