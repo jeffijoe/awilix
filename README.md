@@ -319,14 +319,16 @@ container.cradle.exclaimer.exclaim();
 
 Given an array of globs, returns a `Promise` when loading is done.
 
-Awilix will use `require` on the loaded modules, and call their default exported function (if it *is* a function, that is..) with the container as the first parameter (this is the *Awilix Container Pattern (ACP)*). This function then gets to do the registration of one or more modules.
+Awilix will use `require` on the loaded modules, and register the default-exported function or class as the name of the file.
+
+**This will not work for constructor functions (`function Database{} ...`), because there is no way to determine when to use `new`. Internally, Awilix uses `is-class` which only works for ES6 classes.**
 
 Args:
 
 * `globPatterns`: Array of glob patterns that match JS files to load.
 * `opts.cwd`: The `cwd` being passed to `glob`. Defaults to `process.cwd()`.
 * **returns**: A `Promise` for when we're done. This won't be resolved until all modules are ready.
-* `opts.formatName`: Can be either a string (`'camelCase'`), or a function that takes the current name as the first parameter and returns the new name.
+* `opts.formatName`: Can be either `'camelCase'`, or a function that takes the current name as the first parameter and returns the new name. Default is to pass the name through as-is.
 
 Example:
 
