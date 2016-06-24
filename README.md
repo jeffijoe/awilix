@@ -11,7 +11,28 @@
 
 Simple **Inversion of Control** (IoC) container for Node with dependency resolution support powered by ES6 Proxies. Make IoC great again!
 
-## Installation
+# Table of Contents
+
+* [Installation](#installation)
+* [Usage](#usage)
+* [Auto-loading modules](#auto-loading-modules)
+* [API](#api)
+  - [The `awilix` object](#the-awilix-object)
+  - [`createContainer()`](#createcontainer)
+  - [`listModules()`](#listmodules)
+  - [`AwilixResolutionError`](#awilixresolutionerror)
+  - [`The `AwilixContainer` object`](#the-awilixcontainer-object)
+    + [`container.cradle`](#containercradle)
+    + [`container.registrations`](#containerregistrations)
+    + [`container.registerValue()`](#containerregistervalue)
+    + [`container.registerFactory()`](#containerregisterfactory)
+    + [`container.registerClass()`](#containerregisterclass)
+    + [`container.loadModules()`](#containerloadmodules)
+* [Contributing](#contributing)
+* [What's in a name?](#whats-in-a-name)
+* [Author](#author)
+
+# Installation
 
 ```
 npm install awilix --save
@@ -19,7 +40,7 @@ npm install awilix --save
 
 *Requires Node v6 or above*
 
-## Usage
+# Usage
 
 Awilix has a pretty simple API. At minimum, you need to do 3 things:
 
@@ -114,7 +135,7 @@ router.get('/api/users/:id', container.cradle.userController.getUser);
 
 That example looks big, but if you extract things to their proper files, it becomes rather elegant!
 
-## Auto-loading modules
+# Auto-loading modules
 
 When you have created your container, registering 100's of classes can get boring. You can automate this by using `loadModules`.
 
@@ -151,9 +172,9 @@ container.loadModules([
 });
 ```
 
-## API
+# API
 
-### The `awilix` object
+## The `awilix` object
 
 When importing `awilix`, you get the following top-level API:
 
@@ -163,7 +184,7 @@ When importing `awilix`, you get the following top-level API:
 
 These are documented below.
 
-### `createContainer()`
+## `createContainer()`
 
 Creates a new Awilix container. The container stuff is documented further down.
 
@@ -172,7 +193,7 @@ Args:
 * `options`: Options object. Optional.
   - `options.require`: The function to use when requiring modules. Defaults to `require`. Useful when using something like [`require-stack`](https://npmjs.org/package/require-stack). Optional.
 
-### `listModules()`
+## `listModules()`
 
 Returns a promise for a list of `{name, path}` pairs,
 where the name is the module name, and path is the actual
@@ -202,24 +223,24 @@ listModules([
 })
 ```
 
-### `AwilixResolutionError`
+## `AwilixResolutionError`
 
 This is a special error thrown when Awilix is unable to resolve all dependencies (due to missing or cyclic dependencies). You can catch this error and use `err instanceof AwilixResolutionError` if you wish. It will tell you what dependencies it could not find or which ones caused a cycle.
 
-### The `AwilixContainer` object
+## The `AwilixContainer` object
 
 The container returned from `createContainer` has some methods and properties.
 
-#### `container.cradle`
+### `container.cradle`
 
 **Behold! This is where the magic happens!** The `cradle` is a proxy, and all getters will trigger a `container.resolve`. The `cradle` is actually being
 passed to the constructor/factory function, which is how everything gets wired up.
 
-#### `container.registrations`
+### `container.registrations`
 
 A read-only getter that returns the internal registrations. Not really useful for public use.
 
-#### `container.registerValue()`
+### `container.registerValue()`
 
 Registers a constant value in the container. Can be anything.
 
@@ -241,7 +262,7 @@ container
   .registerValue('db', myDatabaseObject);
 ```
 
-#### `container.registerFactory()`
+### `container.registerFactory()`
 
 Registers a standard function to be called whenever being resolved. The factory function can return anything it wants, and whatever it returns is what is passed to dependents.
 
@@ -287,7 +308,7 @@ setTimeout(() => {
 }, 2000);
 ```
 
-#### `registerClass()`
+### `registerClass()`
 
 Same as `registerFactory`, except it will use `new`.
 
@@ -320,7 +341,7 @@ container.cradle.exclaimer.exclaim();
 // << 2016-06-24T17:00:00.00Z: Hello, this is some value!!!!!
 ```
 
-#### `container.loadModules()`
+### `container.loadModules()`
 
 Given an array of globs, returns a `Promise` when loading is done.
 
@@ -349,7 +370,7 @@ container.loadModules([
 });
 ```
 
-## Contributing
+# Contributing
 
 Clone repo, run `npm i` to install all dependencies, and then `npm run test-watch` + `npm run lint-watch` to start writing code.
 
@@ -358,10 +379,10 @@ For code coverage, run `npm run coverage`.
 If you submit a PR, please aim for 100% code coverage and no linting errors.
 Travis will fail if there are linting errors. Thank you for considering contributing. :)
 
-## What's in a name?
+# What's in a name?
 
 Awilix is the mayan goddess of the moon, and also my favorite character in the game [SMITE](http://www.smitegame.com/play-for-free?ref=Jeffijoe).
 
-## Author
+# Author
 
 Jeff Hansen - [@Jeffijoe](https://twitter.com/Jeffijoe)
