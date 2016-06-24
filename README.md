@@ -308,7 +308,7 @@ setTimeout(() => {
 }, 2000);
 ```
 
-### `registerClass()`
+### `container.registerClass()`
 
 Same as `registerFactory`, except it will use `new`.
 
