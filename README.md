@@ -210,6 +210,11 @@ This is a special error thrown when Awilix is unable to resolve all dependencies
 
 The container returned from `createContainer` has some methods and properties.
 
+#### `container.cradle`
+
+**Behold! This is where the magic happens!** The `cradle` is a proxy, and all getters will trigger a `container.resolve`. The `cradle` is actually being
+passed to the constructor/factory function, which is how everything gets wired up.
+
 #### `container.registrations`
 
 A read-only getter that returns the internal registrations. Not really useful for public use.
