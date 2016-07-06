@@ -1,6 +1,7 @@
 'use strict';
 
 const createContainer = require('../../lib/createContainer');
+const Lifetime = require('../../lib/Lifetime');
 const { catchError } = require('../helpers/errorHelpers');
 const AwilixResolutionError = require('../../lib/AwilixResolutionError');
 
@@ -59,6 +60,18 @@ describe('createContainer', function() {
         Object.keys(container.registrations).length.should.equal(4);
 
         container.resolve('service').method().should.equal('Hello world, the answer is 42');
+      });
+
+      it('passes default options to registration functions', function() {
+        const container = createContainer({
+          defaultOptions: {
+            lifetime: Lifetime.SINGLETON
+          }
+        });
+        let i = 1;
+        container.registerFactory('test', () => i++);
+        container.resolve('test').should.equal(1);
+        container.resolve('test').should.equal(1);
       });
     });
 

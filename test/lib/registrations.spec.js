@@ -2,6 +2,7 @@
 
 const { valueRegistration, factoryRegistration, classRegistration } = require('../../lib/registrations');
 const createContainer = require('../../lib/createContainer');
+const Lifetime = require('../../lib/Lifetime');
 
 const testFn = () => 1337;
 
@@ -24,20 +25,19 @@ describe('registrations', function() {
       factoryRegistration('test', testFn).resolve.should.be.a.function;
     });
 
-    it('defaults to singleton', function() {
+    it('defaults to transient', function() {
       const testSpy = sinon.spy(testFn);
       const reg = factoryRegistration('test', () => testSpy());
       const resolved1 = reg.resolve(container);
       const resolved2 = reg.resolve(container);
 
-      testSpy.should.have.been.calledOnce;
+      testSpy.should.have.been.calledTwice;
     });
 
     it('resolves multiple times when not singleton', function() {
       const testSpy = sinon.spy(testFn);
-      const reg = factoryRegistration('test', {
-        factory: () => testSpy(),
-        singleton: false
+      const reg = factoryRegistration('test', () => testSpy(), {
+        lifetime: Lifetime.TRANSIENT
       });
       const resolved1 = reg.resolve(container);
       const resolved2 = reg.resolve(container);
