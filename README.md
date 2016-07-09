@@ -233,25 +233,31 @@ app.get('/messages', (req,res) => {
 
 **IMPORTANT!** If a singleton is resolved, and it depends on a scoped or transient registration, those will remain in the singleton for it's lifetime!
 
-Read the documentation for [`container.createScope()`](#containercreatescope) for more examples.
-
 ```js
-const makePrintTime = ({ getTime }) => () => {
-  console.log('Time:', getTime());
+const makePrintTime = ({ time }) => () => {
+  console.log('Time:', time);
 };
 
-const makeGetTime = () => () => new Date().toString();
+const getTime = () => new Date().toString();
 
 container.register({
   printTime: asFunction(makePrintTime).singleton(),
-  getTime: asFunction(makeGetTime).transient()
+  time: asFunction(getTime).transient()
 });
 
+// Resolving `time` 2 times will
+// invoke `getTime` 2 times.
+container.resolve('time')
+container.resolve('time')
+
 // These will print the same timestamp at all times,
-// because `printTime` is singleton.
+// because `printTime` is singleton and
+// `getTime` was invoked when making the singleton.
 container.resolve('printTime')();
 container.resolve('printTime')();
 ```
+
+Read the documentation for [`container.createScope()`](#containercreatescope) for more examples.
 
 # Auto-loading modules
 
