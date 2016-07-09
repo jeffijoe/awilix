@@ -11,51 +11,119 @@ const lookupResultFor = modules => Object.keys(modules).map(key => ({
 }));
 
 describe('loadModules', function() {
-  it('calls the default export with the container', function() {
+  it('registers loaded modules with the container using the name of the file', function() {
     const container = createContainer();
+
+    class SomeClass {}
+
     const modules = {
-      ['standard.js']: spy(),
-      ['promise.js']: spy(() => createTimeout()),
-      ['default.js']: { default: spy() },
-      ['default-promise.js']: { default: spy(() => createTimeout()) }
+      ['nope.js']: undefined,
+      ['standard.js']: spy(() => 42),
+      ['default.js']: { default: spy(() => 1337) },
+      ['someClass.js']: SomeClass
     };
     const moduleLookupResult = lookupResultFor(modules);
     const deps = {
       container,
-      listModules: spy(
-        () => Promise.resolve(moduleLookupResult)
-      ),
+      listModules: spy(() => moduleLookupResult),
       require: spy(path => modules[path])
     };
-    const opts = {};
-    return loadModules(deps, 'anything', opts).then(result => {
-      result.should.deep.equal({ loadedModules: moduleLookupResult });
-      Object.keys(modules).map(x => modules[x]).forEach(m => {
-        if (m.default) m = m.default;
-        m.should.have.been.calledWith(container);
-      });
-    });
+
+    const result = loadModules(deps, 'anything');
+    result.should.deep.equal({ loadedModules: moduleLookupResult });
+    Object.keys(container.registrations).length.should.equal(3);
+    container.resolve('standard').should.equal(42);
+    container.resolve('default').should.equal(1337);
+    container.resolve('someClass').should.be.an.instanceOf(SomeClass);
   });
 
-  it('does not die when the default export is not a function', function() {
+  it('uses built-in formatter when given a formatName as a string', function() {
     const container = createContainer();
     const modules = {
-      ['1.js']: undefined,
-      ['2.js']: { },
-      ['3.js']: { default: undefined },
-      ['4.js']: { default: { } }
+      ['SomeClass.js']: spy(() => 42)
     };
     const moduleLookupResult = lookupResultFor(modules);
     const deps = {
       container,
       listModules: spy(
-        () => Promise.resolve(moduleLookupResult)
+        () => moduleLookupResult
       ),
       require: spy(path => modules[path])
     };
-    const opts = {};
-    return loadModules(deps, 'anything', opts).then(result => {
-      Object.keys(container.registeredModules).length.should.equal(0);
-    });
+    const opts = {
+      formatName: 'camelCase'
+    };
+    const result = loadModules(deps, 'anything', opts);
+    result.should.deep.equal({ loadedModules: moduleLookupResult });
+    const reg = container.registrations.someClass;
+    expect(reg).to.be.ok;
+  });
+
+  it('uses the function passed in as formatName', function() {
+    const container = createContainer();
+    const modules = {
+      ['SomeClass.js']: spy(() => 42)
+    };
+    const moduleLookupResult = lookupResultFor(modules);
+    const deps = {
+      container,
+      listModules: spy(
+        () => moduleLookupResult
+      ),
+      require: spy(path => modules[path])
+    };
+    const opts = {
+      formatName: name => name + 'IsGreat'
+    };
+    const result = loadModules(deps, 'anything', opts);
+    result.should.deep.equal({ loadedModules: moduleLookupResult });
+    const reg = container.registrations.SomeClassIsGreat;
+    expect(reg).to.be.ok;
+  });
+
+  it('does nothing with the name if the string formatName does not match a formatter', function() {
+    const container = createContainer();
+    const modules = {
+      ['SomeClass.js']: spy(() => 42)
+    };
+    const moduleLookupResult = lookupResultFor(modules);
+    const deps = {
+      container,
+      listModules: spy(
+        () => moduleLookupResult
+      ),
+      require: spy(path => modules[path])
+    };
+    const opts = {
+      formatName: 'unknownformatternope'
+    };
+    const result = loadModules(deps, 'anything', opts);
+    result.should.deep.equal({ loadedModules: moduleLookupResult });
+    const reg = container.registrations.SomeClass;
+    expect(reg).to.be.ok;
+  });
+
+  it('defaults to transient lifetime if option is unreadable', function() {
+    const container = createContainer();
+    const modules = {
+      ['test.js']: spy(() => 42)
+    };
+    const moduleLookupResult = lookupResultFor(modules);
+    const deps = {
+      container,
+      listModules: spy(
+        () => moduleLookupResult
+      ),
+      require: spy(path => modules[path])
+    };
+    const opts = {
+      registrationOptions: {
+
+      }
+    };
+    const result = loadModules(deps, 'anything', opts);
+    result.should.deep.equal({ loadedModules: moduleLookupResult });
+    const reg = container.registrations.test;
+    expect(reg).to.be.ok;
   });
 });
