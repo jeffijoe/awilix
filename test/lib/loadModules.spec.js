@@ -25,18 +25,16 @@ describe('loadModules', function() {
     const moduleLookupResult = lookupResultFor(modules);
     const deps = {
       container,
-      listModules: spy(
-        () => Promise.resolve(moduleLookupResult)
-      ),
+      listModules: spy(() => moduleLookupResult),
       require: spy(path => modules[path])
     };
-    return loadModules(deps, 'anything').then(result => {
-      result.should.deep.equal({ loadedModules: moduleLookupResult });
-      Object.keys(container.registrations).length.should.equal(3);
-      container.resolve('standard').should.equal(42);
-      container.resolve('default').should.equal(1337);
-      container.resolve('someClass').should.be.an.instanceOf(SomeClass);
-    });
+
+    const result = loadModules(deps, 'anything');
+    result.should.deep.equal({ loadedModules: moduleLookupResult });
+    Object.keys(container.registrations).length.should.equal(3);
+    container.resolve('standard').should.equal(42);
+    container.resolve('default').should.equal(1337);
+    container.resolve('someClass').should.be.an.instanceOf(SomeClass);
   });
 
   it('uses built-in formatter when given a formatName as a string', function() {
@@ -48,18 +46,17 @@ describe('loadModules', function() {
     const deps = {
       container,
       listModules: spy(
-        () => Promise.resolve(moduleLookupResult)
+        () => moduleLookupResult
       ),
       require: spy(path => modules[path])
     };
     const opts = {
       formatName: 'camelCase'
     };
-    return loadModules(deps, 'anything', opts).then(result => {
-      result.should.deep.equal({ loadedModules: moduleLookupResult });
-      const reg = container.registrations.someClass;
-      expect(reg).to.be.ok;
-    });
+    const result = loadModules(deps, 'anything', opts);
+    result.should.deep.equal({ loadedModules: moduleLookupResult });
+    const reg = container.registrations.someClass;
+    expect(reg).to.be.ok;
   });
 
   it('uses the function passed in as formatName', function() {
@@ -71,18 +68,17 @@ describe('loadModules', function() {
     const deps = {
       container,
       listModules: spy(
-        () => Promise.resolve(moduleLookupResult)
+        () => moduleLookupResult
       ),
       require: spy(path => modules[path])
     };
     const opts = {
       formatName: name => name + 'IsGreat'
     };
-    return loadModules(deps, 'anything', opts).then(result => {
-      result.should.deep.equal({ loadedModules: moduleLookupResult });
-      const reg = container.registrations.SomeClassIsGreat;
-      expect(reg).to.be.ok;
-    });
+    const result = loadModules(deps, 'anything', opts);
+    result.should.deep.equal({ loadedModules: moduleLookupResult });
+    const reg = container.registrations.SomeClassIsGreat;
+    expect(reg).to.be.ok;
   });
 
   it('does nothing with the name if the string formatName does not match a formatter', function() {
@@ -94,17 +90,16 @@ describe('loadModules', function() {
     const deps = {
       container,
       listModules: spy(
-        () => Promise.resolve(moduleLookupResult)
+        () => moduleLookupResult
       ),
       require: spy(path => modules[path])
     };
     const opts = {
       formatName: 'unknownformatternope'
     };
-    return loadModules(deps, 'anything', opts).then(result => {
-      result.should.deep.equal({ loadedModules: moduleLookupResult });
-      const reg = container.registrations.SomeClass;
-      expect(reg).to.be.ok;
-    });
+    const result = loadModules(deps, 'anything', opts);
+    result.should.deep.equal({ loadedModules: moduleLookupResult });
+    const reg = container.registrations.SomeClass;
+    expect(reg).to.be.ok;
   });
 });
