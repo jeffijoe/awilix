@@ -25,7 +25,7 @@ Simple **Inversion of Control** (IoC) container for Node with dependency resolut
     + [`container.cradle`](#containercradle)
     + [`container.registrations`](#containerregistrations)
     + [`container.registerValue()`](#containerregistervalue)
-    + [`container.registerFactory()`](#containerregisterfactory)
+    + [`container.registerFunction()`](#containerregisterfunction)
     + [`container.registerClass()`](#containerregisterclass)
     + [`container.loadModules()`](#containerloadmodules)
 * [Contributing](#contributing)
@@ -89,9 +89,9 @@ const makeUserService = ({ db }) => {
   };
 };
 
-container.registerFactory({
+container.registerFunction({
   // the `userService` is resolved by
-  // invoking the factory function.
+  // invoking the function.
   userService: makeUserService
 });
 
@@ -135,6 +135,120 @@ router.get('/api/users/:id', container.cradle.userController.getUser);
 
 That example looks big, but if you extract things to their proper files, it becomes rather elegant!
 
+# Lifetime management
+
+Awilix supports managing the lifetime of registrations. This means that you can control whether objects are resolved and used once, or cached for the lifetime of the process.
+
+There are 3 lifetime types available.
+
+* `TRANSIENT`: This is the default. The registration is resolved every time it is needed. This means if you resolve a class more than once, you will get back a new instance every time.
+* `SCOPED`: The registration is scoped to the container - that means that the resolved value will be reused when resolved from the same scope.
+* `SINGLETON`: The registration is always reused no matter what.
+
+They are exposed on the `awilix.Lifetime` object.
+
+```js
+const Lifetime = awilix.Lifetime;
+```
+
+To register a module with a specific lifetime:
+
+```js
+class MailService {}
+
+container.registerClass({
+  mailService: [MailService, { lifetime: Lifetime.SINGLETON }]
+});
+
+// or using the registration functions directly..
+const { asClass, asFunction, asValue } = awilix;
+container.register({
+  mailService: asClass(MailService).lifetime(Lifetime.SINGLETON)
+});
+
+// or..
+container.register({
+  mailService: asClass(MailService).singleton()
+});
+
+// all roads lead to rome
+container.register({
+  mailService: asClass(MailService, { lifetime: Lifetime.SINGLETON })
+});
+// seriously..
+container.registerClass('mailService', MailService, { lifetime: SINGLETON });
+```
+
+## Scoped lifetime
+
+In web applications, managing state without depending too much on the web framework can get difficult. Having to pass tons of information into every function just to make the right choices based on the authenticated user.
+
+Scoped lifetime in Awilix makes this simple - and fun!
+
+```js
+const { createContainer, asClass, asValue } = awilix;
+const container = createContainer();
+
+class MessageService {
+  constructor({ currentUser }) {
+    this.user = currentUser;
+  }
+
+  getMessages() {
+    const id = this.user.id;
+    // wee!
+  }
+}
+
+container.register({
+  messageService: asClass(MessageService).scoped()
+});
+
+// imagine middleware in some web framework..
+app.use((req, res, next) => {
+  // create a scoped container
+  req.scope = container.createScope();
+
+  // register some request-specific data..
+  req.scope.register({
+    currentUser: asValue(req.user)
+  });
+
+  next();
+});
+
+app.get('/messages', (req,res) => {
+  // for each request we get a new message service!
+  const messageService = req.scope.resolve('messageService');
+  messageService.getMessages().then(messages => {
+    res.send(200, messages)
+  });
+});
+
+// The message service can now be tested
+// without depending on any request data!
+```
+
+**IMPORTANT!** If a singleton is resolved, and it depends on a scoped or transient registration, those will remain in the singleton for it's lifetime!
+
+```js
+const makePrintTime = ({ getTime }) => () => {
+  console.log('Time:', getTime());
+};
+
+const makeGetTime = () => () => new Date().toString();
+
+container.register({
+  printTime: asFunction(makePrintTime).singleton(),
+  getTime: asFunction(makeGetTime).transient()
+});
+
+// These will print the same timestamp at all times,
+// because `printTime` is singleton.
+container.resolve('printTime')();
+container.resolve('printTime')();
+```
+
 # Auto-loading modules
 
 When you have created your container, registering 100's of classes can get boring. You can automate this by using `loadModules`.
@@ -146,7 +260,7 @@ Imagine this app structure:
     + `UserService.js` - exports an ES6 `class UserService {}`
     + `emailService.js`  - exports a factory function `function makeEmailService() {}`
   - `repositories`
-    + `UserRepository.js` - exports an ES6 `class UserService {}`
+    + `UserRepository.js` - exports an ES6 `class UserRepository {}`
   - `index.js` - our main script
 
 In our main script we would do the following
@@ -166,10 +280,10 @@ container.loadModules([
   // by default loaded modules are registered with the
   // name of the file (minus the extension)
   formatName: 'camelCase'
-}).then(() => {
-  // We are now ready! We now have a userService, userRepository and emailService!
-  container.resolve('userService').getUser(1);
 });
+
+// We are now ready! We now have a userService, userRepository and emailService!
+container.resolve('userService').getUser(1);
 ```
 
 # API
@@ -181,6 +295,10 @@ When importing `awilix`, you get the following top-level API:
 * `createContainer`
 * `listModules`
 * `AwilixResolutionError`
+* `asValue`
+* `asFunction`
+* `asClass`
+* `Lifetime`
 
 These are documented below.
 
@@ -195,7 +313,7 @@ Args:
 
 ## `listModules()`
 
-Returns a promise for a list of `{name, path}` pairs,
+Returns an array of `{name, path}` pairs,
 where the name is the module name, and path is the actual
 full path to the module.
 
@@ -206,7 +324,7 @@ Args:
 
 * `globPatterns`: a glob pattern string, or an array of them.
 * `opts.cwd`: The current working directory passed to `glob`. Defaults to `process.cwd()`.
-* **returns**: a `Promise` for an array of objects with:
+* **returns**: an array of objects with:
   - `name`: The module name - e.g. `db`
   - `path`: The path to the module relative to `options.cwd` - e.g. `lib/db.js`
 
@@ -215,12 +333,12 @@ Example:
 ```js
 const listModules = require('awilix').listModules;
 
-listModules([
+const result = listModules([
   'services/*.js'
-]).then(result => {
-  console.log(result);
+]);
+
+console.log(result);
   // << [{ name: 'someService', path: 'path/to/services/someService.js' }]
-})
 ```
 
 ## `AwilixResolutionError`
@@ -240,11 +358,51 @@ passed to the constructor/factory function, which is how everything gets wired u
 
 A read-only getter that returns the internal registrations. Not really useful for public use.
 
+### `container.register()`
+
+Registers modules with the container. This function is used by the `registerValue`, `registerFunction` and `registerClass` functions.
+
+Awilix needs to know how to resolve the modules, so let's pull out the
+registration functions:
+
+```js
+const awilix = require('awilix');
+const { asValue, asFunction, asClass } = awilix;
+```
+
+* `asValue`: Resolves the given value as-is.
+* `asFunction`: Resolve by invoking the function with the container cradle as the first and only argument.
+* `asClass`: Like `asFunction` but uses `new`.
+
+Now we need to use them. There are multiple syntaxes for the `register` function, pick the one you like the most - or use all of them, I don't really care! :sunglasses:
+
+**Both styles supports chaining! `register` returns the container!**
+
+```js
+// name-value-options
+container.register('connectionString', asValue('localhost:1433;user=...'));
+container.register('mailService', asFunction(makeMailService), { lifetime: Lifetime.SINGLETON });
+container.register('context', asClass(SessionContext), { lifetime: Lifetime.SCOPED });
+
+// object
+container.register({
+  connectionString: asValue('localhost:1433;user=...'),
+  mailService: asFunction(makeMailService, { lifetime: Lifetime.SINGLETON }),
+  context: asClass(SessionContext, { lifetime: Lifetime.SCOPED })
+})
+
+// `registerFunction` and `registerClass` also supports a fluid syntax.
+container.register('mailService', asFunction(makeMailService).lifetime(Lifetime.SINGLETON))
+container.register('context', asClass(SessionContext).singleton())
+container.register('context', asClass(SessionContext).transient())
+container.register('context', asClass(SessionContext).scoped())
+```
+
+**The object syntax, key-value syntax and chaining are valid for all `register` calls!**
+
 ### `container.registerValue()`
 
 Registers a constant value in the container. Can be anything.
-
-**The object syntax, key-value syntax and chaining are valid for all `register*` calls!**
 
 ```js
 container.registerValue({
@@ -262,57 +420,57 @@ container
   .registerValue('db', myDatabaseObject);
 ```
 
-### `container.registerFactory()`
+### `container.registerFunction()`
 
 Registers a standard function to be called whenever being resolved. The factory function can return anything it wants, and whatever it returns is what is passed to dependents.
 
-By default all registrations are `singleton`, meaning resolutions will be cached. This is configurable on a per-registration level.
+By default all registrations are `TRANSIENT`, meaning resolutions will **not** be cached. This is configurable on a per-registration level.
+
+**The array syntax for values means `[value, options]`.** This is also valid for `registerClass`.
 
 ```js
 const myFactoryFunction = ({ someName }) => (
   `${new Date().toISOString()}: Hello, this is ${someName}`
 );
 
-container.registerFactory({ fullString: myFactoryFunction });
+container.registerFunction({ fullString: myFactoryFunction });
 console.log(container.cradle.fullString);
-// << 2016-06-24T16:55:43.953Z: Hello, this is some value
+// << 2016-06-24T16:00:00.00Z: Hello, this is some value
 
 // Wait 2 seconds, try again
 setTimeout(() => {
   console.log(container.cradle.fullString);
-  // << 2016-06-24T16:55:43.953Z: Hello, this is some value
+  // << 2016-06-24T16:00:02.00Z: Hello, this is some value
 
-  // The timestamp is the same, because
-  // the factory function's result was cached.
+  // The timestamp is different because the
+  // factory function was called again!
 }, 2000);
 
 // Let's try this again, but we want it to be
-// invoked every time!
-container.registerFactory({
-  fullString: {
-    factory: myFactoryFunction,
-    singleton: false
-  }
+// cached!
+const Lifetime = awilix.Lifetime;
+container.registerFunction({
+  fullString: [myFactoryFunction, { lifetime: Lifetime.SINGLETON }]
 });
 
 console.log(container.cradle.fullString);
-// << 2016-06-24T16:58:00.00Z: Hello, this is some value
+// << 2016-06-24T16:00:02.00Z: Hello, this is some value
 
 // Wait 2 seconds, try again
 setTimeout(() => {
   console.log(container.cradle.fullString);
-  // << 2016-06-24T17:00:00.00Z: Hello, this is some value
+  // << 2016-06-24T16:00:02.00Z: Hello, this is some value
 
-  // The timestamp is now recent because the
-  // factory function was called again!
+  // The timestamp is the same, because
+  // the factory function's result was cached.
 }, 2000);
 ```
 
 ### `container.registerClass()`
 
-Same as `registerFactory`, except it will use `new`.
+Same as `registerFunction`, except it will use `new`.
 
-By default all registrations are `singleton`, meaning resolutions will be cached. This is configurable on a per-registration level.
+By default all registrations are `TRANSIENT`, meaning resolutions will **not** be cached. This is configurable on a per-registration level.
 
 ```js
 class Exclaimer {
@@ -331,10 +489,7 @@ container.registerClass({
 
 // or..
 container.registerClass({
-  exclaimer: {
-    type: Exclaimer,
-    singleton: false
-  }
+  exclaimer: [Exclaimer, { lifetime: Lifetime.SINGLETON }]
 });
 
 container.cradle.exclaimer.exclaim();
@@ -355,6 +510,7 @@ Args:
 * `opts.cwd`: The `cwd` being passed to `glob`. Defaults to `process.cwd()`.
 * **returns**: A `Promise` for when we're done. This won't be resolved until all modules are ready.
 * `opts.formatName`: Can be either `'camelCase'`, or a function that takes the current name as the first parameter and returns the new name. Default is to pass the name through as-is.
+* `registrationOptions`: An `object` passed to the registrations. Used to configure the lifetime of the loaded modules.
 
 Example:
 
@@ -368,6 +524,19 @@ container.loadModules([
   console.log('We are ready!');
   container.cradle.userService.getUser(123);
 });
+
+// to configure lifetime for all modules loaded..
+container.loadModules([
+  'services/*.js',
+  'repositories/*.js',
+  'db/db.js'
+], {
+  registrationOptions: {
+    lifetime: Lifetime.SINGLETON
+  }
+});
+
+container.cradle.userService.getUser(123);
 ```
 
 # Contributing
