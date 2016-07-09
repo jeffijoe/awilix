@@ -25,6 +25,8 @@ Simple **Inversion of Control** (IoC) container for Node with dependency resolut
   - [The `AwilixContainer` object](#the-awilixcontainer-object)
     + [`container.cradle`](#containercradle)
     + [`container.registrations`](#containerregistrations)
+    + [`container.cache`](#containercache)
+    + [`container.resolve()`](#containerresolve)
     + [`container.registerValue()`](#containerregistervalue)
     + [`container.registerFunction()`](#containerregisterfunction)
     + [`container.registerClass()`](#containerregisterclass)
@@ -290,7 +292,9 @@ container.loadModules([
   // by default loaded modules are registered with the
   // name of the file (minus the extension)
   formatName: 'camelCase',
-  // We can make registrations singleton.
+  // We can give these auto-loaded modules
+  // the deal of a lifetime! (see what I did there?)
+  // By default it's `TRANSIENT`.
   registrationOptions: {
     lifetime: Lifetime.SINGLETON
   }
@@ -312,7 +316,7 @@ When importing `awilix`, you get the following top-level API:
 * `asValue`
 * `asFunction`
 * `asClass`
-* `Lifetime`
+* `Lifetime` - this one is documented above.
 
 These are documented below.
 
@@ -370,7 +374,42 @@ passed to the constructor/factory function, which is how everything gets wired u
 
 ### `container.registrations`
 
-A read-only getter that returns the internal registrations. Not really useful for public use.
+A read-only getter that returns the internal registrations. When invoked on a *scope*, will show registrations for it's parent, and it's parent's parent, and so on.
+
+Not really useful for public use.
+
+### `container.cache`
+
+An object used internally for caching resolutions. It's a plain object.
+Not meant for public use but if you find it useful, go ahead but tread carefully.
+
+Each scope has it's own cache, and checks the cache of it's parents.
+
+```js
+let counter = 1;
+container.register({
+  count: asFunction(() => counter++).singleton()
+});
+
+container.cradle.count === 1
+container.cradle.count === 1
+
+delete container.cache.count;
+container.cradle.count === 2
+```
+
+### `container.resolve()`
+
+Resolves the registration with the given name. Used by the cradle.
+
+```js
+container.registerFunction({
+  leet: () => 1337
+});
+
+container.resolve('leet') === 1337
+container.cradle.leet === 1337
+```
 
 ### `container.register()`
 
