@@ -1,5 +1,3 @@
-'use strict';
-
 const listModules = require('../../lib/listModules');
 
 describe('listModules', function() {

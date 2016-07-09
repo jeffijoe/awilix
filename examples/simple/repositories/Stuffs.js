@@ -1,4 +1,3 @@
-'use strict';
 function StuffRepository({ database }) {
   console.log('StuffRepository created with database', database);
 }

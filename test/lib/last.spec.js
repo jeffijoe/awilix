@@ -1,4 +1,3 @@
-'use strict';
 const last = require('../../lib/last');
 
 describe('last', function() {

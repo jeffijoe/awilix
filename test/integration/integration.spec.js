@@ -1,5 +1,3 @@
-'use strict';
-
 const AnotherService = require('./fixture/services/anotherService').AnotherService;
 const fixture = require('./fixture');
 

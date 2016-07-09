@@ -1,4 +1,3 @@
-'use strict';
 const loadModules = require('../../lib/loadModules');
 const spy = sinon.spy;
 const createContainer = require('../../lib/createContainer');

@@ -1,4 +1,3 @@
-'use strict';
 const awilix = require('../../lib/awilix');
 const createContainer = require('../../lib/createContainer');
 const listModules = require('../../lib/listModules');

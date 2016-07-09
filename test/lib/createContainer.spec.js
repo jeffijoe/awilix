@@ -1,5 +1,3 @@
-'use strict';
-
 const createContainer = require('../../lib/createContainer');
 const Lifetime = require('../../lib/Lifetime');
 const { catchError } = require('../helpers/errorHelpers');

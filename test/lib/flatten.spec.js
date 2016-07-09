@@ -1,4 +1,3 @@
-'use strict';
 const flatten = require('../../lib/flatten');
 
 describe('flatten', function() {

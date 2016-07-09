@@ -1,5 +1,3 @@
-'use strict';
-
 const awilix = require('../../../lib/awilix');
 
 module.exports = function () {

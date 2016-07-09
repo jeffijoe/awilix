@@ -1,5 +1,3 @@
-'use strict';
-
 class AnotherService {
   constructor(answerRepository) {
     this.repo = answerRepository;

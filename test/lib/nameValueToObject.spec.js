@@ -1,4 +1,3 @@
-'use strict';
 const nameValueToObject = require('../../lib/nameValueToObject');
 
 describe('nameValueToObject', function() {

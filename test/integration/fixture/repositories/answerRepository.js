@@ -1,5 +1,3 @@
-'use strict';
-
 const THE_UNIVERSAL_ANSWER = 42;
 
 module.exports.default = function() {

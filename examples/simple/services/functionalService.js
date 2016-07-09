@@ -1,4 +1,3 @@
-'use strict';
 /**
  * This is an example of a "functional" service,
  * meaning that instead of exporting a class,

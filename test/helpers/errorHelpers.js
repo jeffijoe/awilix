@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Catches an error when running the given fn, and returns it.
  *

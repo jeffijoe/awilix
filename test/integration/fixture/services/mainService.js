@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports.default = function({ answerRepository }) {
   const getTheAnswer = function(question) {
     const repo = answerRepository;

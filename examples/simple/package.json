@@ -9,6 +9,5 @@
   "author": "Jeff Hansen <jeff@jeffijoe.com>",
   "license": "MIT",
   "dependencies": {
-    "awilix": "../../"
   }
 }

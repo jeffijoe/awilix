@@ -1,4 +1,3 @@
-'use strict';
 const isFunction = require('../../lib/isFunction');
 
 describe('isFunction', function() {

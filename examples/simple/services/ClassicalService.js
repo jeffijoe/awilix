@@ -1,4 +1,3 @@
-'use strict';
 /**
  * This is an example of a "classical" service,
  * meaning that the service is actually a class

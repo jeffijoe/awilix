@@ -1,11 +1,14 @@
 # Awilix
 
-[![npm version](https://badge.fury.io/js/awilix.svg)](https://badge.fury.io/js/awilix)
-[![Dependency Status](https://david-dm.org/jeffijoe/awilix.svg)](https://david-dm.org/jeffijoe/awilix)
-[![devDependency Status](https://david-dm.org/jeffijoe/awilix/dev-status.svg)](https://david-dm.org/jeffijoe/awilix#info=devDependencies)
-[![Build Status](https://travis-ci.org/jeffijoe/awilix.svg?branch=next)](https://travis-ci.org/jeffijoe/awilix)
-[![Coverage Status](https://coveralls.io/repos/github/jeffijoe/awilix/badge.svg?branch=next)](https://coveralls.io/github/jeffijoe/awilix?branch=next)
-[![Code Climate](https://codeclimate.com/github/jeffijoe/awilix/badges/gpa.svg)](https://codeclimate.com/github/jeffijoe/awilix)
+[![npm](https://img.shields.io/npm/v/awilix.svg?maxAge=1000)](https://www.npmjs.com/package/awilix)
+[![dependency Status](https://img.shields.io/david/jeffijoe/awilix.svg?maxAge=1000)](https://david-dm.org/jeffijoe/awilix)
+[![devDependency Status](https://img.shields.io/david/dev/jeffijoe/awilix.svg?maxAge=1000)](https://david-dm.org/jeffijoe/awilix)
+[![Build Status](https://img.shields.io/travis/jeffijoe/awilix.svg?maxAge=1000)](https://travis-ci.org/jeffijoe/awilix)
+[![Coveralls](https://img.shields.io/coveralls/jeffijoe/awilix.svg?maxAge=1000)](https://coveralls.io/github/jeffijoe/awilix)
+[![Code Climate](https://img.shields.io/codeclimate/github/jeffijoe/awilix.svg?maxAge=1000)](https://codeclimate.com/github/jeffijoe/awilix)
+[![npm](https://img.shields.io/npm/dt/awilix.svg?maxAge=1000)](https://www.npmjs.com/package/awilix)
+[![npm](https://img.shields.io/npm/l/awilix.svg?maxAge=1000)](https://github.com/jeffijoe/awilix/blob/master/LICENSE.md)
+[![node](https://img.shields.io/node/v/awilix.svg?maxAge=1000)](https://www.npmjs.com/package/awilix)
 
 Simple **Inversion of Control** (IoC) container for Node with dependency resolution support powered by ES6 Proxies. Make IoC great again!
 

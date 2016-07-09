@@ -1,6 +1,5 @@
-'use strict';
 // Import Awilix
-const awilix = require('awilix');
+const awilix = require('../..');
 
 // Create a container.
 const container = awilix.createContainer();
@@ -17,20 +16,15 @@ container.loadModules([
   // Glob patterns
   'services/*.js',
   'repositories/*.js'
-], opts).then(result => {
-  console.log('Loaded modules:', container.loadedModules);
-  console.log('Registrations', Object.keys(container.registrations));
+], opts);
 
-  // 2 ways to resolve the same service.
-  const classicalServiceFromCradle = container.cradle.classicalService;
-  const classicalService = container.resolve('classicalService');
+// 2 ways to resolve the same service.
+const classicalServiceFromCradle = container.cradle.classicalService;
+const classicalService = container.resolve('classicalService');
 
-  console.log('Resolved to the same instance:', classicalService === classicalServiceFromCradle);
+console.log('Resolved to the same instance:', classicalService === classicalServiceFromCradle);
 
-  // Let's do something!
-  return classicalService.actAllCool().then(r => {
-    console.log('Result from classical service:', r);
-  });
-}).catch(err => {
-  console.error('Error', err.stack);
+// Let's do something!
+return classicalService.actAllCool().then(r => {
+  console.log('Result from classical service:', r);
 });
