@@ -9,6 +9,8 @@
 
 Simple **Inversion of Control** (IoC) container for Node with dependency resolution support powered by ES6 Proxies. Make IoC great again!
 
+> Looking for v1? Click [here](https://github.com/jeffijoe/awilix/tree/v1).
+
 # Table of Contents
 
 * [Installation](#installation)
