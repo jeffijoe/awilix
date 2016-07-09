@@ -139,6 +139,8 @@ router.get('/api/users/:id', container.cradle.userController.getUser);
 
 That example looks big, but if you extract things to their proper files, it becomes rather elegant!
 
+[Check out a working Koa example!](/jeffijoe/awilix/examples/koa)
+
 # Lifetime management
 
 Awilix supports managing the lifetime of registrations. This means that you can control whether objects are resolved and used once, or cached for the lifetime of the process.
