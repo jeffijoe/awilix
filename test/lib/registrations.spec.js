@@ -33,17 +33,6 @@ describe('registrations', function() {
 
       testSpy.should.have.been.calledTwice;
     });
-
-    it('resolves multiple times when not singleton', function() {
-      const testSpy = sinon.spy(testFn);
-      const reg = asFunction(() => testSpy(), {
-        lifetime: Lifetime.TRANSIENT
-      });
-      const resolved1 = reg.resolve(container);
-      const resolved2 = reg.resolve(container);
-
-      testSpy.should.have.been.calledTwice;
-    });
   });
 
   describe('asClass', function() {
@@ -55,6 +44,33 @@ describe('registrations', function() {
       const reg = asClass(TestClass);
       const result = reg.resolve(container);
       result.should.be.an.instanceOf(TestClass);
+    });
+  });
+
+  describe('asClass and asFunction fluid interface', function() {
+    it('supports all lifetimes and returns the object itself', function() {
+      const subjects = [
+        asClass(TestClass),
+        asFunction(() => {})
+      ];
+
+      subjects.forEach(x => {
+        let retVal = x.setLifetime(Lifetime.SCOPED);
+        retVal.should.equal(x);
+        retVal.lifetime.should.equal(Lifetime.SCOPED);
+
+        retVal = retVal.transient();
+        retVal.should.equal(x);
+        retVal.lifetime.should.equal(Lifetime.TRANSIENT);
+
+        retVal = retVal.singleton();
+        retVal.should.equal(x);
+        retVal.lifetime.should.equal(Lifetime.SINGLETON);
+
+        retVal = retVal.scoped();
+        retVal.should.equal(x);
+        retVal.lifetime.should.equal(Lifetime.SCOPED);
+      });
     });
   });
 });

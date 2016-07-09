@@ -279,7 +279,11 @@ container.loadModules([
   // We want to register `UserService` as `userService` -
   // by default loaded modules are registered with the
   // name of the file (minus the extension)
-  formatName: 'camelCase'
+  formatName: 'camelCase',
+  // We can make registrations singleton.
+  registrationOptions: {
+    lifetime: Lifetime.SINGLETON
+  }
 });
 
 // We are now ready! We now have a userService, userRepository and emailService!
@@ -392,7 +396,7 @@ container.register({
 })
 
 // `registerFunction` and `registerClass` also supports a fluid syntax.
-container.register('mailService', asFunction(makeMailService).lifetime(Lifetime.SINGLETON))
+container.register('mailService', asFunction(makeMailService).setLifetime(Lifetime.SINGLETON))
 container.register('context', asClass(SessionContext).singleton())
 container.register('context', asClass(SessionContext).transient())
 container.register('context', asClass(SessionContext).scoped())

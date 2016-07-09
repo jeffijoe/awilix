@@ -180,6 +180,96 @@ describe('createContainer', function() {
         err2.message.should.contain('otherFirst -> second -> third');
       });
 
+      it('supports transient lifetime', function() {
+        const container = createContainer();
+        let counter = 1;
+        container.register({
+          hehe: asFunction(() => counter++).transient()
+        });
+
+        container.cradle.hehe.should.equal(1);
+        container.cradle.hehe.should.equal(2);
+      });
+
+      it('supports singleton lifetime', function() {
+        const container = createContainer();
+        let counter = 1;
+        container.register({
+          hehe: asFunction(() => counter++).singleton()
+        });
+
+        container.cradle.hehe.should.equal(1);
+        container.cradle.hehe.should.equal(1);
+      });
+
+      it('supports scoped lifetime', function() {
+        const container = createContainer();
+        let scopedCounter = 1;
+        container.register({
+          scoped: asFunction(() => scopedCounter++).scoped()
+        });
+
+        const scope1 = container.createScope();
+        scope1.cradle.scoped.should.equal(1);
+        scope1.cradle.scoped.should.equal(1);
+
+        const scope2 = container.createScope();
+        scope2.cradle.scoped.should.equal(2);
+        scope2.cradle.scoped.should.equal(2);
+      });
+
+      it('caches singletons regardless of scope', function() {
+        const container = createContainer();
+        let singletonCounter = 1;
+        container.register({
+          singleton: asFunction(() => singletonCounter++).singleton()
+        });
+
+        const scope1 = container.createScope();
+        scope1.cradle.singleton.should.equal(1);
+        scope1.cradle.singleton.should.equal(1);
+
+        const scope2 = container.createScope();
+        scope2.cradle.singleton.should.equal(1);
+        scope2.cradle.singleton.should.equal(1);
+      });
+
+      it('resolves transients regardless of scope', function() {
+        const container = createContainer();
+        let transientCounter = 1;
+        container.register({
+          transient: asFunction(() => transientCounter++).transient()
+        });
+
+        const scope1 = container.createScope();
+        scope1.cradle.transient.should.equal(1);
+        scope1.cradle.transient.should.equal(2);
+
+        const scope2 = container.createScope();
+        scope2.cradle.transient.should.equal(3);
+        scope2.cradle.transient.should.equal(4);
+      });
+
+      it('uses parents cache when scoped', function() {
+        const container = createContainer();
+        let scopedCounter = 1;
+        container.register({
+          scoped: asFunction(() => scopedCounter++).scoped()
+        });
+
+        const scope1 = container.createScope();
+        scope1.cradle.scoped.should.equal(1);
+        scope1.cradle.scoped.should.equal(1);
+
+        const scope2 = scope1.createScope();
+        scope2.cradle.scoped.should.equal(1);
+        scope2.cradle.scoped.should.equal(1);
+
+        container.cradle.scoped.should.equal(2);
+        container.cradle.scoped.should.equal(2);
+        scope2.cradle.scoped.should.equal(1);
+      });
+
       it('throws an AwilixResolutionError when there are cyclic dependencies', function() {
         const container = createContainer();
         container.registerFunction({
