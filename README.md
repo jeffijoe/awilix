@@ -139,7 +139,7 @@ router.get('/api/users/:id', container.cradle.userController.getUser);
 
 That example looks big, but if you extract things to their proper files, it becomes rather elegant!
 
-[Check out a working Koa example!](/jeffijoe/awilix/examples/koa)
+[Check out a working Koa example!](/examples/koa)
 
 # Lifetime management
 
