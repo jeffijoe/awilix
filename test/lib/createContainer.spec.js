@@ -292,7 +292,7 @@ describe('createContainer', function() {
         const err = catchError(() => container.resolve('first'));
         err.message.should.contain('first -> second');
         err.message.should.contain('lol');
-      })
+      });
     });
   });
 });
