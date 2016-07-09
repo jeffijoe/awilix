@@ -1,10 +1,12 @@
+> This is the `v1` branch of Awilix for Node v4 and above. The API in v2 changed dramatically. If you are using Node v6 or above, you should consider migrating to the latest version.
+
 # Awilix
 
 [![npm version](https://badge.fury.io/js/awilix.svg)](https://badge.fury.io/js/awilix)
 [![Dependency Status](https://david-dm.org/jeffijoe/awilix.svg)](https://david-dm.org/jeffijoe/awilix)
 [![devDependency Status](https://david-dm.org/jeffijoe/awilix/dev-status.svg)](https://david-dm.org/jeffijoe/awilix#info=devDependencies)
-[![Build Status](https://travis-ci.org/jeffijoe/awilix.svg?branch=master)](https://travis-ci.org/jeffijoe/awilix)
-[![Coverage Status](https://coveralls.io/repos/github/jeffijoe/awilix/badge.svg?branch=master)](https://coveralls.io/github/jeffijoe/awilix?branch=master)
+[![Build Status](https://travis-ci.org/jeffijoe/awilix.svg?branch=v1)](https://travis-ci.org/jeffijoe/awilix)
+[![Coverage Status](https://coveralls.io/repos/github/jeffijoe/awilix/badge.svg?branch=v1)](https://coveralls.io/github/jeffijoe/awilix?branch=v1)
 [![Code Climate](https://codeclimate.com/github/jeffijoe/awilix/badges/gpa.svg)](https://codeclimate.com/github/jeffijoe/awilix)
 
 Simple **Inversion of Control** (IoC) container for Node with dependency resolution support. Make IoC great again!
@@ -12,7 +14,7 @@ Simple **Inversion of Control** (IoC) container for Node with dependency resolut
 ## Installation
 
 ```
-npm install awilix --save
+npm install awilix@1 --save
 ```
 
 *Requires Node v4 or above, and possibly npm v3.*
