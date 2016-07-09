@@ -571,6 +571,27 @@ container.cradle.someValue
 // of the registration.
 ```
 
+Things registered in the scope take precedence over it's parent.
+
+```js
+// It does not matter when the scope is created,
+// it will still have anything that is registered
+// in it's parent.
+const scope = container.createScope();
+
+container.register({
+  value: asValue('root'),
+  usedValue: asFunction((cradle) => cradle.value)
+});
+
+scope.register({
+  value: asValue('scope')
+});
+
+container.cradle.usedValue === 'root'
+scope.cradle.usedValue === 'scope'
+```
+
 ### `container.loadModules()`
 
 Given an array of globs, returns a `Promise` when loading is done.

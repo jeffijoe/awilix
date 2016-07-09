@@ -326,6 +326,26 @@ describe('createContainer', function() {
         expect(() => container.cradle.scopedValue).to.throw(AwilixResolutionError);
       });
 
+      it('supports overwriting values in a scope', function() {
+        const container = createContainer();
+        // It does not matter when the scope is created,
+        // it will still have anything that is registered
+        // in it's parent.
+        const scope = container.createScope();
+
+        container.register({
+          value: asValue('root'),
+          usedValue: asFunction((cradle) => cradle.value)
+        });
+
+        scope.register({
+          value: asValue('scope')
+        });
+
+        container.cradle.usedValue.should.equal('root');
+        scope.cradle.usedValue.should.equal('scope');
+      });
+
       it('throws an AwilixResolutionError when there are cyclic dependencies', function() {
         const container = createContainer();
         container.registerFunction({
