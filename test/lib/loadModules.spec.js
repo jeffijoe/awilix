@@ -102,4 +102,28 @@ describe('loadModules', function() {
     const reg = container.registrations.SomeClass;
     expect(reg).to.be.ok;
   });
+
+  it('defaults to transient lifetime if option is unreadable', function() {
+    const container = createContainer();
+    const modules = {
+      ['test.js']: spy(() => 42)
+    };
+    const moduleLookupResult = lookupResultFor(modules);
+    const deps = {
+      container,
+      listModules: spy(
+        () => moduleLookupResult
+      ),
+      require: spy(path => modules[path])
+    };
+    const opts = {
+      registrationOptions: {
+
+      }
+    };
+    const result = loadModules(deps, 'anything', opts);
+    result.should.deep.equal({ loadedModules: moduleLookupResult });
+    const reg = container.registrations.test;
+    expect(reg).to.be.ok;
+  });
 });

@@ -281,6 +281,18 @@ describe('createContainer', function() {
         const err = catchError(() => container.resolve('first'));
         err.message.should.contain('first -> second -> third -> second');
       });
+
+      it('throws an AwilixResolutionError when the lifetime is unknown', function() {
+        const container = createContainer();
+        container.registerFunction({
+          first: (cradle) => cradle.second,
+          second: [(cradle) => 'hah', { lifetime: 'lol' }]
+        });
+
+        const err = catchError(() => container.resolve('first'));
+        err.message.should.contain('first -> second');
+        err.message.should.contain('lol');
+      })
     });
   });
 });
