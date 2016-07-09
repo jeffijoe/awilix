@@ -15,6 +15,7 @@ Simple **Inversion of Control** (IoC) container for Node with dependency resolut
 
 * [Installation](#installation)
 * [Usage](#usage)
+* [Lifetime management](#lifetime-management)
 * [Auto-loading modules](#auto-loading-modules)
 * [API](#api)
   - [The `awilix` object](#the-awilix-object)
@@ -28,6 +29,7 @@ Simple **Inversion of Control** (IoC) container for Node with dependency resolut
     + [`container.registerFunction()`](#containerregisterfunction)
     + [`container.registerClass()`](#containerregisterclass)
     + [`container.loadModules()`](#containerloadmodules)
+    + [`container.createScope()`](#containercreatescope)
 * [Contributing](#contributing)
 * [What's in a name?](#whats-in-a-name)
 * [Author](#author)
@@ -230,6 +232,8 @@ app.get('/messages', (req,res) => {
 ```
 
 **IMPORTANT!** If a singleton is resolved, and it depends on a scoped or transient registration, those will remain in the singleton for it's lifetime!
+
+Read the documentation for [`container.createScope()`](#containercreatescope) for more examples.
 
 ```js
 const makePrintTime = ({ getTime }) => () => {
@@ -498,6 +502,73 @@ container.registerClass({
 
 container.cradle.exclaimer.exclaim();
 // << 2016-06-24T17:00:00.00Z: Hello, this is some value!!!!!
+```
+
+### `container.createScope()`
+
+Creates a new scope. All registrations with a `Lifetime.SCOPED` will be cached inside a scope. A scope is basically a "child" container.
+
+* returns `AwilixContainer`
+
+```js
+// Increments the counter every time it is resolved.
+let counter = 1;
+container.register({
+  counterValue: asFunction(() => counter++).scoped()
+});
+const scope1 = container.createScope();
+const scope2 = container.createScope();
+
+const scope1Child = scope1.createScope();
+
+scope1.cradle.counterValue === 1
+scope1.cradle.counterValue === 1
+scope2.cradle.counterValue === 2
+scope2.cradle.counterValue === 2
+
+scope1Child.cradle.counterValue === 1
+```
+
+**Be careful!** If a scope's *parent* has already resolved a scoped value, that value will be returned.
+
+```js
+let counter = 1;
+container.register({
+  counterValue: asFunction(() => counter++).scoped()
+});
+const scope1 = container.createScope();
+const scope2 = container.createScope();
+
+container.cradle.counterValue === 1
+
+// These are resolved to the parent's cached value.
+scope1.cradle.counterValue === 1
+scope1.cradle.counterValue === 1
+scope2.cradle.counterValue === 1
+scope2.cradle.counterValue === 1
+```
+
+A scope may also register additional stuff - they will only be available within that scope and it's children.
+
+```js
+// Register a transient function
+// that returns the value of the scope-provided dependency.
+// For this example we could also use scoped lifetime.
+container.register({
+  scopedValue: asFunction((cradle) => 'Hello ' + cradle.someValue)
+});
+
+// Create a scope and register a value.
+const scope = container.createScope();
+scope.register({
+  someValue: asValue('scope')
+});
+
+scope.cradle.scopedValue === 'Hello scope';
+container.cradle.someValue
+// throws AwilixResolutionException
+// because the root container does not know
+// of the registration.
 ```
 
 ### `container.loadModules()`

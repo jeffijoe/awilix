@@ -270,6 +270,62 @@ describe('createContainer', function() {
         scope2.cradle.scoped.should.equal(1);
       });
 
+      it('supports nested scopes', function() {
+        const container = createContainer();
+
+        // Increments the counter every time it is resolved.
+        let counter = 1;
+        container.register({
+          counterValue: asFunction(() => counter++).scoped()
+        });
+        const scope1 = container.createScope();
+        const scope2 = container.createScope();
+
+        const scope1Child = scope1.createScope();
+
+        scope1.cradle.counterValue.should.equal(1);
+        scope1.cradle.counterValue.should.equal(1);
+        scope2.cradle.counterValue.should.equal(2);
+        scope2.cradle.counterValue.should.equal(2);
+        scope1Child.cradle.counterValue.should.equal(1);
+      });
+
+      it('resolves dependencies in scope', function() {
+        const container = createContainer();
+        // Register a transient function
+        // that returns the value of the scope-provided dependency.
+        // For this example we could also use scoped lifetime.
+        container.register({
+          scopedValue: asFunction((cradle) => 'Hello ' + cradle.someValue)
+        });
+
+        // Create a scope and register a value.
+        const scope = container.createScope();
+        scope.register({
+          someValue: asValue('scope')
+        });
+
+        scope.cradle.scopedValue.should.equal('Hello scope');
+      });
+
+      it('cannot find a scope-registered value when resolved from root', function() {
+        const container = createContainer();
+        // Register a transient function
+        // that returns the value of the scope-provided dependency.
+        // For this example we could also use scoped lifetime.
+        container.register({
+          scopedValue: asFunction((cradle) => 'Hello ' + cradle.someValue)
+        });
+
+        // Create a scope and register a value.
+        const scope = container.createScope();
+        scope.register({
+          someValue: asValue('scope')
+        });
+
+        expect(() => container.cradle.scopedValue).to.throw(AwilixResolutionError);
+      });
+
       it('throws an AwilixResolutionError when there are cyclic dependencies', function() {
         const container = createContainer();
         container.registerFunction({
