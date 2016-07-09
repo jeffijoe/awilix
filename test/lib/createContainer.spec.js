@@ -4,6 +4,7 @@ const createContainer = require('../../lib/createContainer');
 const Lifetime = require('../../lib/Lifetime');
 const { catchError } = require('../helpers/errorHelpers');
 const AwilixResolutionError = require('../../lib/AwilixResolutionError');
+const { asClass, asFunction, asValue } = require('../../lib/registrations');
 
 class Test {
   constructor({ repo }) {
@@ -30,13 +31,13 @@ describe('createContainer', function() {
   describe('container', function() {
     it('lets me register something and resolve it', function() {
       const container = createContainer();
-      container.registerValue({ someValue: 42 });
-      container.registerFactory({
-        test: (deps) => {
+      container.register({ someValue: asValue(42) });
+      container.register({
+        test: asFunction((deps) => {
           return {
             someValue: deps.someValue
           };
-        }
+        })
       });
 
       const test = container.cradle.test;
@@ -44,17 +45,17 @@ describe('createContainer', function() {
       test.someValue.should.equal(42);
     });
 
-    describe('register*', function() {
+    describe('register', function() {
       it('supports multiple registrations in a single call', function() {
         const container = createContainer();
-        container.registerValue({
-          universe: 42,
-          leet: 1337
+        container.register({
+          universe: asValue(42),
+          leet: asValue(1337)
         });
 
-        container.registerFactory({
-          service: ({ func, universe }) => ({ method: () => func(universe) }),
-          func: () => (answer) => 'Hello world, the answer is ' + answer
+        container.register({
+          service: asFunction(({ func, universe }) => ({ method: () => func(universe) })),
+          func: asFunction(() => (answer) => 'Hello world, the answer is ' + answer)
         });
 
         Object.keys(container.registrations).length.should.equal(4);
@@ -62,28 +63,68 @@ describe('createContainer', function() {
         container.resolve('service').method().should.equal('Hello world, the answer is 42');
       });
 
-      it('passes default options to registration functions', function() {
-        const container = createContainer({
-          defaultOptions: {
-            lifetime: Lifetime.SINGLETON
-          }
-        });
-        let i = 1;
-        container.registerFactory('test', () => i++);
-        container.resolve('test').should.equal(1);
-        container.resolve('test').should.equal(1);
-      });
-    });
-
-    describe('registerClass', function() {
       it('supports classes', function() {
         const container = createContainer();
-        container.registerClass({
-          test: Test,
-          repo: Repo
+        container.register({
+          test: asClass(Test),
+          repo: asClass(Repo)
         });
 
         container.resolve('test').stuff().should.equal('stuff');
+      });
+    });
+
+    describe('register* functions', function() {
+      let container;
+      beforeEach(function() {
+        container = createContainer();
+      });
+
+      it('supports registerClass', function() {
+        container.registerClass('nameValue', Test);
+        container.registerClass('nameValueWithOpts', Test, { lifetime: Lifetime.SCOPED });
+        container.registerClass('nameValueWithArray', [Test, { lifetime: Lifetime.SCOPED }]);
+        container.registerClass({
+          obj: Test,
+          objWithOpts: [Test, { lifetime: Lifetime.SCOPED }]
+        });
+
+        container.registrations.nameValue.lifetime.should.equal(Lifetime.TRANSIENT);
+        container.registrations.nameValueWithArray.lifetime.should.equal(Lifetime.SCOPED);
+        container.registrations.nameValueWithOpts.lifetime.should.equal(Lifetime.SCOPED);
+
+        container.registrations.obj.lifetime.should.equal(Lifetime.TRANSIENT);
+        container.registrations.objWithOpts.lifetime.should.equal(Lifetime.SCOPED);
+      });
+
+      it('supports registerFunction', function() {
+        const fn = () => 42;
+        container.registerFunction('nameValue', fn);
+        container.registerFunction('nameValueWithOpts', fn, { lifetime: Lifetime.SCOPED });
+        container.registerFunction('nameValueWithArray', [fn, { lifetime: Lifetime.SCOPED }]);
+        container.registerFunction({
+          obj: fn,
+          objWithOpts: [fn, { lifetime: Lifetime.SCOPED }]
+        });
+
+        container.registrations.nameValue.lifetime.should.equal(Lifetime.TRANSIENT);
+        container.registrations.nameValueWithArray.lifetime.should.equal(Lifetime.SCOPED);
+        container.registrations.nameValueWithOpts.lifetime.should.equal(Lifetime.SCOPED);
+
+        container.registrations.obj.lifetime.should.equal(Lifetime.TRANSIENT);
+        container.registrations.objWithOpts.lifetime.should.equal(Lifetime.SCOPED);
+      });
+
+      it('supports registerValue', function() {
+        container.registerValue('nameValue', 1);
+        container.registerValue({
+          obj: 2,
+          another: 3
+        });
+
+        container.resolve('nameValue').should.equal(1);
+        container.resolve('obj').should.equal(2);
+        container.resolve('another').should.equal(3);
       });
     });
 
@@ -98,7 +139,7 @@ describe('createContainer', function() {
         const factorySpy = sinon.spy((cradle) => 'factory ' + cradle.value);
         const container = createContainer();
         container.registerValue({ value: 42 });
-        container.registerFactory({ factory: (cradle) => () => factorySpy(cradle) });
+        container.registerFunction({ factory: (cradle) => () => factorySpy(cradle) });
         container.registerClass({ theClass: TestClass });
 
         const root = container.resolve('theClass');
@@ -114,7 +155,7 @@ describe('createContainer', function() {
 
       it('throws an AwilixResolutionError with a resolution path when resolving an unregistered dependency', function() {
         const container = createContainer();
-        container.registerFactory({
+        container.registerFunction({
           first: (cradle) => cradle.second,
           second: (cradle) => cradle.third,
           third: (cradle) => cradle.unregistered
@@ -126,7 +167,7 @@ describe('createContainer', function() {
 
       it('does not screw up the resolution stack when called twice', function() {
         const container = createContainer();
-        container.registerFactory({
+        container.registerFunction({
           first: (cradle) => cradle.second,
           otherFirst: (cradle) => cradle.second,
           second: (cradle) => cradle.third,
@@ -141,7 +182,7 @@ describe('createContainer', function() {
 
       it('throws an AwilixResolutionError when there are cyclic dependencies', function() {
         const container = createContainer();
-        container.registerFactory({
+        container.registerFunction({
           first: (cradle) => cradle.second,
           second: (cradle) => cradle.third,
           third: (cradle) => cradle.second

@@ -1,6 +1,6 @@
 'use strict';
 
-const { valueRegistration, factoryRegistration, classRegistration } = require('../../lib/registrations');
+const { asValue, asFunction, asClass } = require('../../lib/registrations');
 const createContainer = require('../../lib/createContainer');
 const Lifetime = require('../../lib/Lifetime');
 
@@ -14,20 +14,20 @@ describe('registrations', function() {
     container = createContainer();
   });
 
-  describe('valueRegistration', function() {
+  describe('asValue', function() {
     it('creates a registration with a resolve method', function() {
-      valueRegistration('test', 42).resolve.should.be.a.function;
+      asValue(42).resolve.should.be.a.function;
     });
   });
 
-  describe('factoryRegistration', function() {
+  describe('asFunction', function() {
     it('creates a registration with a resolve method', function() {
-      factoryRegistration('test', testFn).resolve.should.be.a.function;
+      asFunction(testFn).resolve.should.be.a.function;
     });
 
     it('defaults to transient', function() {
       const testSpy = sinon.spy(testFn);
-      const reg = factoryRegistration('test', () => testSpy());
+      const reg = asFunction(() => testSpy());
       const resolved1 = reg.resolve(container);
       const resolved2 = reg.resolve(container);
 
@@ -36,7 +36,7 @@ describe('registrations', function() {
 
     it('resolves multiple times when not singleton', function() {
       const testSpy = sinon.spy(testFn);
-      const reg = factoryRegistration('test', () => testSpy(), {
+      const reg = asFunction(() => testSpy(), {
         lifetime: Lifetime.TRANSIENT
       });
       const resolved1 = reg.resolve(container);
@@ -46,13 +46,13 @@ describe('registrations', function() {
     });
   });
 
-  describe('classRegistration', function() {
+  describe('asClass', function() {
     it('creates a registration with a resolve method', function() {
-      classRegistration('test', TestClass).resolve.should.be.a.function;
+      asClass(TestClass).resolve.should.be.a.function;
     });
 
     it('resolves the class by newing it up', function() {
-      const reg = classRegistration('test', TestClass);
+      const reg = asClass(TestClass);
       const result = reg.resolve(container);
       result.should.be.an.instanceOf(TestClass);
     });
