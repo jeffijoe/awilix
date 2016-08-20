@@ -644,7 +644,7 @@ scope.cradle.usedValue === 'scope'
 
 ### `container.loadModules()`
 
-Given an array of globs, returns a `Promise` when loading is done.
+Given an array of globs, returns a (useless) object with info about the loaded modules.
 
 Awilix will use `require` on the loaded modules, and register the default-exported function or class as the name of the file.
 
@@ -666,10 +666,9 @@ container.loadModules([
   'services/*.js',
   'repositories/*.js',
   'db/db.js'
-]).then(() => {
-  console.log('We are ready!');
-  container.cradle.userService.getUser(123);
-});
+])
+
+container.cradle.userService.getUser(123);
 
 // to configure lifetime for all modules loaded..
 container.loadModules([
