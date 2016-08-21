@@ -34,18 +34,19 @@
   "homepage": "https://github.com/jeffijoe/awilix#readme",
   "devDependencies": {
     "chai": "^3.5.0",
-    "coveralls": "^2.11.9",
-    "eslint": "^3.0.1",
-    "eslint-watch": "^2.1.13",
+    "coveralls": "^2.11.12",
+    "eslint": "^3.3.1",
+    "eslint-watch": "^2.1.14",
     "istanbul": "^0.4.4",
-    "mocha": "^2.5.3",
-    "sinon": "^1.17.4",
+    "mocha": "^3.0.2",
+    "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
     "camel-case": "^3.0.0",
     "glob": "^7.0.5",
     "is-class": "0.0.4",
-    "is-plain-object": "^2.0.1"
+    "is-plain-object": "^2.0.1",
+    "is-string": "^1.0.4"
   }
 }

@@ -38,4 +38,17 @@ describe('listModules', function() {
     createContainerSpec.name.should.equal('createContainer');
     createContainerSpec.path.should.contain('createContainer.js');
   });
+
+  it('supports array-opts syntax', function() {
+    const opts = { value: 'yep' };
+    const result = listModules([
+      ['lib/*.js', opts],
+      'test/*.js'
+    ]);
+
+    const createContainerModule = result.find(x => x.name === 'createContainer');
+    createContainerModule.name.should.equal('createContainer');
+    createContainerModule.path.should.contain('createContainer.js');
+    createContainerModule.opts.should.deep.equal(opts);
+  })
 });

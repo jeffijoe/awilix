@@ -1,6 +1,7 @@
 const loadModules = require('../../lib/loadModules');
 const spy = sinon.spy;
 const createContainer = require('../../lib/createContainer');
+const Lifetime = require('../../lib/Lifetime');
 
 const createTimeout = () => new Promise(resolve => setTimeout(resolve, 1));
 
@@ -124,5 +125,61 @@ describe('loadModules', function() {
     result.should.deep.equal({ loadedModules: moduleLookupResult });
     const reg = container.registrations.test;
     expect(reg).to.be.ok;
+  });
+
+  it('supports array opts syntax with string (lifetime)', function() {
+    const container = createContainer();
+    const modules = {
+      ['test.js']: spy(() => 42),
+      ['test2.js']: spy(() => 42)
+    };
+
+    const deps = {
+      container,
+      listModules: spy(
+        () => [
+          { name: 'test', path: 'test.js', opts: Lifetime.SCOPED },
+          { name: 'test2', path: 'test2.js' }
+        ]
+      ),
+      require: spy(path => modules[path])
+    };
+
+    loadModules(deps, 'anything', {
+      registrationOptions: {
+        lifetime: Lifetime.SINGLETON
+      }
+    });
+
+    container.registrations.test.lifetime.should.equal(Lifetime.SCOPED);
+    container.registrations.test2.lifetime.should.equal(Lifetime.SINGLETON);
+  });
+
+  it('supports array opts syntax with object', function() {
+    const container = createContainer();
+    const modules = {
+      ['test.js']: spy(() => 42),
+      ['test2.js']: spy(() => 42)
+    };
+
+    const deps = {
+      container,
+      listModules: spy(
+        () => [
+          { name: 'test', path: 'test.js', opts: { lifetime: Lifetime.SCOPED } },
+          { name: 'test2', path: 'test2.js' }
+        ]
+      ),
+      require: spy(path => modules[path])
+    };
+
+    loadModules(deps, 'anything', {
+      registrationOptions: {
+        lifetime: Lifetime.SINGLETON
+      }
+    });
+
+    container.registrations.test.lifetime.should.equal(Lifetime.SCOPED);
+    container.registrations.test2.lifetime.should.equal(Lifetime.SINGLETON);
   });
 });
