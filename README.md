@@ -682,7 +682,22 @@ container.loadModules([
 });
 
 container.cradle.userService.getUser(123);
+
+// to configure lifetime for specific globs..
+container.loadModules([
+  ['services/*.js', Lifetime.SCOPED], // all services will have scoped lifetime
+  'repositories/*.js',
+  'db/db.js'
+], {
+  registrationOptions: {
+    lifetime: Lifetime.SINGLETON // db and repositories will be singleton
+  }
+});
+
+container.cradle.userService.getUser(123);
 ```
+
+The `['glob', Lifetime.SCOPED]` syntax is a shorthand for passing in registration options like so: `['glob', { lifetime: Lifetime.SCOPED }]`
 
 # Contributing
 
