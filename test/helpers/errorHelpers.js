@@ -6,9 +6,9 @@
  */
 module.exports.catchError = (fn) => {
   try {
-    fn();
-    throw new Error('Expected to catch an error, but did not.');
+    fn()
+    throw new Error('Expected to catch an error, but did not.')
   } catch (err) {
-    return err;
+    return err
   }
-};
+}
