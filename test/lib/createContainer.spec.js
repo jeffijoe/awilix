@@ -124,6 +124,20 @@ describe('createContainer', function() {
         container.resolve('obj').should.equal(2)
         container.resolve('another').should.equal(3)
       })
+
+      it('supports chaining', function() {
+        class Heh {}
+        const func = () => {}
+        const value = 42
+
+        expect(
+          container
+            .register('lol', asValue('haha'))
+            .registerValue('value', value)
+            .registerFunction('function', func)
+            .registerClass('class', Heh)
+        ).to.equal(container)
+      })
     })
 
     describe('resolve', function() {
