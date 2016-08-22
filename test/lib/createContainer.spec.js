@@ -382,5 +382,16 @@ describe('createContainer', function() {
         err.message.should.contain('lol')
       })
     })
+
+    describe('loadModules', function() {
+      let container
+      beforeEach(function () {
+        container = createContainer()
+      })
+
+      it('returns the container', function() {
+        expect(container.loadModules([])).to.equal(container)
+      })
+    })
   })
 })

@@ -1,10 +1,11 @@
 const awilix = require('../../../lib/awilix')
 
 module.exports = function () {
-  const container = awilix.createContainer()
-  container.loadModules([
-    ['services/*.js', awilix.Lifetime.SCOPED],
-    'repositories/*.js'
-  ], { cwd: __dirname })
-  return container
+  const opts = { cwd: __dirname }
+  return awilix
+    .createContainer()
+    .loadModules([
+      ['services/*.js', awilix.Lifetime.SCOPED],
+      'repositories/*.js'
+    ], opts)
 }

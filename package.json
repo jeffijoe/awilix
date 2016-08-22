@@ -37,7 +37,7 @@
     "coveralls": "^2.11.12",
     "eslint": "^3.3.1",
     "eslint-watch": "^2.1.14",
-    "istanbul": "^0.4.4",
+    "istanbul": "^0.4.5",
     "mocha": "^3.0.2",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0"
