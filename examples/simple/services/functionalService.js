@@ -14,14 +14,14 @@
 // as the first argument!!!!!
 function getStuffAndDeleteSecret(opts, someArgument) {
   // We depend on "stuffs" repository.
-  const stuffs = opts.stuffs;
+  const stuffs = opts.stuffs
 
   // We may now carry on.
   return stuffs.getStuff(someArgument).then(stuff => {
     // Modify return value. Just to prove this is testable.
-    delete stuff.secret;
-    return stuff;
-  });
+    delete stuff.secret
+    return stuff
+  })
 }
 
 // NOTE: When using ES6 import-export, you can simply use `export default`.
@@ -30,7 +30,7 @@ module.exports = function (opts) {
   // result in a resolution.
   return {
     getStuffAndDeleteSecret: getStuffAndDeleteSecret.bind(null, { stuffs: opts.stuffs })
-  };
-};
+  }
+}
 
-module.exports.getStuffAndDeleteSecret = getStuffAndDeleteSecret;
+module.exports.getStuffAndDeleteSecret = getStuffAndDeleteSecret

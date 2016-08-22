@@ -10,17 +10,17 @@
 class ClassicalService {
   // Classic example of constructor injection.
   constructor(opts) {
-    this.functionalService = opts.functionalService;
+    this.functionalService = opts.functionalService
   }
 
   // The awesome method we're calling in index.js.
   actAllCool() {
     // Look ma'! No require!
     return this.functionalService.getStuffAndDeleteSecret('be cool').then(stuff => {
-      stuff.isCool = true;
-      return stuff;
-    });
+      stuff.isCool = true
+      return stuff
+    })
   }
 }
 
-module.exports = ClassicalService;
+module.exports = ClassicalService

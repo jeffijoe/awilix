@@ -644,7 +644,7 @@ scope.cradle.usedValue === 'scope'
 
 ### `container.loadModules()`
 
-Given an array of globs, returns a (useless) object with info about the loaded modules.
+Given an array of globs, registers the modules and returns the container.
 
 Awilix will use `require` on the loaded modules, and register the default-exported function or class as the name of the file.
 

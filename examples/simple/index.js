@@ -1,30 +1,33 @@
 // Import Awilix
-const awilix = require('../..');
+const awilix = require('../..')
 
 // Create a container.
-const container = awilix.createContainer();
+const container = awilix.createContainer()
 
 // Register some value.. We depend on this in `Stuffs.js`
-container.registerValue('database', 'stuffs_db');
+container.registerValue('database', 'stuffs_db')
 
 // Auto-load our services and our repositories.
 const opts = {
   // We want ClassicalService to be registered as classicalService.
   formatName: 'camelCase'
-};
+}
 container.loadModules([
   // Glob patterns
   'services/*.js',
   'repositories/*.js'
-], opts);
+], opts)
 
 // 2 ways to resolve the same service.
-const classicalServiceFromCradle = container.cradle.classicalService;
-const classicalService = container.resolve('classicalService');
+const classicalServiceFromCradle = container.cradle.classicalService
+const classicalService = container.resolve('classicalService')
 
-console.log('Resolved to the same instance:', classicalService === classicalServiceFromCradle);
+console.log('Resolved to the same instance:', classicalService === classicalServiceFromCradle)
+
+// This will return false because the default is to return a new instance
+// when resolving.
 
 // Let's do something!
 return classicalService.actAllCool().then(r => {
-  console.log('Result from classical service:', r);
-});
+  console.log('Result from classical service:', r)
+})
