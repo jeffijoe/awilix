@@ -1,11 +1,11 @@
 class AnotherService {
-  constructor(answerRepository) {
+  constructor (answerRepository) {
     this.repo = answerRepository
   }
 }
 
 module.exports.AnotherService = AnotherService
 
-module.exports.default = function(deps) {
+module.exports.default = function (deps) {
   return new AnotherService(deps.answerRepository)
 }

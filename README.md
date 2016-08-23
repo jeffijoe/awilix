@@ -9,6 +9,7 @@
 [![npm](https://img.shields.io/npm/dt/awilix.svg?maxAge=1000)](https://www.npmjs.com/package/awilix)
 [![npm](https://img.shields.io/npm/l/awilix.svg?maxAge=1000)](https://github.com/jeffijoe/awilix/blob/master/LICENSE.md)
 [![node](https://img.shields.io/node/v/awilix.svg?maxAge=1000)](https://www.npmjs.com/package/awilix)
+[![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 
 Simple **Inversion of Control** (IoC) container for Node with dependency resolution support powered by ES6 Proxies. Make IoC great again!
 

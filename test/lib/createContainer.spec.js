@@ -5,29 +5,29 @@ const AwilixResolutionError = require('../../lib/AwilixResolutionError')
 const { asClass, asFunction, asValue } = require('../../lib/registrations')
 
 class Test {
-  constructor({ repo }) {
+  constructor ({ repo }) {
     this.repo = repo
   }
 
-  stuff() {
+  stuff () {
     return this.repo.getStuff()
   }
 }
 
 class Repo {
-  getStuff() {
+  getStuff () {
     return 'stuff'
   }
 }
 
-describe('createContainer', function() {
-  it('returns an object', function() {
+describe('createContainer', function () {
+  it('returns an object', function () {
     const container = createContainer()
     container.should.be.an.object
   })
 
-  describe('container', function() {
-    it('lets me register something and resolve it', function() {
+  describe('container', function () {
+    it('lets me register something and resolve it', function () {
       const container = createContainer()
       container.register({ someValue: asValue(42) })
       container.register({
@@ -43,8 +43,8 @@ describe('createContainer', function() {
       test.someValue.should.equal(42)
     })
 
-    describe('register', function() {
-      it('supports multiple registrations in a single call', function() {
+    describe('register', function () {
+      it('supports multiple registrations in a single call', function () {
         const container = createContainer()
         container.register({
           universe: asValue(42),
@@ -61,7 +61,7 @@ describe('createContainer', function() {
         container.resolve('service').method().should.equal('Hello world, the answer is 42')
       })
 
-      it('supports classes', function() {
+      it('supports classes', function () {
         const container = createContainer()
         container.register({
           test: asClass(Test),
@@ -72,13 +72,13 @@ describe('createContainer', function() {
       })
     })
 
-    describe('register* functions', function() {
+    describe('register* functions', function () {
       let container
-      beforeEach(function() {
+      beforeEach(function () {
         container = createContainer()
       })
 
-      it('supports registerClass', function() {
+      it('supports registerClass', function () {
         container.registerClass('nameValue', Test)
         container.registerClass('nameValueWithOpts', Test, { lifetime: Lifetime.SCOPED })
         container.registerClass('nameValueWithArray', [Test, { lifetime: Lifetime.SCOPED }])
@@ -95,7 +95,7 @@ describe('createContainer', function() {
         container.registrations.objWithOpts.lifetime.should.equal(Lifetime.SCOPED)
       })
 
-      it('supports registerFunction', function() {
+      it('supports registerFunction', function () {
         const fn = () => 42
         container.registerFunction('nameValue', fn)
         container.registerFunction('nameValueWithOpts', fn, { lifetime: Lifetime.SCOPED })
@@ -113,7 +113,7 @@ describe('createContainer', function() {
         container.registrations.objWithOpts.lifetime.should.equal(Lifetime.SCOPED)
       })
 
-      it('supports registerValue', function() {
+      it('supports registerValue', function () {
         container.registerValue('nameValue', 1)
         container.registerValue({
           obj: 2,
@@ -125,7 +125,7 @@ describe('createContainer', function() {
         container.resolve('another').should.equal(3)
       })
 
-      it('supports chaining', function() {
+      it('supports chaining', function () {
         class Heh {}
         const func = () => {}
         const value = 42
@@ -140,10 +140,10 @@ describe('createContainer', function() {
       })
     })
 
-    describe('resolve', function() {
-      it('resolves the dependency chain and supports all registrations', function() {
+    describe('resolve', function () {
+      it('resolves the dependency chain and supports all registrations', function () {
         class TestClass {
-          constructor({ factory }) {
+          constructor ({ factory }) {
             this.factoryResult = factory()
           }
         }
@@ -158,14 +158,14 @@ describe('createContainer', function() {
         root.factoryResult.should.equal('factory 42')
       })
 
-      it('throws an AwilixResolutionError when there are unregistered dependencies', function() {
+      it('throws an AwilixResolutionError when there are unregistered dependencies', function () {
         const container = createContainer()
         const err = catchError(() => container.resolve('nope'))
         err.should.be.an.instanceOf(AwilixResolutionError)
         err.message.should.match(/nope/i)
       })
 
-      it('throws an AwilixResolutionError with a resolution path when resolving an unregistered dependency', function() {
+      it('throws an AwilixResolutionError with a resolution path when resolving an unregistered dependency', function () {
         const container = createContainer()
         container.registerFunction({
           first: (cradle) => cradle.second,
@@ -177,7 +177,7 @@ describe('createContainer', function() {
         err.message.should.contain('first -> second -> third')
       })
 
-      it('does not screw up the resolution stack when called twice', function() {
+      it('does not screw up the resolution stack when called twice', function () {
         const container = createContainer()
         container.registerFunction({
           first: (cradle) => cradle.second,
@@ -192,7 +192,7 @@ describe('createContainer', function() {
         err2.message.should.contain('otherFirst -> second -> third')
       })
 
-      it('supports transient lifetime', function() {
+      it('supports transient lifetime', function () {
         const container = createContainer()
         let counter = 1
         container.register({
@@ -203,7 +203,7 @@ describe('createContainer', function() {
         container.cradle.hehe.should.equal(2)
       })
 
-      it('supports singleton lifetime', function() {
+      it('supports singleton lifetime', function () {
         const container = createContainer()
         let counter = 1
         container.register({
@@ -214,7 +214,7 @@ describe('createContainer', function() {
         container.cradle.hehe.should.equal(1)
       })
 
-      it('supports scoped lifetime', function() {
+      it('supports scoped lifetime', function () {
         const container = createContainer()
         let scopedCounter = 1
         container.register({
@@ -230,7 +230,7 @@ describe('createContainer', function() {
         scope2.cradle.scoped.should.equal(2)
       })
 
-      it('caches singletons regardless of scope', function() {
+      it('caches singletons regardless of scope', function () {
         const container = createContainer()
         let singletonCounter = 1
         container.register({
@@ -246,7 +246,7 @@ describe('createContainer', function() {
         scope2.cradle.singleton.should.equal(1)
       })
 
-      it('resolves transients regardless of scope', function() {
+      it('resolves transients regardless of scope', function () {
         const container = createContainer()
         let transientCounter = 1
         container.register({
@@ -262,7 +262,7 @@ describe('createContainer', function() {
         scope2.cradle.transient.should.equal(4)
       })
 
-      it('uses parents cache when scoped', function() {
+      it('uses parents cache when scoped', function () {
         const container = createContainer()
         let scopedCounter = 1
         container.register({
@@ -282,7 +282,7 @@ describe('createContainer', function() {
         scope2.cradle.scoped.should.equal(1)
       })
 
-      it('supports nested scopes', function() {
+      it('supports nested scopes', function () {
         const container = createContainer()
 
         // Increments the counter every time it is resolved.
@@ -302,7 +302,7 @@ describe('createContainer', function() {
         scope1Child.cradle.counterValue.should.equal(1)
       })
 
-      it('resolves dependencies in scope', function() {
+      it('resolves dependencies in scope', function () {
         const container = createContainer()
         // Register a transient function
         // that returns the value of the scope-provided dependency.
@@ -320,7 +320,7 @@ describe('createContainer', function() {
         scope.cradle.scopedValue.should.equal('Hello scope')
       })
 
-      it('cannot find a scope-registered value when resolved from root', function() {
+      it('cannot find a scope-registered value when resolved from root', function () {
         const container = createContainer()
         // Register a transient function
         // that returns the value of the scope-provided dependency.
@@ -338,7 +338,7 @@ describe('createContainer', function() {
         expect(() => container.cradle.scopedValue).to.throw(AwilixResolutionError)
       })
 
-      it('supports overwriting values in a scope', function() {
+      it('supports overwriting values in a scope', function () {
         const container = createContainer()
         // It does not matter when the scope is created,
         // it will still have anything that is registered
@@ -358,7 +358,7 @@ describe('createContainer', function() {
         scope.cradle.usedValue.should.equal('scope')
       })
 
-      it('throws an AwilixResolutionError when there are cyclic dependencies', function() {
+      it('throws an AwilixResolutionError when there are cyclic dependencies', function () {
         const container = createContainer()
         container.registerFunction({
           first: (cradle) => cradle.second,
@@ -370,7 +370,7 @@ describe('createContainer', function() {
         err.message.should.contain('first -> second -> third -> second')
       })
 
-      it('throws an AwilixResolutionError when the lifetime is unknown', function() {
+      it('throws an AwilixResolutionError when the lifetime is unknown', function () {
         const container = createContainer()
         container.registerFunction({
           first: (cradle) => cradle.second,
@@ -383,14 +383,22 @@ describe('createContainer', function() {
       })
     })
 
-    describe('loadModules', function() {
+    describe('loadModules', function () {
       let container
       beforeEach(function () {
         container = createContainer()
       })
 
-      it('returns the container', function() {
+      it('returns the container', function () {
         expect(container.loadModules([])).to.equal(container)
+      })
+    })
+
+    describe('setting a property on the cradle', function () {
+      it('should fail', function () {
+        expect(() => {
+          createContainer().cradle.lol = 'nope'
+        }).to.throw(Error, /lol/)
       })
     })
   })

@@ -2,7 +2,7 @@ const AnotherService = require('./fixture/services/anotherService').AnotherServi
 const fixture = require('./fixture')
 const Lifetime = require('../../lib/Lifetime')
 
-describe('integration tests', function() {
+describe('integration tests', function () {
   it('bootstraps everything so the answer can be resolved', function () {
     const container = fixture()
     const anotherService = container.resolve('anotherService')
@@ -12,7 +12,7 @@ describe('integration tests', function() {
     Object.keys(container.registrations).length.should.equal(3)
   })
 
-  it('registered all services as scoped', function() {
+  it('registered all services as scoped', function () {
     const container = fixture()
     const scope1 = container.createScope()
     const scope2 = container.createScope()
