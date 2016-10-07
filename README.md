@@ -1,5 +1,6 @@
 # Awilix
 
+[![Join the chat at https://gitter.im/awilix/Lobby](https://badges.gitter.im/awilix/Lobby.svg)](https://gitter.im/awilix/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![npm](https://img.shields.io/npm/v/awilix.svg?maxAge=1000)](https://www.npmjs.com/package/awilix)
 [![dependency Status](https://img.shields.io/david/jeffijoe/awilix.svg?maxAge=1000)](https://david-dm.org/jeffijoe/awilix)
 [![devDependency Status](https://img.shields.io/david/dev/jeffijoe/awilix.svg?maxAge=1000)](https://david-dm.org/jeffijoe/awilix)
