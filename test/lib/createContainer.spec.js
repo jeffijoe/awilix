@@ -1,3 +1,4 @@
+const util = require('util')
 const createContainer = require('../../lib/createContainer')
 const Lifetime = require('../../lib/Lifetime')
 const { catchError } = require('../helpers/errorHelpers')
@@ -399,6 +400,18 @@ describe('createContainer', function () {
         expect(() => {
           createContainer().cradle.lol = 'nope'
         }).to.throw(Error, /lol/)
+      })
+    })
+
+    describe('using util.inspect on the container', function () {
+      it('should return a summary', function () {
+        const container = createContainer()
+          .registerValue({ val1: 1, val2: 2 })
+          .registerFunction({ fn1: () => true })
+          .registerClass({ c1: Repo })
+
+        expect(util.inspect(container)).to.equal('[AwilixContainer (registrations: 4)]')
+        expect(util.inspect(container.createScope().registerValue({ val3: 3 }))).to.equal('[AwilixContainer (scoped, registrations: 5)]')
       })
     })
   })
