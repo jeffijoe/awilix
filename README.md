@@ -654,7 +654,6 @@ Args:
 
 * `globPatterns`: Array of glob patterns that match JS files to load.
 * `opts.cwd`: The `cwd` being passed to `glob`. Defaults to `process.cwd()`.
-* **returns**: A `Promise` for when we're done. This won't be resolved until all modules are ready.
 * `opts.formatName`: Can be either `'camelCase'`, or a function that takes the current name as the first parameter and returns the new name. Default is to pass the name through as-is.
 * `registrationOptions`: An `object` passed to the registrations. Used to configure the lifetime of the loaded modules.
 
