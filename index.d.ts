@@ -173,9 +173,9 @@ export interface RegisterNameAndValuePair {
  * @interface Registration
  */
 export interface Registration {
-  singleton(): Registration;
-  scoped(): Registration;
-  transient(): Registration;
+  singleton(): this;
+  scoped(): this;
+  transient(): this;
 }
 
 /**
