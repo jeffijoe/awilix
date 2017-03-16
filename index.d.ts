@@ -7,6 +7,7 @@
  * @interface AwilixContainer
  */
 export declare interface AwilixContainer {
+  cradle: { [key: string]: any };
   createScope(): AwilixContainer;
   loadModules(globPatterns: string[], options?: LoadModulesOptions): Module[];
   registrations: Registration[];
