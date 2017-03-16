@@ -11,7 +11,7 @@ export declare interface AwilixContainer {
   loadModules(globPatterns: string[], options?: LoadModulesOptions): Module[];
   registrations: Registration[];
   register(name: string, registration: Registration): AwilixContainer;
-  register({ name: string, registration: Registration }): AwilixContainer;
+  register(nameAndRegistrationPair: NameAndRegistrationPair): AwilixContainer;
   registerClass<T>(name: string, instance: Object): AwilixContainer;
   registerClass<T>(nameAndClassPair: RegisterNameAndClassPair<T>): AwilixContainer;
   registerClass<T>(nameAndArrayClassPair: RegisterNameAndArrayClassPair<T>): AwilixContainer;
@@ -93,7 +93,7 @@ export declare class Lifetime {
  * @param {ListModulesOptions} options
  * @return Module[]
  */
-export declare function listModules(globPatterns?: string | string[], options?: ListModulesOptions): Module[];
+export declare function listModules(globPatterns: string | string[], options?: ListModulesOptions): Module[];
 
 /**
  * The options when invoking listModules().
@@ -109,7 +109,7 @@ export interface ListModulesOptions {
  */
 export interface LoadModulesOptions {
   cwd?: string;
-  formatName?: (fileName: string) => string | NameFormatters;
+  formatName?: Function | NameFormatters;
   registrationOptions?: RegistrationOptions;
 }
 
@@ -120,6 +120,14 @@ export interface LoadModulesOptions {
 export interface Module {
   name: string;
   path: string;
+}
+
+/**
+ * Register a Registration
+ * @interface NameAndRegistrationPair
+ */
+export interface NameAndRegistrationPair {
+  [key: string]: Registration;
 }
 
 /**
