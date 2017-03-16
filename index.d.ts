@@ -4,9 +4,9 @@
 
 /**
  * The container returned from createContainer has some methods and properties.
- * @class AwilixContainer
+ * @interface AwilixContainer
  */
-export declare class AwilixContainer {
+export declare interface AwilixContainer {
   createScope(): AwilixContainer;
   loadModules(globPatterns: string[], options?: LoadModulesOptions): Module[];
   registrations: Registration[];
@@ -58,7 +58,7 @@ export declare function asFunction(fn: Function, options?: RegistrationOptions):
  * @param {RegistrationOptions} options
  * @return {Registration}
  */
-export declare function asValue(value: any, options?: RegistrationOptions): Registration;
+export declare function asValue(value: any, options?: RegistrationOptions): void;
 
 /**
  * The options for the createContainer function.
@@ -97,9 +97,9 @@ export type NameFormatters = "camelCase";
  * full path to the module.
  * @param {string | string[]} globPatterns
  * @param {ListModulesOptions} options
- * @return Promise<Module[]>
+ * @return Module[]
  */
-export declare function listModules(globPatterns?: string | string[], options?: ListModulesOptions): Promise<Module[]>;
+export declare function listModules(globPatterns?: string | string[], options?: ListModulesOptions): Module[];
 
 /**
  * The options when invoking listModules().
@@ -115,7 +115,7 @@ export interface ListModulesOptions {
  */
 export interface LoadModulesOptions {
   cwd?: string;
-  formatName?: NameFormatters;
+  formatName?: (fileName: string) => string | NameFormatters;
   registrationOptions?: RegistrationOptions;
 }
 
@@ -173,9 +173,9 @@ export interface RegisterNameAndValuePair {
  * @interface Registration
  */
 export interface Registration {
-  singleton(): void;
-  scoped(): void;
-  transient(): void;
+  singleton(): Registration;
+  scoped(): Registration;
+  transient(): Registration;
 }
 
 /**
