@@ -86,12 +86,6 @@ export declare class Lifetime {
 }
 
 /**
- * Name formatting options when using loadModules().
- * @type NameFormatters
- */
-export type NameFormatters = "camelCase";
-
-/**
  * Returns a promise for a list of {name, path} pairs,
  * where the name is the module name, and path is the actual
  * full path to the module.
@@ -127,6 +121,12 @@ export interface Module {
   name: string;
   path: string;
 }
+
+/**
+ * Name formatting options when using loadModules().
+ * @type NameFormatters
+ */
+export type NameFormatters = "camelCase";
 
 /**
  * Register a class using the [value, options] array syntax.
