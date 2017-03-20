@@ -59,7 +59,7 @@ export declare function asFunction(fn: Function, options?: RegistrationOptions):
  * @param {RegistrationOptions} options
  * @return {Registration}
  */
-export declare function asValue(value: any, options?: RegistrationOptions): void;
+export declare function asValue(value: any, options?: RegistrationOptions): Registration;
 
 /**
  * The options for the createContainer function.
@@ -75,6 +75,16 @@ export interface ContainerOptions {
  * @return {AwilixContainer}
  */
 export declare function createContainer(options?: ContainerOptions): AwilixContainer;
+
+/**
+ * A registration object created by asClass() or asFunction().
+ * @interface FluidRegistration
+ */
+export interface FluidRegistration extends Registration {
+  singleton(): this;
+  scoped(): this;
+  transient(): this;
+}
 
 /**
  * Lifetime management.
@@ -178,13 +188,11 @@ export interface RegisterNameAndValuePair {
 }
 
 /**
- * A registration object created by asClass(), asFunction() or asValue().
- * @interface Registration
+ * A registration object returned by asClass(), asFunction() or asValue().
  */
 export interface Registration {
-  singleton(): this;
-  scoped(): this;
-  transient(): this;
+  resolve(): any;
+  lifetime: Lifetime;
 }
 
 /**
