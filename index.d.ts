@@ -42,7 +42,7 @@ export declare class AwilixResolutionError extends Error {
  * @param {RegistrationOptions} options
  * @return {Registration}
  */
-export declare function asClass<T>(type: T, options?: RegistrationOptions): Registration;
+export declare function asClass<T>(type: T, options?: RegistrationOptions): FluidRegistration;
 
 /**
  * Creates a factory registration where the given factory function
@@ -51,7 +51,7 @@ export declare function asClass<T>(type: T, options?: RegistrationOptions): Regi
  * @param {RegistrationOptions} options
  * @return {Registration}
  */
-export declare function asFunction(fn: Function, options?: RegistrationOptions): Registration;
+export declare function asFunction(fn: Function, options?: RegistrationOptions): FluidRegistration;
 
 /**
  * Creates a simple value registration where the given value will always be resolved.
