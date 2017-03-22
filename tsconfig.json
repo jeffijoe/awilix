@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "experimentalDecorators": true,
+    "module": "commonjs",
+    "outDir": "dist",
+    "sourceMap": false,
+    "target": "es6"
+  },
+  "include": [
+    "test/**/*.ts"
+  ],
+  "exclude": [
+    "examples",
+    "lib",
+    "node_modules",
+    "**/.baseDir.ts"
+  ]
+}
