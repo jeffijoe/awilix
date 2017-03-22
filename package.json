@@ -8,12 +8,12 @@
     "node": ">=6.0.0"
   },
   "scripts": {
-    "test": "mocha test/**/*.js --require test/index.js",
+    "test": "tsc && mocha test/**/*.js --require test/index.js",
     "test-watch": "npm run test -- --watch --reporter nyan",
     "lint": "esw lib/ test/",
     "lint-watch": "npm run lint -- --watch",
-    "cover": "istanbul cover  -x \"**example/**\" ./node_modules/mocha/bin/_mocha -- test/**/*.js --require test/index.js",
-    "coveralls": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- test/**/*.js --require test/index.js && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "cover": "tsc && istanbul cover  -x \"**example/**\" ./node_modules/mocha/bin/_mocha -- test/**/*.js --require test/index.js",
+    "coveralls": "tsc && istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- test/**/*.js --require test/index.js && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "do-publish": "npm run lint && npm run cover && npm publish"
   },
   "repository": {
@@ -47,7 +47,8 @@
     "mocha": "^3.2.0",
     "mocha-typescript": "^1.0.23",
     "sinon": "^1.17.7",
-    "sinon-chai": "^2.8.0"
+    "sinon-chai": "^2.8.0",
+    "typescript": "^2.2.1"
   },
   "dependencies": {
     "camel-case": "^3.0.0",
