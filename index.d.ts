@@ -7,21 +7,21 @@
  * @interface AwilixContainer
  */
 export declare interface AwilixContainer {
-  cradle: { [key: string]: any };
-  createScope(): AwilixContainer;
-  loadModules(globPatterns: string[], options?: LoadModulesOptions): Module[];
-  registrations: Registration[];
-  register(name: string, registration: Registration): AwilixContainer;
-  register(nameAndRegistrationPair: NameAndRegistrationPair): AwilixContainer;
-  registerClass<T>(name: string, instance: Object): AwilixContainer;
-  registerClass<T>(nameAndClassPair: RegisterNameAndClassPair<T>): AwilixContainer;
-  registerClass<T>(nameAndArrayClassPair: RegisterNameAndArrayClassPair<T>): AwilixContainer;
-  registerFunction(name: string, fn: Function): AwilixContainer;
+  cradle: { [key: string]: any }
+  createScope(): AwilixContainer
+  loadModules(globPatterns: string[], options?: LoadModulesOptions): Module[]
+  registrations: Registration[]
+  register(name: string, registration: Registration): AwilixContainer
+  register(nameAndRegistrationPair: NameAndRegistrationPair): AwilixContainer
+  registerClass<T>(name: string, instance: Object): AwilixContainer
+  registerClass<T>(nameAndClassPair: RegisterNameAndClassPair<T>): AwilixContainer
+  registerClass<T>(nameAndArrayClassPair: RegisterNameAndArrayClassPair<T>): AwilixContainer
+  registerFunction(name: string, fn: Function): AwilixContainer
   registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair)
-  registerFunction(nameAndArrayPair: RegisterNameAndArrayFunctionPair): AwilixContainer;
-  registerValue(name: string, value: any): AwilixContainer;
-  registerValue(nameAndValuePairs: RegisterNameAndValuePair): AwilixContainer;
-  resolve<T>(name: string): T;
+  registerFunction(nameAndArrayPair: RegisterNameAndArrayFunctionPair): AwilixContainer
+  registerValue(name: string, value: any): AwilixContainer
+  registerValue(nameAndValuePairs: RegisterNameAndValuePair): AwilixContainer
+  resolve<T>(name: string): T
 }
 
 /**
@@ -42,7 +42,7 @@ export declare class AwilixResolutionError extends Error {
  * @param {RegistrationOptions} options
  * @return {Registration}
  */
-export declare function asClass<T>(type: T, options?: RegistrationOptions): FluidRegistration;
+export declare function asClass<T>(type: T, options?: RegistrationOptions): FluidRegistration
 
 /**
  * Creates a factory registration where the given factory function
@@ -51,7 +51,7 @@ export declare function asClass<T>(type: T, options?: RegistrationOptions): Flui
  * @param {RegistrationOptions} options
  * @return {Registration}
  */
-export declare function asFunction(fn: Function, options?: RegistrationOptions): FluidRegistration;
+export declare function asFunction(fn: Function, options?: RegistrationOptions): FluidRegistration
 
 /**
  * Creates a simple value registration where the given value will always be resolved.
@@ -59,14 +59,14 @@ export declare function asFunction(fn: Function, options?: RegistrationOptions):
  * @param {RegistrationOptions} options
  * @return {Registration}
  */
-export declare function asValue(value: any, options?: RegistrationOptions): Registration;
+export declare function asValue(value: any, options?: RegistrationOptions): Registration
 
 /**
  * The options for the createContainer function.
  * @interface ContainerOptions
  */
 export interface ContainerOptions {
-  require?: (id: string) => any;
+  require?: (id: string) => any
 }
 
 /**
@@ -74,16 +74,16 @@ export interface ContainerOptions {
  * @param {ContainerOptions} options
  * @return {AwilixContainer}
  */
-export declare function createContainer(options?: ContainerOptions): AwilixContainer;
+export declare function createContainer(options?: ContainerOptions): AwilixContainer
 
 /**
  * A registration object created by asClass() or asFunction().
  * @interface FluidRegistration
  */
 export interface FluidRegistration extends Registration {
-  singleton(): this;
-  scoped(): this;
-  transient(): this;
+  singleton(): this
+  scoped(): this
+  transient(): this
 }
 
 /**
@@ -91,9 +91,9 @@ export interface FluidRegistration extends Registration {
  * @class Lifetime
  */
 export declare class Lifetime {
-  static SCOPED: string;
-  static SINGLETON: string;
-  static TRANSIENT: string;
+  static SCOPED: string
+  static SINGLETON: string
+  static TRANSIENT: string
 }
 
 /**
@@ -104,14 +104,14 @@ export declare class Lifetime {
  * @param {ListModulesOptions} options
  * @return Module[]
  */
-export declare function listModules(globPatterns: string | string[], options?: ListModulesOptions): Module[];
+export declare function listModules(globPatterns: string | string[], options?: ListModulesOptions): Module[]
 
 /**
  * The options when invoking listModules().
  * @interface ListModulesOptions
  */
 export interface ListModulesOptions {
-  cwd?: string;
+  cwd?: string
 }
 
 /**
@@ -119,9 +119,9 @@ export interface ListModulesOptions {
  * @interface LoadModulesOptions
  */
 export interface LoadModulesOptions {
-  cwd?: string;
-  formatName?: Function | NameFormatters;
-  registrationOptions?: RegistrationOptions;
+  cwd?: string
+  formatName?: Function | NameFormatters
+  registrationOptions?: RegistrationOptions
 }
 
 /**
@@ -129,8 +129,8 @@ export interface LoadModulesOptions {
  * @interface Module
  */
 export interface Module {
-  name: string;
-  path: string;
+  name: string
+  path: string
 }
 
 /**
@@ -138,21 +138,21 @@ export interface Module {
  * @interface NameAndRegistrationPair
  */
 export interface NameAndRegistrationPair {
-  [key: string]: Registration;
+  [key: string]: Registration
 }
 
 /**
  * Name formatting options when using loadModules().
  * @type NameFormatters
  */
-export type NameFormatters = "camelCase";
+export type NameFormatters = 'camelCase'
 
 /**
  * Register a class using the [value, options] array syntax.
  * @interface RegisterNameAndArrayClassPair<T>
  */
 export interface RegisterNameAndArrayClassPair<T> {
-  [key: string]: [T, RegistrationOptions];
+  [key: string]: [T, RegistrationOptions]
 }
 
 /**
@@ -160,7 +160,7 @@ export interface RegisterNameAndArrayClassPair<T> {
  * @interface RegisterNameAndArrayFunctionPair
  */
 export interface RegisterNameAndArrayFunctionPair {
-  [key: string]: [Function, RegistrationOptions];
+  [key: string]: [Function, RegistrationOptions]
 }
 
 /**
@@ -168,7 +168,7 @@ export interface RegisterNameAndArrayFunctionPair {
  * @interface RegisterNameAndClassPair
  */
 export interface RegisterNameAndClassPair<T> {
-  [key: string]: T;
+  [key: string]: T
 }
 
 /**
@@ -176,7 +176,7 @@ export interface RegisterNameAndClassPair<T> {
  * @interface RegisterNameAndFunctionPair
  */
 export interface RegisterNameAndFunctionPair {
-  [key: string]: Function;
+  [key: string]: Function
 }
 
 /**
@@ -184,15 +184,15 @@ export interface RegisterNameAndFunctionPair {
  * @interface RegisterNameAndValuePair
  */
 export interface RegisterNameAndValuePair {
-  [key: string]: any;
+  [key: string]: any
 }
 
 /**
  * A registration object returned by asClass(), asFunction() or asValue().
  */
 export interface Registration {
-  resolve(): any;
-  lifetime: Lifetime;
+  resolve(): any
+  lifetime: Lifetime
 }
 
 /**
@@ -200,5 +200,5 @@ export interface Registration {
  * @interface RegistrationOptions
  */
 export interface RegistrationOptions {
-  lifetime?: Lifetime;
+  lifetime?: Lifetime
 }
