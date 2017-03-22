@@ -3,6 +3,7 @@
   "version": "2.2.3",
   "description": "Simple dependency injection container + helper utilities to facilitate wiring of modules",
   "main": "lib/awilix.js",
+  "typings": "index.d.ts",
   "engines": {
     "node": ">=6.0.0"
   },
