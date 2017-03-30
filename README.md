@@ -14,6 +14,8 @@
 
 Extremely powerful **Inversion of Control** (IoC) container for Node with dependency resolution support powered by ES6 Proxies. Make IoC great again!
 
+> Check out this [intro to Dependency Injection with Awilix](https://medium.com/@Jeffijoe/dependency-injection-in-node-js-2016-edition-f2a88efdd427)
+
 # Table of Contents
 
 * [Installation](#installation)
