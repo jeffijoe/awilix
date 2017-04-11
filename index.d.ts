@@ -17,7 +17,7 @@ export declare interface AwilixContainer {
   registerClass<T>(nameAndClassPair: RegisterNameAndClassPair<T>): AwilixContainer
   registerClass<T>(nameAndArrayClassPair: RegisterNameAndArrayClassPair<T>): AwilixContainer
   registerFunction(name: string, fn: Function): AwilixContainer
-  registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair)
+  registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair): AwilixContainer
   registerFunction(nameAndArrayPair: RegisterNameAndArrayFunctionPair): AwilixContainer
   registerValue(name: string, value: any): AwilixContainer
   registerValue(nameAndValuePairs: RegisterNameAndValuePair): AwilixContainer
