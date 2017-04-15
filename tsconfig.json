@@ -5,7 +5,11 @@
     "module": "commonjs",
     "outDir": "dist",
     "sourceMap": false,
-    "target": "es6"
+    "target": "es6",
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "strictNullChecks": true
   },
   "include": [
     "test/**/*.ts"
