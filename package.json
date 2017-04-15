@@ -1,6 +1,6 @@
 {
   "name": "awilix",
-  "version": "2.2.5",
+  "version": "2.2.4",
   "description": "Simple dependency injection container + helper utilities to facilitate wiring of modules",
   "main": "lib/awilix.js",
   "typings": "index.d.ts",
@@ -40,6 +40,8 @@
     "coveralls": "^2.13.0",
     "eslint": "^3.19.0",
     "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-node": "^4.2.2",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
     "eslint-watch": "^3.1.0",
