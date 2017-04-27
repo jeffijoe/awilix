@@ -3,6 +3,7 @@
 ## 2.2.6
 
 * Pass in the module descriptor to `formatName` - thanks @anasinnyk!
+* Fixed some issues with TypeScript definitions.
 
 ## 2.2.5
 
