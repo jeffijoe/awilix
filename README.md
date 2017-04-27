@@ -656,7 +656,7 @@ Args:
 
 * `globPatterns`: Array of glob patterns that match JS files to load.
 * `opts.cwd`: The `cwd` being passed to `glob`. Defaults to `process.cwd()`.
-* `opts.formatName`: Can be either `'camelCase'`, or a function that takes the current name as the first parameter and returns the new name. Default is to pass the name through as-is.
+* `opts.formatName`: Can be either `'camelCase'`, or a function that takes the current name as the first parameter and returns the new name. Default is to pass the name through as-is. The 2nd parameter is a full module descriptor.
 * `registrationOptions`: An `object` passed to the registrations. Used to configure the lifetime of the loaded modules.
 
 Example:
@@ -696,6 +696,33 @@ container.loadModules([
 });
 
 container.cradle.userService.getUser(123);
+
+// to use camelCase for modules where filenames are not camelCase
+container.loadModules([
+  'repositories/account-repository.js',
+  'db/db.js'
+], {
+  formatName: 'camelCase'
+});
+
+container.cradle.accountRepository.getUser(123);
+
+// to customize how modules are named in the container (and for injection)
+container.loadModules([
+  'repository/account.js',
+  'service/email.js'
+], {
+  // This formats the module name so `repository/account.js` becomes `accountRepository`
+  formatName: (name, descriptor) => {
+    const splat = descriptor.path.split('/')
+    const namespace = splat[splat.length - 2] // `repository` or `service`
+    const upperNamespace = namespace.charAt(0).toUpperCase() + namespace.substring(1)
+    return name + upperNamespace
+  }
+});
+
+container.cradle.accountRepository.getUser(123);
+container.cradle.emailService.sendEmail('test@test.com', 'waddup');
 ```
 
 The `['glob', Lifetime.SCOPED]` syntax is a shorthand for passing in registration options like so: `['glob', { lifetime: Lifetime.SCOPED }]`
