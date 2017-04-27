@@ -34,8 +34,8 @@
   },
   "homepage": "https://github.com/jeffijoe/awilix#readme",
   "devDependencies": {
-    "@types/chai": "^3.5.0",
-    "@types/node": "^7.0.12",
+    "@types/chai": "^3.5.1",
+    "@types/node": "^7.0.14",
     "chai": "^3.5.0",
     "coveralls": "^2.13.0",
     "eslint": "^3.19.0",
@@ -46,8 +46,8 @@
     "eslint-plugin-standard": "^3.0.1",
     "eslint-watch": "^3.1.0",
     "istanbul": "^0.4.5",
-    "mocha": "^3.2.0",
-    "mocha-typescript": "^1.0.23",
+    "mocha": "^3.3.0",
+    "mocha-typescript": "^1.1.0",
     "sinon": "^2.1.0",
     "sinon-chai": "^2.9.0",
     "typescript": "^2.2.2"

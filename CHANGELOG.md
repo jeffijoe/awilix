@@ -1,5 +1,9 @@
 # Awilix Changelog
 
+## 2.2.6
+
+* Pass in the module descriptor to `formatName` - thanks @anasinnyk!
+
 ## 2.2.5
 
 * Fixed `registerFunction` return type definition - thanks @ycros!

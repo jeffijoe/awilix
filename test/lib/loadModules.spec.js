@@ -71,7 +71,10 @@ describe('loadModules', function () {
       require: spy(path => modules[path])
     }
     const opts = {
-      formatName: name => name + 'IsGreat'
+      formatName: (name, descriptor) => {
+        expect(descriptor.path).to.be.ok
+        return name + 'IsGreat'
+      }
     }
     const result = loadModules(deps, 'anything', opts)
     result.should.deep.equal({ loadedModules: moduleLookupResult })

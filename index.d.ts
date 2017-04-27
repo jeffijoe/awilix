@@ -1,4 +1,4 @@
-// Type definitions for Awilix v2.2.3
+// Type definitions for Awilix v2.2.6
 // Project: https://github.com/jeffijoe/awilix
 // Definitions by: Brian Love <https://github.com/blove/>
 
@@ -9,7 +9,7 @@
 export declare interface AwilixContainer {
   cradle: { [key: string]: any }
   createScope(): AwilixContainer
-  loadModules(globPatterns: string[], options?: LoadModulesOptions): Module[]
+  loadModules(globPatterns: string[] | Array<[string, RegistrationOptions]>, options?: LoadModulesOptions): ModuleDescriptor[]
   registrations: Registration[]
   register(name: string, registration: Registration): AwilixContainer
   register(nameAndRegistrationPair: NameAndRegistrationPair): AwilixContainer
@@ -33,7 +33,6 @@ export declare interface AwilixContainer {
  * @extends Error
  */
 export declare class AwilixResolutionError extends Error {
-  //left blank intentionally
 }
 
 /**
@@ -42,7 +41,7 @@ export declare class AwilixResolutionError extends Error {
  * @param {RegistrationOptions} options
  * @return {Registration}
  */
-export declare function asClass<T>(type: T, options?: RegistrationOptions): FluidRegistration
+export declare function asClass<T>(type: new (...args: any[]) => T, options?: RegistrationOptions): FluidRegistration
 
 /**
  * Creates a factory registration where the given factory function
@@ -104,7 +103,10 @@ export declare class Lifetime {
  * @param {ListModulesOptions} options
  * @return Module[]
  */
-export declare function listModules(globPatterns: string | string[], options?: ListModulesOptions): Module[]
+export declare function listModules(
+  globPatterns: string | string[] | Array<[string, RegistrationOptions]>,
+  options?: ListModulesOptions
+): ModuleDescriptor[]
 
 /**
  * The options when invoking listModules().
@@ -120,15 +122,26 @@ export interface ListModulesOptions {
  */
 export interface LoadModulesOptions {
   cwd?: string
-  formatName?: Function | NameFormatters
+  formatName?: NameFormatter | BuiltInNameFormatters
   registrationOptions?: RegistrationOptions
 }
 
 /**
- * An object containing the module name and path (full path to module).
- * @interface Module
+ * Takes in the filename of the module being loaded as well as the module descriptor,
+ * and returns a string which is used to register the module in the container.
+ *
+ * `descriptor.name` is the same as `name`.
+ *
+ * @type {NameFormatter}
  */
-export interface Module {
+export type NameFormatter = (name: string, descriptor: ModuleDescriptor) => string
+
+/**
+ * An object containing the module name and path (full path to module).
+ *
+ * @interface ModuleDescriptor
+ */
+export interface ModuleDescriptor {
   name: string
   path: string
 }
@@ -143,9 +156,9 @@ export interface NameAndRegistrationPair {
 
 /**
  * Name formatting options when using loadModules().
- * @type NameFormatters
+ * @type BuiltInNameFormatters
  */
-export type NameFormatters = 'camelCase'
+export type BuiltInNameFormatters = 'camelCase'
 
 /**
  * Register a class using the [value, options] array syntax.
