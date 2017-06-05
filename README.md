@@ -106,9 +106,12 @@ container.registerFunction({
 
 // Alright, now we need a database.
 // Let's make that a constructor function.
-function Database({ connectionString }) {
+// Finally, notice how the dependency is referenced by name directly.
+// Named dependencies work as long as the injected into a
+// function is an exact match with that of the registered dependency
+function Database(connectionString, timeout) {
   // We can inject plain values as well!
-  this.conn = connectToYourDatabaseSomehow(connectionString);
+  this.conn = connectToYourDatabaseSomehow(connectionString, timeout);
 }
 
 Database.prototype.query = function(sql) {
@@ -127,7 +130,8 @@ container.registerValue({
   // We can register things as-is - this is not just
   // limited to strings and numbers, it can be anything,
   // really - they will be passed through directly.
-  connectionString: process.env.CONN_STR
+  connectionString: process.env.CONN_STR,
+  timeout: 1000
 });
 
 
@@ -145,6 +149,8 @@ router.get('/api/users/:id', container.cradle.userController.getUser);
 That example looks big, but if you extract things to their proper files, it becomes rather elegant!
 
 [Check out a working Koa example!](/examples/koa)
+
+One last quick note on resolution: in order to support named resolution (I.E. not using destructuring to retrieve references) the names of the dependencies must exactly match the registered names of the dependencies. When there is one dependency being injected (such as the `opts` dependency in the `UserController`) and the name is not found in the registrations, then the `cradle` is injected allowing the consumer to reference any dependencies that have been registered. This is to allow backwards compatability and to prevent a breaking change when the named injection was added. If multiple dependencies exist and one or more are not found in the registrations then an error is thrown.
 
 # Lifetime management
 
@@ -731,7 +737,7 @@ The `['glob', Lifetime.SCOPED]` syntax is a shorthand for passing in registratio
 
 Clone repo, run `npm i` to install all dependencies, and then `npm run test-watch` + `npm run lint-watch` to start writing code.
 
-For code coverage, run `npm run coverage`.
+For code coverage, run `npm run cover`.
 
 If you submit a PR, please aim for 100% code coverage and no linting errors.
 Travis will fail if there are linting errors. Thank you for considering contributing. :)

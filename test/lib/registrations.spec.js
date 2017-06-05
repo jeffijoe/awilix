@@ -4,16 +4,25 @@ const Lifetime = require('../../lib/Lifetime')
 
 const testFn = () => 1337
 const depsFn = (testClass) => testClass
+const multiDeps = (testClass, needsCradle) => {
+  return { testClass, needsCradle }
+}
 
 class TestClass {}
 class WithDeps {
-  constructor(testClass) {
+  constructor (testClass) {
     this.testClass = testClass
   }
 }
 class NeedsCradle {
-  constructor(cradle) {
+  constructor (cradle) {
     this.testClass = cradle.testClass
+  }
+}
+class MultipleDeps {
+  constructor (testClass, needsCradle) {
+    this.testClass = testClass
+    this.needsCradle = needsCradle
   }
 }
 
@@ -43,7 +52,7 @@ describe('registrations', function () {
       testSpy.should.have.been.calledTwice
     })
 
-    it('manually resolves function dependencies', function() {
+    it('manually resolves function dependencies', function () {
       container.registerClass({
         testClass: TestClass
       })
@@ -51,6 +60,18 @@ describe('registrations', function () {
       const result = reg.resolve(container)
       reg.resolve.should.be.a.function
       result.should.be.an.instanceOf(TestClass)
+    })
+
+    it('manually resolves multiple function dependencies', function () {
+      container.registerClass({
+        testClass: TestClass,
+        needsCradle: NeedsCradle
+      })
+      const reg = asFunction(multiDeps)
+      const result = reg.resolve(container)
+      reg.resolve.should.be.a.function
+      result.testClass.should.be.an.instanceOf(TestClass)
+      result.needsCradle.should.be.an.instanceOf(NeedsCradle)
     })
   })
 
@@ -65,7 +86,7 @@ describe('registrations', function () {
       result.should.be.an.instanceOf(TestClass)
     })
 
-    it('resolves dependencies manually', function() {
+    it('resolves dependencies manually', function () {
       container.registerClass({
         testClass: TestClass
       })
@@ -74,7 +95,8 @@ describe('registrations', function () {
       result.should.be.an.instanceOf(WithDeps)
       result.testClass.should.be.an.instanceOf(TestClass)
     })
-    it('resolves single dependency as cradle', function() {
+
+    it('resolves single dependency as cradle', function () {
       container.registerClass({
         testClass: TestClass
       })
@@ -82,6 +104,18 @@ describe('registrations', function () {
       const result = reg.resolve(container)
       result.should.be.an.instanceOf(NeedsCradle)
       result.testClass.should.be.an.instanceOf(TestClass)
+    })
+
+    it('resolves multiple dependencies manually', function () {
+      container.registerClass({
+        testClass: TestClass,
+        needsCradle: NeedsCradle
+      })
+      const reg = asClass(MultipleDeps)
+      const result = reg.resolve(container)
+      result.should.be.an.instanceOf(MultipleDeps)
+      result.testClass.should.be.an.instanceOf(TestClass)
+      result.needsCradle.should.be.an.instanceOf(NeedsCradle)
     })
   })
 
