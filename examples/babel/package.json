@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node lib/index.js",
-    "build": "babel src -d lib"
+    "start": "node dist/index.js",
+    "build": "babel src -d dist"
   },
   "author": "",
   "license": "ISC",
