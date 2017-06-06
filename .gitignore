@@ -4,3 +4,4 @@ npm-debug.log
 coverage
 .DS_Store
 .vscode/
+examples/babel/package-lock.json
