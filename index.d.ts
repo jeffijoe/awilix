@@ -65,7 +65,8 @@ export declare function asValue(value: any, options?: RegistrationOptions): Regi
  * @interface ContainerOptions
  */
 export interface ContainerOptions {
-  require?: (id: string) => any
+  require?: (id: string) => any,
+  resolutionMode?: ResolutionMode
 }
 
 /**
@@ -83,6 +84,17 @@ export interface FluidRegistration extends Registration {
   singleton(): this
   scoped(): this
   transient(): this
+  proxy(): this
+  classic(): this
+}
+
+/**
+ * Resolution Modes
+ * @class ResolutionMode
+ */
+export declare class ResolutionMode {
+  static PROXY: string
+  static CLASSIC: string
 }
 
 /**
@@ -206,6 +218,7 @@ export interface RegisterNameAndValuePair {
 export interface Registration {
   resolve(): any
   lifetime: Lifetime
+  resolutionMode: ResolutionMode
 }
 
 /**
@@ -214,4 +227,5 @@ export interface Registration {
  */
 export interface RegistrationOptions {
   lifetime?: Lifetime
+  resolutionMode?: ResolutionMode
 }

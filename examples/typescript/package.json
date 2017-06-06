@@ -1,0 +1,11 @@
+{
+  "name": "typescript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "run": "../../node_modules/.bin/tsc && node index.ts"
+  },
+  "author": "",
+  "license": "ISC"
+}

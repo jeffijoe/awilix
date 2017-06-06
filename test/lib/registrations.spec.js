@@ -60,15 +60,16 @@ describe('registrations', function () {
       const reg = asFunction(depsFn).classic()
       const result = reg.resolve(container)
       reg.resolve.should.be.a.function
+      console.log(result)
       result.should.be.an.instanceOf(TestClass)
     })
 
     it('manually resolves multiple function dependencies', function () {
       container.register({
-        testClass: asClass(TestClass, { resolutionMode:  ResolutionMode.CLASSIC }),
-        needsCradle: asClass(NeedsCradle, { resolutionMode:  ResolutionMode.PROXY })
+        testClass: asClass(TestClass, { resolutionMode: ResolutionMode.CLASSIC }),
+        needsCradle: asClass(NeedsCradle).proxy()
       })
-      const reg = asFunction(multiDeps, { resolutionMode:  ResolutionMode.CLASSIC })
+      const reg = asFunction(multiDeps, { resolutionMode: ResolutionMode.CLASSIC })
       const result = reg.resolve(container)
       reg.resolve.should.be.a.function
       result.testClass.should.be.an.instanceOf(TestClass)
@@ -91,7 +92,7 @@ describe('registrations', function () {
       container.registerClass({
         testClass: TestClass
       })
-      const withDepsReg = asClass(WithDeps)
+      const withDepsReg = asClass(WithDeps).classic()
       const result = withDepsReg.resolve(container)
       result.should.be.an.instanceOf(WithDeps)
       result.testClass.should.be.an.instanceOf(TestClass)
@@ -101,7 +102,7 @@ describe('registrations', function () {
       container.registerClass({
         testClass: TestClass
       })
-      const reg = asClass(NeedsCradle)
+      const reg = asClass(NeedsCradle).proxy()
       const result = reg.resolve(container)
       result.should.be.an.instanceOf(NeedsCradle)
       result.testClass.should.be.an.instanceOf(TestClass)
@@ -112,7 +113,7 @@ describe('registrations', function () {
         testClass: TestClass,
         needsCradle: NeedsCradle
       })
-      const reg = asClass(MultipleDeps)
+      const reg = asClass(MultipleDeps, { resolutionMode: ResolutionMode.CLASSIC })
       const result = reg.resolve(container)
       result.should.be.an.instanceOf(MultipleDeps)
       result.testClass.should.be.an.instanceOf(TestClass)

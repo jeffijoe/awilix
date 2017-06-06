@@ -4,6 +4,7 @@ const Lifetime = require('../../lib/Lifetime')
 const { catchError } = require('../helpers/errorHelpers')
 const AwilixResolutionError = require('../../lib/AwilixResolutionError')
 const { asClass, asFunction, asValue } = require('../../lib/registrations')
+const ResolutionMode = require('../../lib/ResolutionMode')
 
 class Test {
   constructor ({ repo }) {
@@ -18,6 +19,12 @@ class Test {
 class Repo {
   getStuff () {
     return 'stuff'
+  }
+}
+
+class ManualTest {
+  constructor (repo) {
+    this.repo = repo
   }
 }
 
@@ -42,6 +49,20 @@ describe('createContainer', function () {
       const test = container.cradle.test
       expect(test).to.be.ok
       test.someValue.should.equal(42)
+    })
+
+    it('lets me register something and resolve it via classic resolution mode', function () {
+      const container = createContainer({
+        resolutionMode: ResolutionMode.CLASSIC
+      })
+      container.register({
+        manual: asClass(ManualTest),
+        repo: asClass(Repo)
+      })
+
+      const test = container.cradle.manual
+      expect(test).to.be.ok
+      expect(test.repo).to.be.ok
     })
 
     describe('register', function () {
