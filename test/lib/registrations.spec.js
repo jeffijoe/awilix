@@ -1,6 +1,7 @@
 const { asValue, asFunction, asClass } = require('../../lib/registrations')
 const createContainer = require('../../lib/createContainer')
 const Lifetime = require('../../lib/Lifetime')
+const ResolutionMode = require('../../lib/ResolutionMode')
 
 const testFn = () => 1337
 const depsFn = (testClass) => testClass
@@ -53,21 +54,21 @@ describe('registrations', function () {
     })
 
     it('manually resolves function dependencies', function () {
-      container.registerClass({
-        testClass: TestClass
+      container.register({
+        testClass: asClass(TestClass).classic()
       })
-      const reg = asFunction(depsFn)
+      const reg = asFunction(depsFn).classic()
       const result = reg.resolve(container)
       reg.resolve.should.be.a.function
       result.should.be.an.instanceOf(TestClass)
     })
 
     it('manually resolves multiple function dependencies', function () {
-      container.registerClass({
-        testClass: TestClass,
-        needsCradle: NeedsCradle
+      container.register({
+        testClass: asClass(TestClass, { resolutionMode:  ResolutionMode.CLASSIC }),
+        needsCradle: asClass(NeedsCradle, { resolutionMode:  ResolutionMode.PROXY })
       })
-      const reg = asFunction(multiDeps)
+      const reg = asFunction(multiDeps, { resolutionMode:  ResolutionMode.CLASSIC })
       const result = reg.resolve(container)
       reg.resolve.should.be.a.function
       result.testClass.should.be.an.instanceOf(TestClass)
