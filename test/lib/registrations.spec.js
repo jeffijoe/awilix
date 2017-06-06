@@ -60,7 +60,6 @@ describe('registrations', function () {
       const reg = asFunction(depsFn).classic()
       const result = reg.resolve(container)
       reg.resolve.should.be.a.function
-      console.log(result)
       result.should.be.an.instanceOf(TestClass)
     })
 
