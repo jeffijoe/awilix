@@ -62,8 +62,10 @@ Awilix has a pretty simple API. At minimum, you need to do 3 things:
 ```javascript
 const awilix = require('awilix');
 
-// Create the container.
-const container = awilix.createContainer();
+// Create the container and set the resolutionMode to PROXY (which is also the default).
+const container = awilix.createContainer({
+  resolutionMode: awilix.ResolutionMode.PROXY
+});
 
 // This is our app code... We can use
 // factory functions, constructor functions
@@ -106,9 +108,12 @@ container.registerFunction({
 
 // Alright, now we need a database.
 // Let's make that a constructor function.
-function Database({ connectionString }) {
+// Finally, notice how the dependency is referenced by name directly.
+// This would happen in "CLASSIC" resolution mode. Named dependencies work as long as the injected into a
+// function is an exact match with that of the registered dependency
+function Database(connectionString, timeout) {
   // We can inject plain values as well!
-  this.conn = connectToYourDatabaseSomehow(connectionString);
+  this.conn = connectToYourDatabaseSomehow(connectionString, timeout);
 }
 
 Database.prototype.query = function(sql) {
@@ -116,9 +121,14 @@ Database.prototype.query = function(sql) {
   return this.conn.rawSql(sql);
 }
 
-// We use registerClass because we want it to be called with `new`.
-container.registerClass({
-  db: Database
+// We use registerClass because we want it to be called with `new`. If we want to use a different resolutionMode we need a different mechanism.
+//container.registerClass({
+//  db: Database
+//})
+
+// We use register coupled with asClass to override the default resolutionMode yet still construct the class with the 'new' keyword
+container.register({
+  db: asClass(Database).classic()
 })
 
 // Lastly we register the connection string,
@@ -127,7 +137,8 @@ container.registerValue({
   // We can register things as-is - this is not just
   // limited to strings and numbers, it can be anything,
   // really - they will be passed through directly.
-  connectionString: process.env.CONN_STR
+  connectionString: process.env.CONN_STR,
+  timeout: 1000
 });
 
 
@@ -145,6 +156,8 @@ router.get('/api/users/:id', container.cradle.userController.getUser);
 That example looks big, but if you extract things to their proper files, it becomes rather elegant!
 
 [Check out a working Koa example!](/examples/koa)
+
+One last quick note on `CLASSIC` resolution: in order to support named resolution (I.E. not using destructuring to retrieve references) the names of the dependencies must exactly match the registered names of the dependencies. Use `resolutionMode` of `PROXY` if you do not want the default `awilix` dependency injection behavior. For more information see the `createContainer` section.
 
 # Lifetime management
 
@@ -335,6 +348,9 @@ Args:
 
 * `options`: Options object. Optional.
   - `options.require`: The function to use when requiring modules. Defaults to `require`. Useful when using something like [`require-stack`](https://npmjs.org/package/require-stack). Optional.
+  - `options.resolutionMode`: Determines the method for resolving dependencies. Valid modes are:
+    - `PROXY`: Uses the `awilix` default dependency resolution mechanism (I.E. injects the cradle into the function or class). This is the default resolution mode.
+    - `CLASSIC`: Uses the named dependency resolution mechanism. Dependencies ___must___ be named exactly like they are in the registration. For example, a dependency registered as `repository` cannot be referenced in a class constructor as `repo`.
 
 ## `listModules()`
 
@@ -731,7 +747,7 @@ The `['glob', Lifetime.SCOPED]` syntax is a shorthand for passing in registratio
 
 Clone repo, run `npm i` to install all dependencies, and then `npm run test-watch` + `npm run lint-watch` to start writing code.
 
-For code coverage, run `npm run coverage`.
+For code coverage, run `npm run cover`.
 
 If you submit a PR, please aim for 100% code coverage and no linting errors.
 Travis will fail if there are linting errors. Thank you for considering contributing. :)

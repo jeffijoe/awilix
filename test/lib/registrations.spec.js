@@ -1,10 +1,31 @@
 const { asValue, asFunction, asClass } = require('../../lib/registrations')
 const createContainer = require('../../lib/createContainer')
 const Lifetime = require('../../lib/Lifetime')
+const ResolutionMode = require('../../lib/ResolutionMode')
 
 const testFn = () => 1337
+const depsFn = (testClass) => testClass
+const multiDeps = (testClass, needsCradle) => {
+  return { testClass, needsCradle }
+}
 
 class TestClass {}
+class WithDeps {
+  constructor (testClass) {
+    this.testClass = testClass
+  }
+}
+class NeedsCradle {
+  constructor (cradle) {
+    this.testClass = cradle.testClass
+  }
+}
+class MultipleDeps {
+  constructor (testClass, needsCradle) {
+    this.testClass = testClass
+    this.needsCradle = needsCradle
+  }
+}
 
 describe('registrations', function () {
   let container
@@ -31,6 +52,29 @@ describe('registrations', function () {
 
       testSpy.should.have.been.calledTwice
     })
+
+    it('manually resolves function dependencies', function () {
+      container.register({
+        testClass: asClass(TestClass).classic()
+      })
+      const reg = asFunction(depsFn).classic()
+      const result = reg.resolve(container)
+      reg.resolve.should.be.a.function
+      console.log(result)
+      result.should.be.an.instanceOf(TestClass)
+    })
+
+    it('manually resolves multiple function dependencies', function () {
+      container.register({
+        testClass: asClass(TestClass, { resolutionMode: ResolutionMode.CLASSIC }),
+        needsCradle: asClass(NeedsCradle).proxy()
+      })
+      const reg = asFunction(multiDeps, { resolutionMode: ResolutionMode.CLASSIC })
+      const result = reg.resolve(container)
+      reg.resolve.should.be.a.function
+      result.testClass.should.be.an.instanceOf(TestClass)
+      result.needsCradle.should.be.an.instanceOf(NeedsCradle)
+    })
   })
 
   describe('asClass', function () {
@@ -42,6 +86,38 @@ describe('registrations', function () {
       const reg = asClass(TestClass)
       const result = reg.resolve(container)
       result.should.be.an.instanceOf(TestClass)
+    })
+
+    it('resolves dependencies manually', function () {
+      container.registerClass({
+        testClass: TestClass
+      })
+      const withDepsReg = asClass(WithDeps).classic()
+      const result = withDepsReg.resolve(container)
+      result.should.be.an.instanceOf(WithDeps)
+      result.testClass.should.be.an.instanceOf(TestClass)
+    })
+
+    it('resolves single dependency as cradle', function () {
+      container.registerClass({
+        testClass: TestClass
+      })
+      const reg = asClass(NeedsCradle).proxy()
+      const result = reg.resolve(container)
+      result.should.be.an.instanceOf(NeedsCradle)
+      result.testClass.should.be.an.instanceOf(TestClass)
+    })
+
+    it('resolves multiple dependencies manually', function () {
+      container.registerClass({
+        testClass: TestClass,
+        needsCradle: NeedsCradle
+      })
+      const reg = asClass(MultipleDeps, { resolutionMode: ResolutionMode.CLASSIC })
+      const result = reg.resolve(container)
+      result.should.be.an.instanceOf(MultipleDeps)
+      result.testClass.should.be.an.instanceOf(TestClass)
+      result.needsCradle.should.be.an.instanceOf(NeedsCradle)
     })
   })
 
