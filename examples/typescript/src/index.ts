@@ -1,6 +1,6 @@
-///<reference path="../../index.d.ts" />
+///<reference path="../../../index.d.ts" />
 
-// This is largely for testing. The main import is wrong in this file to account for the output in the dist folder
+// This is largely for testing, but import what we need
 import { AwilixContainer, createContainer, asClass, ResolutionMode } from '../../..'
 import TestService from './services/TestService'
 import DependentService from './services/DependentService'

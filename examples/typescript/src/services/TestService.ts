@@ -1,7 +1,7 @@
 export default class TestService {
 data: string
 
-  constructor() {
+  constructor () {
     this.data = 'Hello world!'
   }
 
