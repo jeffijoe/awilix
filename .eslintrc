@@ -1,5 +1,8 @@
 {
   "extends": [
     "standard"
-  ]
+  ],
+  "rules": {
+    "prefer-const": 1
+  }
 }
