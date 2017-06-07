@@ -435,5 +435,29 @@ describe('createContainer', function () {
         expect(util.inspect(container.createScope().registerValue({ val3: 3 }))).to.equal('[AwilixContainer (scoped, registrations: 5)]')
       })
     })
+
+    describe('explicitly trying to fuck shit up', function () {
+      it('should prevent you from fucking shit up', function () {
+        const container = createContainer({
+          resolutionMode: null
+        })
+        .registerValue({ answer: 42 })
+        .registerFunction('theAnswer', ({ answer }) => () => answer)
+
+        const theAnswer = container.resolve('theAnswer')
+        expect(theAnswer()).to.equal(42)
+      })
+
+      it('should default to PROXY resolution mode when unknown', function () {
+        const container = createContainer({
+          resolutionMode: 'I dunno maaaang...'
+        })
+        .registerValue({ answer: 42 })
+        .registerFunction('theAnswer', ({ answer }) => () => answer)
+
+        const theAnswer = container.resolve('theAnswer')
+        expect(theAnswer()).to.equal(42)
+      })
+    })
   })
 })
