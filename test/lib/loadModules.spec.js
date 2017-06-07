@@ -2,6 +2,7 @@ const loadModules = require('../../lib/loadModules')
 const spy = sinon.spy
 const createContainer = require('../../lib/createContainer')
 const Lifetime = require('../../lib/Lifetime')
+const ResolutionMode = require('../../lib/ResolutionMode')
 
 const lookupResultFor = modules => Object.keys(modules).map(key => ({
   name: key.replace('.js', ''),
@@ -182,5 +183,33 @@ describe('loadModules', function () {
 
     container.registrations.test.lifetime.should.equal(Lifetime.SCOPED)
     container.registrations.test2.lifetime.should.equal(Lifetime.SINGLETON)
+  })
+
+  it('supports passing in a default resolutionMode', function () {
+    const container = createContainer()
+    const modules = {
+      'test.js': spy(() => 42),
+      'test2.js': spy(() => 42)
+    }
+
+    const deps = {
+      container,
+      listModules: spy(
+        () => [
+          { name: 'test', path: 'test.js', opts: { resolutionMode: ResolutionMode.PROXY } },
+          { name: 'test2', path: 'test2.js' }
+        ]
+      ),
+      require: spy(path => modules[path])
+    }
+
+    loadModules(deps, 'anything', {
+      registrationOptions: {
+        resolutionMode: ResolutionMode.CLASSIC
+      }
+    })
+
+    container.registrations.test.resolutionMode.should.equal(ResolutionMode.PROXY)
+    container.registrations.test2.resolutionMode.should.equal(ResolutionMode.CLASSIC)
   })
 })
