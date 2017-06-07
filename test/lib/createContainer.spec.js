@@ -31,7 +31,7 @@ class ManualTest {
 describe('createContainer', function () {
   it('returns an object', function () {
     const container = createContainer()
-    container.should.be.an.object
+    container.should.be.an('object')
   })
 
   describe('container', function () {

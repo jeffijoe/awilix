@@ -35,13 +35,13 @@ describe('registrations', function () {
 
   describe('asValue', function () {
     it('creates a registration with a resolve method', function () {
-      asValue(42).resolve.should.be.a.function
+      asValue(42).resolve.should.be.a('function')
     })
   })
 
   describe('asFunction', function () {
     it('creates a registration with a resolve method', function () {
-      asFunction(testFn).resolve.should.be.a.function
+      asFunction(testFn).resolve.should.be.a('function')
     })
 
     it('defaults to transient', function () {
@@ -59,7 +59,7 @@ describe('registrations', function () {
       })
       const reg = asFunction(depsFn).classic()
       const result = reg.resolve(container)
-      reg.resolve.should.be.a.function
+      reg.resolve.should.be.a('function')
       result.should.be.an.instanceOf(TestClass)
     })
 
@@ -70,7 +70,7 @@ describe('registrations', function () {
       })
       const reg = asFunction(multiDeps, { resolutionMode: ResolutionMode.CLASSIC })
       const result = reg.resolve(container)
-      reg.resolve.should.be.a.function
+      reg.resolve.should.be.a('function')
       result.testClass.should.be.an.instanceOf(TestClass)
       result.needsCradle.should.be.an.instanceOf(NeedsCradle)
     })
@@ -78,7 +78,7 @@ describe('registrations', function () {
 
   describe('asClass', function () {
     it('creates a registration with a resolve method', function () {
-      asClass(TestClass).resolve.should.be.a.function
+      asClass(TestClass).resolve.should.be.a('function')
     })
 
     it('resolves the class by newing it up', function () {

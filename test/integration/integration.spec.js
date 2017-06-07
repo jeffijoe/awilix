@@ -7,8 +7,8 @@ describe('integration tests', function () {
     const container = fixture()
     const anotherService = container.resolve('anotherService')
     anotherService.should.be.an.instanceOf(AnotherService)
-    anotherService.repo.should.be.an.object
-    anotherService.repo.getAnswerFor.should.be.a.function
+    anotherService.repo.should.be.an('object')
+    anotherService.repo.getAnswerFor.should.be.a('function')
     Object.keys(container.registrations).length.should.equal(3)
   })
 
