@@ -32,6 +32,7 @@ Extremely powerful **Inversion of Control** (IoC) container for Node with depend
     + [`container.cradle`](#containercradle)
     + [`container.registrations`](#containerregistrations)
     + [`container.cache`](#containercache)
+    + [`container.options`](#containeroptions)
     + [`container.resolve()`](#containerresolve)
     + [`container.registerValue()`](#containerregistervalue)
     + [`container.registerFunction()`](#containerregisterfunction)
@@ -129,7 +130,7 @@ Database.prototype.query = function(sql) {
 // We also want to use `CLASSIC` resolution mode for this 
 // registration. Read more about resolution modes below.
 container.register({
-  db: asClass(Database).classic()
+  db: awilix.asClass(Database).classic()
 })
 
 // Lastly we register the connection string and timeout values
@@ -141,7 +142,6 @@ container.registerValue({
   connectionString: process.env.CONN_STR,
   timeout: 1000
 })
-
 
 // We have now wired everything up!
 // Let's use it! (use your imagination with the router thing..)
@@ -160,13 +160,13 @@ That example is rather lengthy, but if you extract things to their proper files 
 
 # Lifetime management
 
-Awilix supports managing the lifetime of registrations. This means that you can control whether objects are resolved and used once, or cached for the lifetime of the process.
+Awilix supports managing the lifetime of instances. This means that you can control whether objects are resolved and used once, cached within a certain scope, or cached for the lifetime of the process.
 
 There are 3 lifetime types available.
 
-* `TRANSIENT`: This is the default. The registration is resolved every time it is needed. This means if you resolve a class more than once, you will get back a new instance every time.
-* `SCOPED`: The registration is scoped to the container - that means that the resolved value will be reused when resolved from the same scope.
-* `SINGLETON`: The registration is always reused no matter what.
+* `Lifetime.TRANSIENT`: This is the default. The registration is resolved every time it is needed. This means if you resolve a class more than once, you will get back a new instance every time.
+* `Lifetime.SCOPED`: The registration is scoped to the container - that means that the resolved value will be reused when resolved from the same scope.
+* `Lifetime.SINGLETON`: The registration is always reused no matter what.
 
 They are exposed on the `awilix.Lifetime` object.
 
@@ -285,9 +285,9 @@ Read the documentation for [`container.createScope()`](#containercreatescope) fo
 The resolution mode determines how a function/constructor receives its dependencies. Pre-2.3.0, only one mode was
 supported - `PROXY` - which remains the default mode.
 
-Awilix v2.3.0 introduced an alternative resolution mode: `CLASSIC`.
+Awilix v2.3.0 introduced an alternative resolution mode: `CLASSIC`. The resolution modes are available on `awilix.ResolutionMode`
 
-* `PROXY` (default): Injects a proxy to functions/constructors which looks like a regular object.
+* `ResolutionMode.PROXY` (default): Injects a proxy to functions/constructors which looks like a regular object.
     
     ```js
     class UserService {
@@ -309,7 +309,7 @@ Awilix v2.3.0 introduced an alternative resolution mode: `CLASSIC`.
     }
     ```
 
-* `CLASSIC`: Parses the function/constructor parameters, and matches them with registrations in the container.
+* `ResolutionMode.CLASSIC`: Parses the function/constructor parameters, and matches them with registrations in the container.
     
     ```js
     class UserService {
@@ -320,9 +320,9 @@ Awilix v2.3.0 introduced an alternative resolution mode: `CLASSIC`.
     }
     ```
 
-Resolution modes can be set on a per-container level, per-scope and per-registration. The most specific one wins.
+Resolution modes can be set per-container and per-registration. The most specific one wins.
 
-> Note: I personally don't see why you would want to have different resolution modes, but
+> Note: I personally don't see why you would want to have different resolution modes in a project, but
 > if the need arises, Awilix supports it.
 
 **Container-wide**:
@@ -331,13 +331,6 @@ Resolution modes can be set on a per-container level, per-scope and per-registra
 const { createContainer, ResolutionMode } = require('awilix')
 
 const container = createContainer({ resolutionMode: ResolutionMode.CLASSIC })
-```
-
-**Scope-wide**:
-
-```js
-const container = createContainer({ resolutionMode: ResolutionMode.CLASSIC })
-const scope = container.createScope({ resolutionMode: ResolutionMode.PROXY })
 ```
 
 **Per registration**:
