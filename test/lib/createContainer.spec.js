@@ -147,6 +147,11 @@ describe('createContainer', function () {
         container.resolve('another').should.equal(3)
       })
 
+      it('does not treat arrays in registerValue as [val, opts]', function () {
+        container.registerValue('arr', [1, 2])
+        container.resolve('arr').should.deep.equal([1, 2])
+      })
+
       it('supports chaining', function () {
         class Heh {}
         const func = () => {}

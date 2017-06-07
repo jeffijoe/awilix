@@ -1,5 +1,10 @@
 # Awilix Changelog
 
+## 2.3.0
+
+* **[NEW]**: Classic dependency resolution mode using parameter name matching implemented, thanks to [@cjhoward92](https://github.com/jeffijoe/awilix/pull/21)! This is an alternative to the default proxy mechanism.
+* [chore]: Updated packages.
+
 ## 2.2.6
 
 * Pass in the module descriptor to `formatName` - thanks @anasinnyk!

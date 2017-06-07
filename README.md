@@ -12,7 +12,7 @@
 [![node](https://img.shields.io/node/v/awilix.svg?maxAge=1000)](https://www.npmjs.com/package/awilix)
 [![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 
-Extremely powerful **Inversion of Control** (IoC) container for Node with dependency resolution support powered by ES6 Proxies. Make IoC great again!
+Extremely powerful **Inversion of Control** (IoC) container for Node with dependency resolution support powered by `Proxy`. Make IoC great again!
 
 > Check out this [intro to Dependency Injection with Awilix](https://medium.com/@Jeffijoe/dependency-injection-in-node-js-2016-edition-f2a88efdd427)
 
@@ -21,6 +21,7 @@ Extremely powerful **Inversion of Control** (IoC) container for Node with depend
 * [Installation](#installation)
 * [Usage](#usage)
 * [Lifetime management](#lifetime-management)
+* [Resolution modes](#resolution-modes)
 * [Auto-loading modules](#auto-loading-modules)
 * [API](#api)
   - [The `awilix` object](#the-awilix-object)
@@ -108,9 +109,8 @@ container.registerFunction({
 
 // Alright, now we need a database.
 // Let's make that a constructor function.
-// Finally, notice how the dependency is referenced by name directly.
-// This would happen in "CLASSIC" resolution mode. Named dependencies work as long as the injected into a
-// function is an exact match with that of the registered dependency
+// Notice how the dependency is referenced by name directly instead of destructuring an object.
+// This is because we register it in "CLASSIC" resolution mode below.
 function Database(connectionString, timeout) {
   // We can inject plain values as well!
   this.conn = connectToYourDatabaseSomehow(connectionString, timeout);
