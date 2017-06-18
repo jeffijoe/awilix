@@ -4,6 +4,7 @@ describe('isFunction', function () {
   it('returns true when the value is a function', function () {
     isFunction(() => {}).should.be.true
     isFunction(function () {}).should.be.true
+    isFunction(class {}).should.be.true
   })
 
   it('returns false when the value is not a function', function () {
