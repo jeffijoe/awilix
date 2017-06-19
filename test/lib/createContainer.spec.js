@@ -446,8 +446,8 @@ describe('createContainer', function () {
         const container = createContainer({
           resolutionMode: null
         })
-        .registerValue({ answer: 42 })
-        .registerFunction('theAnswer', ({ answer }) => () => answer)
+          .registerValue({ answer: 42 })
+          .registerFunction('theAnswer', ({ answer }) => () => answer)
 
         const theAnswer = container.resolve('theAnswer')
         expect(theAnswer()).to.equal(42)
@@ -457,8 +457,8 @@ describe('createContainer', function () {
         const container = createContainer({
           resolutionMode: 'I dunno maaaang...'
         })
-        .registerValue({ answer: 42 })
-        .registerFunction('theAnswer', ({ answer }) => () => answer)
+          .registerValue({ answer: 42 })
+          .registerFunction('theAnswer', ({ answer }) => () => answer)
 
         const theAnswer = container.resolve('theAnswer')
         expect(theAnswer()).to.equal(42)
