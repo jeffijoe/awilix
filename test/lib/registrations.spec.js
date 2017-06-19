@@ -2,6 +2,8 @@ const { asValue, asFunction, asClass } = require('../../lib/registrations')
 const createContainer = require('../../lib/createContainer')
 const Lifetime = require('../../lib/Lifetime')
 const ResolutionMode = require('../../lib/ResolutionMode')
+const AwilixNotAFunctionError = require('../../lib/AwilixNotAFunctionError')
+const { catchError } = require('../helpers/errorHelpers')
 
 const testFn = () => 1337
 const depsFn = (testClass) => testClass
@@ -74,6 +76,11 @@ describe('registrations', function () {
       result.testClass.should.be.an.instanceOf(TestClass)
       result.needsCradle.should.be.an.instanceOf(NeedsCradle)
     })
+
+    it('throws AwilixNotAFunctionError when given null', function () {
+      const err = catchError(() => asFunction(null))
+      err.should.be.an.instanceof(AwilixNotAFunctionError)
+    })
   })
 
   describe('asClass', function () {
@@ -117,6 +124,11 @@ describe('registrations', function () {
       result.should.be.an.instanceOf(MultipleDeps)
       result.testClass.should.be.an.instanceOf(TestClass)
       result.needsCradle.should.be.an.instanceOf(NeedsCradle)
+    })
+
+    it('throws an Error when given null', function () {
+      const err = catchError(() => asClass(null))
+      err.should.be.an.instanceof(AwilixNotAFunctionError)
     })
   })
 
