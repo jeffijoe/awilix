@@ -1,5 +1,9 @@
 # Awilix Changelog
 
+## 2.4.0
+
+* **[BREAKING]**: Guard assertions added to `asFunction` and `asClass`. This will prevent some nasty runtime behaviors. ([#20](https://github.com/jeffijoe/awilix/issues/20)), thanks [@zer0tonin](https://github.com/zer0tonin)!
+
 ## 2.3.0
 
 * **[NEW]**: Classic dependency resolution mode using parameter name matching implemented, thanks to [@cjhoward92](https://github.com/jeffijoe/awilix/pull/21)! This is an alternative to the default proxy mechanism.
