@@ -1,5 +1,11 @@
 # Awilix Changelog
 
+## 2.5.0
+
+* **[NEW]**: Implemented per-module locals injection.
+* Fixed issue where passing a `Lifetime` like `.registerFunction('name', func, Lifetime.SCOPED)` didn't work.
+* Documented `asClass`, `asValue` and `asFunction`.
+
 ## 2.4.0
 
 * **[BREAKING]**: Guard assertions added to `asFunction` and `asClass`. This will prevent some nasty runtime behaviors. ([#20](https://github.com/jeffijoe/awilix/issues/20)), thanks [@zer0tonin](https://github.com/zer0tonin)!

@@ -23,9 +23,13 @@ Extremely powerful **Inversion of Control** (IoC) container for Node with depend
 * [Lifetime management](#lifetime-management)
 * [Resolution modes](#resolution-modes)
 * [Auto-loading modules](#auto-loading-modules)
+* [Per-module local injections](#per-module-local-injections)
 * [API](#api)
   - [The `awilix` object](#the-awilix-object)
   - [`createContainer()`](#createcontainer)
+  - [`asFunction()`](#asfunction)
+  - [`asClass()`](#asclass)
+  - [`asValue()`](#asvalue)
   - [`listModules()`](#listmodules)
   - [`AwilixResolutionError`](#awilixresolutionerror)
   - [The `AwilixContainer` object](#the-awilixcontainer-object)
@@ -439,6 +443,61 @@ container.loadModules([
 container.resolve('userService').getUser(1)
 ```
 
+# Per-module local injections
+
+Some modules might need some additional configuration values than just dependencies.
+
+For example, our `userRepository` wants a `db` module which is registered with the container, but it also wants a `timeout` value. `timeout` is a very generic name and we don't want to register that as a value that can be accessed by all modules in the container (maybe other modules have a different timeout?)
+
+```js
+export default function userRepository ({ db, timeout }) {
+  return {
+    find () {
+      return Promise.race([
+        db.query('select * from users'),
+        Promise.delay(timeout).then(() => Promise.reject(new Error('Timed out')))
+      ])
+    }
+  }
+}
+```
+
+Awilix 2.5 added per-module local injections. The following snippet contains _all_ the possible ways to set this up.
+
+```js
+import { createContainer, Lifetime, asFunction } from 'awilix'
+import createUserRepository from './repositories/userRepository'
+
+const container = createContainer()
+  // Using the fluid variant:
+  .register({
+    userRepository: asFunction(createUserRepository)
+      // provide an injection function that returns an object with locals.
+      .inject(() => ({ timeout: 2000 }))
+  })
+  
+  // Shorthand variants
+  .registerFunction({
+    userRepository: [createUserRepository, { inject: () => ({ timeout: 2000 }) }]
+  })
+  
+  // Stringly-typed shorthand
+  .registerFunction(
+    'userRepository', 
+    createUserRepository, 
+    { inject: () => ({ timeout: 2000 }) }
+  )
+  
+  // with `loadModules`
+  .loadModules([
+    ['repositories/*.js', { inject: () => ({ timeout: 2000 }) }]
+  ])
+```
+
+This way `timeout` is only available to the modules it was configured for.
+
+**IMPORTANT**: the way this works is by wrapping the `cradle` in another proxy that provides the returned values from the `inject` function. This means if you pass along the injected cradle object, anything with access to it can access the local injections.
+
 # API
 
 ## The `awilix` object
@@ -467,6 +526,28 @@ Args:
   - `options.resolutionMode`: Determines the method for resolving dependencies. Valid modes are:
     - `PROXY`: Uses the `awilix` default dependency resolution mechanism (I.E. injects the cradle into the function or class). This is the default resolution mode.
     - `CLASSIC`: Uses the named dependency resolution mechanism. Dependencies ___must___ be named exactly like they are in the registration. For example, a dependency registered as `repository` cannot be referenced in a class constructor as `repo`.
+
+## `asFunction()`
+
+Used with `container.register({ userService: asFunction(makeUserService) })`. Tells Awilix to invoke the function without any context.
+
+The returned registration has the following chainable (fluid) API:
+
+* `asFunction(fn).setLifetime(lifetime: string)`: sets the lifetime of the registration to the given value.
+* `asFunction(fn).transient()`: same as `asFunction(fn).setLifetime(Lifetime.TRANSIENT)`.
+* `asFunction(fn).scoped()`: same as `asFunction(fn).setLifetime(Lifetime.SCOPED)`.
+* `asFunction(fn).singleton()`: same as `asFunction(fn).setLifetime(Lifetime.SINGLETON)`.
+* `asFunction(fn).inject(injector: Function)`: Let's you provide local dependencies only available to this module.
+
+## `asClass()`
+
+Used with `container.register({ userService: asClass(UserService) })`. Tells Awilix to instantiate the given function as a class using `new`.
+
+The returned registration has the same chainable API as [`asFunction`](#asfunction).
+
+## `asValue()`
+
+Used with `container.register({ dbHost: asValue('localhost') })`. Tells Awilix to provide the given value as-is.
 
 ## `listModules()`
 
@@ -575,10 +656,10 @@ Now we need to use them. There are multiple syntaxes for the `register` function
 **Both styles supports chaining! `register` returns the container!**
 
 ```js
-// name-value-options
+// name-registration)
 container.register('connectionString', asValue('localhost:1433;user=...'))
-container.register('mailService', asFunction(makeMailService), { lifetime: Lifetime.SINGLETON })
-container.register('context', asClass(SessionContext), { lifetime: Lifetime.SCOPED })
+container.register('mailService', asFunction(makeMailService))
+container.register('context', asClass(SessionContext))
 
 // object
 container.register({
@@ -588,8 +669,12 @@ container.register({
 })
 
 // `registerFunction` and `registerClass` also supports a fluid syntax.
+// This...
 container.register('mailService', asFunction(makeMailService).setLifetime(Lifetime.SINGLETON))
+// .. is the same as this:
 container.register('context', asClass(SessionContext).singleton())
+
+// .. and here are the other `Lifetime` variants as fluid functions.
 container.register('context', asClass(SessionContext).transient())
 container.register('context', asClass(SessionContext).scoped())
 ```
@@ -683,7 +768,12 @@ container.registerClass({
   exclaimer: Exclaimer
 })
 
-// or..
+// or, to easily set up Lifetime..
+container.registerClass({
+  exclaimer: [Exclaimer, Lifetime.SINGLETON]
+})
+
+// or, to fully customize options..
 container.registerClass({
   exclaimer: [Exclaimer, { lifetime: Lifetime.SINGLETON }]
 })

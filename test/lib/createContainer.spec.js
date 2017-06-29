@@ -104,17 +104,21 @@ describe('createContainer', function () {
         container.registerClass('nameValue', Test)
         container.registerClass('nameValueWithOpts', Test, { lifetime: Lifetime.SCOPED })
         container.registerClass('nameValueWithArray', [Test, { lifetime: Lifetime.SCOPED }])
+        container.registerClass('nameValueWithLifetime', [Test, Lifetime.SCOPED])
         container.registerClass({
           obj: Test,
-          objWithOpts: [Test, { lifetime: Lifetime.SCOPED }]
+          objWithOpts: [Test, { lifetime: Lifetime.SCOPED }],
+          objWithLifetime: [Test, Lifetime.SCOPED]
         })
 
         container.registrations.nameValue.lifetime.should.equal(Lifetime.TRANSIENT)
         container.registrations.nameValueWithArray.lifetime.should.equal(Lifetime.SCOPED)
         container.registrations.nameValueWithOpts.lifetime.should.equal(Lifetime.SCOPED)
+        container.registrations.nameValueWithLifetime.lifetime.should.equal(Lifetime.SCOPED)
 
         container.registrations.obj.lifetime.should.equal(Lifetime.TRANSIENT)
         container.registrations.objWithOpts.lifetime.should.equal(Lifetime.SCOPED)
+        container.registrations.objWithLifetime.lifetime.should.equal(Lifetime.SCOPED)
       })
 
       it('supports registerFunction', function () {
@@ -122,17 +126,21 @@ describe('createContainer', function () {
         container.registerFunction('nameValue', fn)
         container.registerFunction('nameValueWithOpts', fn, { lifetime: Lifetime.SCOPED })
         container.registerFunction('nameValueWithArray', [fn, { lifetime: Lifetime.SCOPED }])
+        container.registerFunction('nameValueWithLifetime', [fn, Lifetime.SCOPED])
         container.registerFunction({
           obj: fn,
-          objWithOpts: [fn, { lifetime: Lifetime.SCOPED }]
+          objWithOpts: [fn, { lifetime: Lifetime.SCOPED }],
+          objWithLifetime: [fn, Lifetime.SCOPED]
         })
 
         container.registrations.nameValue.lifetime.should.equal(Lifetime.TRANSIENT)
         container.registrations.nameValueWithArray.lifetime.should.equal(Lifetime.SCOPED)
         container.registrations.nameValueWithOpts.lifetime.should.equal(Lifetime.SCOPED)
+        container.registrations.nameValueWithLifetime.lifetime.should.equal(Lifetime.SCOPED)
 
         container.registrations.obj.lifetime.should.equal(Lifetime.TRANSIENT)
         container.registrations.objWithOpts.lifetime.should.equal(Lifetime.SCOPED)
+        container.registrations.objWithLifetime.lifetime.should.equal(Lifetime.SCOPED)
       })
 
       it('supports registerValue', function () {
