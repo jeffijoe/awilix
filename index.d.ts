@@ -15,10 +15,8 @@ export declare interface AwilixContainer {
   register(nameAndRegistrationPair: NameAndRegistrationPair): AwilixContainer
   registerClass<T>(name: string, instance: Object): AwilixContainer
   registerClass<T>(nameAndClassPair: RegisterNameAndClassPair<T>): AwilixContainer
-  registerClass<T>(nameAndArrayClassPair: RegisterNameAndArrayClassPair<T>): AwilixContainer
   registerFunction(name: string, fn: Function): AwilixContainer
   registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair): AwilixContainer
-  registerFunction(nameAndArrayPair: RegisterNameAndArrayFunctionPair): AwilixContainer
   registerValue(name: string, value: any): AwilixContainer
   registerValue(nameAndValuePairs: RegisterNameAndValuePair): AwilixContainer
   resolve<T>(name: string): T
@@ -41,7 +39,10 @@ export declare class AwilixResolutionError extends Error {
  * @param {RegistrationOptions} options
  * @return {Registration}
  */
-export declare function asClass<T>(type: new (...args: any[]) => T, options?: RegistrationOptions): FluidRegistration
+export declare function asClass<T>(
+  type: new (...args: any[]) => T,
+  options?: RegistrationOptions
+): FluidRegistration
 
 /**
  * Creates a factory registration where the given factory function
@@ -50,7 +51,10 @@ export declare function asClass<T>(type: new (...args: any[]) => T, options?: Re
  * @param {RegistrationOptions} options
  * @return {Registration}
  */
-export declare function asFunction(fn: Function, options?: RegistrationOptions): FluidRegistration
+export declare function asFunction(
+  fn: Function,
+  options?: RegistrationOptions
+): FluidRegistration
 
 /**
  * Creates a simple value registration where the given value will always be resolved.
@@ -58,7 +62,10 @@ export declare function asFunction(fn: Function, options?: RegistrationOptions):
  * @param {RegistrationOptions} options
  * @return {Registration}
  */
-export declare function asValue(value: any, options?: RegistrationOptions): Registration
+export declare function asValue(
+  value: any,
+  options?: RegistrationOptions
+): Registration
 
 /**
  * The options for the createContainer function.
@@ -77,6 +84,15 @@ export interface ContainerOptions {
 export declare function createContainer(options?: ContainerOptions): AwilixContainer
 
 /**
+ * Gets passed the container and is expected to return an object
+ * whose properties are accessible at construction time for the
+ * configured registration.
+ *
+ * @type {Function}
+ */
+export type InjectorFunction = (container: AwilixContainer) => object
+
+/**
  * A registration object created by asClass() or asFunction().
  * @interface FluidRegistration
  */
@@ -86,6 +102,7 @@ export interface FluidRegistration extends Registration {
   transient(): this
   proxy(): this
   classic(): this
+  inject(injector: InjectorFunction): this
 }
 
 /**
@@ -173,27 +190,11 @@ export interface NameAndRegistrationPair {
 export type BuiltInNameFormatters = 'camelCase'
 
 /**
- * Register a class using the [value, options] array syntax.
- * @interface RegisterNameAndArrayClassPair<T>
- */
-export interface RegisterNameAndArrayClassPair<T> {
-  [key: string]: [T, RegistrationOptions]
-}
-
-/**
- * Register a function using the [value, options] array syntax.
- * @interface RegisterNameAndArrayFunctionPair
- */
-export interface RegisterNameAndArrayFunctionPair {
-  [key: string]: [Function, RegistrationOptions]
-}
-
-/**
  * Register a class.
  * @interface RegisterNameAndClassPair
  */
 export interface RegisterNameAndClassPair<T> {
-  [key: string]: T
+  [key: string]: [T, RegistrationOptions] | T
 }
 
 /**
@@ -201,7 +202,7 @@ export interface RegisterNameAndClassPair<T> {
  * @interface RegisterNameAndFunctionPair
  */
 export interface RegisterNameAndFunctionPair {
-  [key: string]: Function
+  [key: string]: [Function, RegistrationOptions] | Function
 }
 
 /**
@@ -228,4 +229,5 @@ export interface Registration {
 export interface RegistrationOptions {
   lifetime?: Lifetime
   resolutionMode?: ResolutionMode
+  injector?: InjectorFunction
 }

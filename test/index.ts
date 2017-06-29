@@ -36,7 +36,7 @@ const VALUE: string = 'foo'
 const container = createContainer()
 const scope: AwilixContainer = container.createScope()
 container.register({
-  testClass: asClass<TestClass>(TestClass),
+  testClass: asClass<TestClass>(TestClass).inject(container => ({ value: 42 })),
   testClass2: asClass(TestClass),
   testFunction: asFunction(testFunction),
   testValue: asValue(VALUE)
@@ -60,11 +60,13 @@ testFunc2("")
 container.register('_testValue', asValue(VALUE))
 
 container.registerClass({
-  __testClass: TestClass
+  __testClass: TestClass,
+  __testClass2: [TestClass, {}]
 })
 
 container.registerFunction({
-  __testFunction: testFunction
+  __testFunction: testFunction,
+  __testFunction2: [testFunction, { injector: (c) => ({ hehe: 42 })}]
 })
 
 container.registerValue({
@@ -75,7 +77,8 @@ container.loadModules(['*.js'], {
   formatName: (name, descriptor) => descriptor.path
 })
 container.loadModules([
-  ['hello.js', { lifetime: Lifetime.SCOPED }]
+  ['hello.js', { lifetime: Lifetime.SCOPED }],
+  ['world.js', { injector: (c) => ({ hah: 123 }) }]
 ])
 listModules('')
 listModules([''])
