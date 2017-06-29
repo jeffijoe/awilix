@@ -6,6 +6,6 @@ module.exports = function () {
     .createContainer()
     .loadModules([
       ['services/*.js', awilix.Lifetime.SCOPED],
-      'repositories/*.js'
+      ['repositories/*.js', { injector: () => ({ timeout: 10 }) }]
     ], opts)
 }

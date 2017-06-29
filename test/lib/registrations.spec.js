@@ -157,5 +157,17 @@ describe('registrations', function () {
         retVal.lifetime.should.equal(Lifetime.SCOPED)
       })
     })
+
+    it('supports inject()', function () {
+      const subjects = [
+        asClass(TestClass),
+        asFunction(() => {})
+      ]
+
+      subjects.forEach(x => {
+        const retVal = x.inject(() => ({ value: 42 }))
+        expect(retVal).to.equal(x)
+      })
+    })
   })
 })

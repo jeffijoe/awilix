@@ -5,6 +5,7 @@
 * **[NEW]**: Implemented per-module locals injection.
 * Fixed issue where passing a `Lifetime` like `.registerFunction('name', func, Lifetime.SCOPED)` didn't work.
 * Documented `asClass`, `asValue` and `asFunction`.
+* **[FIXED]**: nasty options leaking when using `registerClass/Function({ test1: [Test1, { }], test2: [Test2, { }] }).
 
 ## 2.4.0
 

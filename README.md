@@ -478,19 +478,19 @@ const container = createContainer()
   
   // Shorthand variants
   .registerFunction({
-    userRepository: [createUserRepository, { inject: () => ({ timeout: 2000 }) }]
+    userRepository: [createUserRepository, { injector: () => ({ timeout: 2000 }) }]
   })
   
   // Stringly-typed shorthand
   .registerFunction(
     'userRepository', 
     createUserRepository, 
-    { inject: () => ({ timeout: 2000 }) }
+    { injector: () => ({ timeout: 2000 }) }
   )
   
   // with `loadModules`
   .loadModules([
-    ['repositories/*.js', { inject: () => ({ timeout: 2000 }) }]
+    ['repositories/*.js', { injector: () => ({ timeout: 2000 }) }]
   ])
 ```
 
@@ -537,7 +537,7 @@ The returned registration has the following chainable (fluid) API:
 * `asFunction(fn).transient()`: same as `asFunction(fn).setLifetime(Lifetime.TRANSIENT)`.
 * `asFunction(fn).scoped()`: same as `asFunction(fn).setLifetime(Lifetime.SCOPED)`.
 * `asFunction(fn).singleton()`: same as `asFunction(fn).setLifetime(Lifetime.SINGLETON)`.
-* `asFunction(fn).inject(injector: Function)`: Let's you provide local dependencies only available to this module.
+* `asFunction(fn).inject(injector: Function)`: Let's you provide local dependencies only available to this module. The `injector` gets the container passed as the first and only argument and should return an object.
 
 ## `asClass()`
 
