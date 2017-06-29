@@ -472,7 +472,9 @@ const container = createContainer()
   // Using the fluid variant:
   .register({
     userRepository: asFunction(createUserRepository)
-      // provide an injection function that returns an object with locals.
+      // Provide an injection function that returns an object with locals.
+      // The function is called once per resolve of the registration
+      // it is attached to.
       .inject(() => ({ timeout: 2000 }))
   })
   
@@ -494,7 +496,7 @@ const container = createContainer()
   ])
 ```
 
-This way `timeout` is only available to the modules it was configured for.
+Now `timeout` is only available to the modules it was configured for.
 
 **IMPORTANT**: the way this works is by wrapping the `cradle` in another proxy that provides the returned values from the `inject` function. This means if you pass along the injected cradle object, anything with access to it can access the local injections.
 

@@ -2,7 +2,7 @@
 
 ## 2.5.0
 
-* **[NEW]**: Implemented per-module locals injection.
+* **[NEW]**: Implemented per-module locals injection ([#24](https://github.com/jeffijoe/awilix/issues/24)).
 * Fixed issue where passing a `Lifetime` like `.registerFunction('name', func, Lifetime.SCOPED)` didn't work.
 * Documented `asClass`, `asValue` and `asFunction`.
 * **[FIXED]**: nasty options leaking when using `registerClass/Function({ test1: [Test1, { }], test2: [Test2, { }] })`.
