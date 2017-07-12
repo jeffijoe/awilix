@@ -60,6 +60,7 @@ testFunc2("")
 
 container.register('_testValue', asValue(VALUE))
 
+container.registerClass<TestClass>(TestClass)
 container.registerClass<TestClass>('__testClass', TestClass)
 container.registerClass('__testClass', TestClass)
 container.registerClass('__testClass', TestClass, { lifetime: Lifetime.SCOPED })
@@ -69,6 +70,7 @@ container.registerClass({
   __testClass2: [TestClass, {}]
 })
 
+container.registerFunction(testFunction, { lifetime: Lifetime.SCOPED })
 container.registerFunction('__testClass', testFunction)
 container.registerFunction('__testClass', testFunction, { resolutionMode: ResolutionMode.CLASSIC })
 container.registerFunction('__testClass', [testFunction, { resolutionMode: ResolutionMode.CLASSIC }])

@@ -13,9 +13,11 @@ export declare interface AwilixContainer {
   registrations: Registration[]
   register(name: string, registration: Registration): this
   register(nameAndRegistrationPair: NameAndRegistrationPair): this
+  registerClass<T>(ctor: Constructor<T>, opts?: RegistrationOptions): this
   registerClass<T>(name: string, ctor: Constructor<T>, opts?: RegistrationOptions): this
   registerClass<T>(name: string, ctorAndOptionsPair: [Constructor<T>, RegistrationOptions]): this
   registerClass(nameAndClassPair: RegisterNameAndClassPair): this
+  registerFunction(fn: Function, opts?: RegistrationOptions): this
   registerFunction(name: string, fn: Function, opts?: RegistrationOptions): this
   registerFunction(name: string, funcAndOptionsPair: [Function, RegistrationOptions]): this
   registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair): this

@@ -144,14 +144,18 @@ describe('createContainer', function () {
       })
 
       it('can infer the registration name in registerFunction and registerClass', function () {
-        container.registerFunction(function plain () { return 1 })
+        container.registerFunction(function plain () { return 1 }, { lifetime: Lifetime.SCOPED })
+
         const arrow = () => 2
         container.registerFunction(arrow)
+
         container.registerClass(Repo)
 
         expect(container.resolve('plain')).to.equal(1)
         expect(container.resolve('arrow')).to.equal(2)
         expect(container.resolve('Repo')).to.be.an.instanceOf(Repo)
+
+        expect(container.registrations.plain.lifetime).to.equal(Lifetime.SCOPED)
       })
 
       it('fails when it cannot read the name of the function', function () {

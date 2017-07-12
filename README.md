@@ -718,6 +718,7 @@ container
 
 **Signatures**
 
+* `registerFunction(fn: Function, opts?: RegistrationOptions): AwilixContainer` (infers the name using `fn.name`)
 * `registerFunction(name: string, fn: Function, opts?: RegistrationOptions): AwilixContainer`
 * `registerFunction(name: string, funcAndOptionsPair: [Function, RegistrationOptions]): AwilixContainer`
 * `registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair): AwilixContainer`
@@ -769,6 +770,8 @@ setTimeout(() => {
 ### `container.registerClass()`
 
 **Signatures**
+
+* `registerClass(ctor: Constructor<T>, opts?: RegistrationOptions): AwilixContainer` (infers the name using `ctor.name`)
 
 * `registerClass<T>(name: string, ctor: Constructor<T>, opts?: RegistrationOptions): AwilixContainer`
 * `registerClass<T>(name: string, ctorAndOptionsPair: [Constructor<T>, RegistrationOptions]): AwilixContainer`
