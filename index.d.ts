@@ -11,16 +11,28 @@ export declare interface AwilixContainer {
   createScope(): AwilixContainer
   loadModules(globPatterns: string[] | Array<[string, RegistrationOptions]>, options?: LoadModulesOptions): ModuleDescriptor[]
   registrations: Registration[]
-  register(name: string, registration: Registration): AwilixContainer
-  register(nameAndRegistrationPair: NameAndRegistrationPair): AwilixContainer
-  registerClass<T>(name: string, instance: Object): AwilixContainer
-  registerClass<T>(nameAndClassPair: RegisterNameAndClassPair<T>): AwilixContainer
-  registerFunction(name: string, fn: Function): AwilixContainer
-  registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair): AwilixContainer
-  registerValue(name: string, value: any): AwilixContainer
-  registerValue(nameAndValuePairs: RegisterNameAndValuePair): AwilixContainer
+  register(name: string, registration: Registration): this
+  register(nameAndRegistrationPair: NameAndRegistrationPair): this
+  registerClass<T>(name: string, ctor: Constructor<T>, opts?: RegistrationOptions): this
+  registerClass<T>(name: string, ctorAndOptionsPair: [Constructor<T>, RegistrationOptions]): this
+  registerClass(nameAndClassPair: RegisterNameAndClassPair): this
+  registerFunction(name: string, fn: Function, opts?: RegistrationOptions): this
+  registerFunction(name: string, funcAndOptionsPair: [Function, RegistrationOptions]): this
+  registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair): this
+  registerValue(name: string, value: any): this
+  registerValue(nameAndValuePairs: RegisterNameAndValuePair): this
   resolve<T>(name: string): T
 }
+
+/**
+ * A class constructor. For example:
+ *
+ *    class MyClass {}
+ *
+ *    container.registerClass('myClass', MyClass)
+ *                                       ^^^^^^^
+ */
+export type Constructor<T> = { new (...args: any[]): T }
 
 /**
  * This is a special error thrown when Awilix is unable to resolve all dependencies
@@ -40,7 +52,7 @@ export declare class AwilixResolutionError extends Error {
  * @return {Registration}
  */
 export declare function asClass<T>(
-  type: new (...args: any[]) => T,
+  type: Constructor<T>,
   options?: RegistrationOptions
 ): FluidRegistration
 
@@ -193,8 +205,8 @@ export type BuiltInNameFormatters = 'camelCase'
  * Register a class.
  * @interface RegisterNameAndClassPair
  */
-export interface RegisterNameAndClassPair<T> {
-  [key: string]: [T, RegistrationOptions] | T
+export interface RegisterNameAndClassPair {
+  [key: string]: [Constructor<any>, RegistrationOptions] | Constructor<any>
 }
 
 /**

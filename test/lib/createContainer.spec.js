@@ -143,6 +143,21 @@ describe('createContainer', function () {
         container.registrations.objWithLifetime.lifetime.should.equal(Lifetime.SCOPED)
       })
 
+      it('can infer the registration name in registerFunction and registerClass', function () {
+        container.registerFunction(function plain () { return 1 })
+        const arrow = () => 2
+        container.registerFunction(arrow)
+        container.registerClass(Repo)
+
+        expect(container.resolve('plain')).to.equal(1)
+        expect(container.resolve('arrow')).to.equal(2)
+        expect(container.resolve('Repo')).to.be.an.instanceOf(Repo)
+      })
+
+      it('fails when it cannot read the name of the function', function () {
+        expect(() => container.registerFunction(() => 42)).to.throw(/name/)
+      })
+
       it('supports registerValue', function () {
         container.registerValue('nameValue', 1)
         container.registerValue({

@@ -38,6 +38,7 @@ Extremely powerful **Inversion of Control** (IoC) container for Node with depend
     + [`container.cache`](#containercache)
     + [`container.options`](#containeroptions)
     + [`container.resolve()`](#containerresolve)
+    + [`container.register()`](#containerregister)
     + [`container.registerValue()`](#containerregistervalue)
     + [`container.registerFunction()`](#containerregisterfunction)
     + [`container.registerClass()`](#containerregisterclass)
@@ -639,6 +640,11 @@ container.cradle.leet === 1337
 
 ### `container.register()`
 
+**Signatures**
+
+* `register(name: string, registration: Registration): AwilixContainer`
+* `register(nameAndRegistrationPair: NameAndRegistrationPair): AwilixContainer`
+
 Registers modules with the container. This function is used by the `registerValue`, `registerFunction` and `registerClass` functions.
 
 Awilix needs to know how to resolve the modules, so let's pull out the
@@ -685,6 +691,11 @@ container.register('context', asClass(SessionContext).scoped())
 
 ### `container.registerValue()`
 
+**Signatures**
+
+* `registerValue(name: string, value: any): AwilixContainer`
+* `registerValue(nameAndValuePairs: RegisterNameAndValuePair): AwilixContainer `
+
 Registers a constant value in the container. Can be anything.
 
 ```js
@@ -704,6 +715,12 @@ container
 ```
 
 ### `container.registerFunction()`
+
+**Signatures**
+
+* `registerFunction(name: string, fn: Function, opts?: RegistrationOptions): AwilixContainer`
+* `registerFunction(name: string, funcAndOptionsPair: [Function, RegistrationOptions]): AwilixContainer`
+* `registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair): AwilixContainer`
 
 Registers a standard function to be called whenever being resolved. The factory function can return anything it wants, and whatever it returns is what is passed to dependents.
 
@@ -750,6 +767,12 @@ setTimeout(() => {
 ```
 
 ### `container.registerClass()`
+
+**Signatures**
+
+* `registerClass<T>(name: string, ctor: Constructor<T>, opts?: RegistrationOptions): AwilixContainer`
+* `registerClass<T>(name: string, ctorAndOptionsPair: [Constructor<T>, RegistrationOptions]): AwilixContainer`
+* `registerClass(nameAndClassPair: RegisterNameAndClassPair): AwilixContainer`
 
 Same as `registerFunction`, except it will use `new`.
 

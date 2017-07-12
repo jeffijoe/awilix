@@ -9,7 +9,8 @@ import {
   AwilixContainer,
   ContainerOptions,
   listModules,
-  Lifetime
+  Lifetime,
+  ResolutionMode
 } from '../index'
 
 /**
@@ -59,11 +60,18 @@ testFunc2("")
 
 container.register('_testValue', asValue(VALUE))
 
+container.registerClass<TestClass>('__testClass', TestClass)
+container.registerClass('__testClass', TestClass)
+container.registerClass('__testClass', TestClass, { lifetime: Lifetime.SCOPED })
+container.registerClass('__testClass', [TestClass, { lifetime: Lifetime.SCOPED }])
 container.registerClass({
   __testClass: TestClass,
   __testClass2: [TestClass, {}]
 })
 
+container.registerFunction('__testClass', testFunction)
+container.registerFunction('__testClass', testFunction, { resolutionMode: ResolutionMode.CLASSIC })
+container.registerFunction('__testClass', [testFunction, { resolutionMode: ResolutionMode.CLASSIC }])
 container.registerFunction({
   __testFunction: testFunction,
   __testFunction2: [testFunction, { injector: (c) => ({ hehe: 42 })}]

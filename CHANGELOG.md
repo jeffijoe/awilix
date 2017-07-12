@@ -1,5 +1,10 @@
 # Awilix Changelog
 
+## 2.6
+
+* **[NEW]**: infer function name for `registerClass`/`registerFunction` ([#26](https://github.com/jeffijoe/awilix/issues/26))
+* **[FIXED]**: Corrected some TypeScript typings related to `registerClass` and `registerFunction`.
+
 ## 2.5.0
 
 * **[NEW]**: Implemented per-module locals injection ([#24](https://github.com/jeffijoe/awilix/issues/24)).
