@@ -87,4 +87,12 @@ describe('parseParameterList', function () {
       )
     ).to.deep.equal(['dep1', 'dep2'])
   })
+
+  it('supports weird formatting', function () {
+    expect(
+      parseParameterList(
+        `function(  dep1    \n,\r\n  dep2 = 123 \r\n) {}`
+      )
+    ).to.deep.equal(['dep1', 'dep2'])
+  })
 })
