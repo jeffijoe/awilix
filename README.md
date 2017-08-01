@@ -26,6 +26,7 @@ Extremely powerful **Inversion of Control** (IoC) container for Node with depend
 * [Per-module local injections](#per-module-local-injections)
 * [API](#api)
   - [The `awilix` object](#the-awilix-object)
+  - ['Registration options'](#registrationoptions)
   - [`createContainer()`](#createcontainer)
   - [`asFunction()`](#asfunction)
   - [`asClass()`](#asclass)
@@ -508,6 +509,7 @@ Now `timeout` is only available to the modules it was configured for.
 
 # API
 
+
 ## The `awilix` object
 
 When importing `awilix`, you get the following top-level API:
@@ -522,6 +524,31 @@ When importing `awilix`, you get the following top-level API:
 * `ResolutionMode` - documented above.
 
 These are documented below.
+
+## Registration options
+
+Whenever you see a place where you can pass in **registration options**, you can pass in an object with the following props:
+
+* `lifetime`: An `awilix.Lifetime.*` string, such as `awilix.Lifetime.SCOPED`
+* `resolutionMode`: An `awilix.ResolutionMode.*` string, such as `awilix.ResolutionMode.CLASSIC`
+* `injector`: An injector function - see [Per-module local injections](#per-module-local-injections)
+* `register`: Only used in `loadModules`, determines how to register a loaded module explicitly
+
+**Examples of usage:**
+
+```js
+container.register({
+  stuff: asClass(MyClass, { resolutionMode: ResolutionMode.CLASSIC })
+})
+
+container.loadModules([
+  ['some/path/to/*.js', { register: asClass }]
+], {
+  registrationOptions: {
+    lifetime: Lifetime.SCOPED
+  }
+})
+```
 
 ## `createContainer()`
 
