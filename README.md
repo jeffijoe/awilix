@@ -432,11 +432,16 @@ container.loadModules([
   // by default loaded modules are registered with the
   // name of the file (minus the extension)
   formatName: 'camelCase',
-  // We can give these auto-loaded modules
-  // the deal of a lifetime! (see what I did there?)
-  // By default it's `TRANSIENT`.
+  // Apply registration options to all modules.
   registrationOptions: {
-    lifetime: Lifetime.SINGLETON
+    // We can give these auto-loaded modules
+    // the deal of a lifetime! (see what I did there?)
+    // By default it's `TRANSIENT`.
+    lifetime: Lifetime.SINGLETON,
+    // We can tell Awilix what to register everything as,
+    // instead of guessing. If omitted, will inspect the
+    // module to determinw what to register as.
+    register: awilix.asClass
   }
 })
 
@@ -911,7 +916,7 @@ Args:
 * `globPatterns`: Array of glob patterns that match JS files to load.
 * `opts.cwd`: The `cwd` being passed to `glob`. Defaults to `process.cwd()`.
 * `opts.formatName`: Can be either `'camelCase'`, or a function that takes the current name as the first parameter and returns the new name. Default is to pass the name through as-is. The 2nd parameter is a full module descriptor.
-* `registrationOptions`: An `object` passed to the registrations. Used to configure the lifetime of the loaded modules.
+* `registrationOptions`: An `object` passed to the registrations. Used to configure the lifetime, resolution mode and more of the loaded modules.
 
 Example:
 

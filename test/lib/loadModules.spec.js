@@ -3,6 +3,7 @@ const spy = sinon.spy
 const createContainer = require('../../lib/createContainer')
 const Lifetime = require('../../lib/Lifetime')
 const ResolutionMode = require('../../lib/ResolutionMode')
+const { asFunction } = require('../../lib/registrations')
 
 const lookupResultFor = modules => Object.keys(modules).map(key => ({
   name: key.replace('.js', ''),
@@ -127,6 +128,35 @@ describe('loadModules', function () {
     result.should.deep.equal({ loadedModules: moduleLookupResult })
     const reg = container.registrations.test
     expect(reg).to.be.ok
+  })
+
+  it('supports passing in a register function', function () {
+    const container = createContainer()
+    const moduleSpy = spy(() => () => 42)
+    const modules = {
+      'test.js': moduleSpy
+    }
+    const moduleLookupResult = lookupResultFor(modules)
+    const registerSpy = spy(asFunction)
+    const deps = {
+      container,
+      listModules: spy(
+        () => moduleLookupResult
+      ),
+      require: spy(path => modules[path])
+    }
+    const regOpts = {
+      register: registerSpy,
+      lifetime: Lifetime.SCOPED
+    }
+    const opts = {
+      registrationOptions: regOpts
+    }
+    const result = loadModules(deps, 'anything', opts)
+    result.should.deep.equal({ loadedModules: moduleLookupResult })
+    const reg = container.registrations.test
+    expect(reg).to.be.ok
+    expect(registerSpy).to.have.been.calledWith(moduleSpy, regOpts)
   })
 
   it('supports array opts syntax with string (lifetime)', function () {
