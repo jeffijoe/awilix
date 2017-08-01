@@ -77,6 +77,19 @@ describe('registrations', function () {
       result.needsCradle.should.be.an.instanceOf(NeedsCradle)
     })
 
+    it('supports arrow functions', function () {
+      const arrowWithParen = (dep) => dep
+      const arrowWithoutParen = dep => dep
+      container.register({
+        withParen: asFunction(arrowWithParen).classic(),
+        withoutParen: asFunction(arrowWithoutParen).classic(),
+        dep: asValue(42)
+      })
+
+      expect(container.resolve('withParen')).to.equal(42)
+      expect(container.resolve('withoutParen')).to.equal(42)
+    })
+
     it('throws AwilixNotAFunctionError when given null', function () {
       const err = catchError(() => asFunction(null))
       err.should.be.an.instanceof(AwilixNotAFunctionError)
