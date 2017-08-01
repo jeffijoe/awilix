@@ -1,5 +1,9 @@
 # Awilix Changelog
 
+## 2.6.2
+
+* **[FIXED]**: Parsing regression in 2.6.1 ([#30](https://github.com/jeffijoe/awilix/issues/30))
+
 ## 2.6.1
 
 * **[FIXED]**: Implemented a crude arguments parser to replace regex. ([#30](https://github.com/jeffijoe/awilix/issues/30))
