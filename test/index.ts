@@ -87,9 +87,14 @@ container.loadModules(['*.js'], {
   formatName: (name, descriptor) => descriptor.path
 })
 container.loadModules([
-  ['hello.js', { lifetime: Lifetime.SCOPED }],
+  ['hello.js', { lifetime: Lifetime.SCOPED, register: asClass }],
   ['world.js', { injector: (c) => ({ hah: 123 }) }]
-])
+], {
+  registrationOptions: {
+    register: asFunction,
+    lifetime: Lifetime.SCOPED
+  }
+})
 listModules('')
 listModules([''])
 listModules([

@@ -1,5 +1,10 @@
 # Awilix Changelog
 
+## 2.7.0
+
+* **[BREAKING]**: Custom `isClass` function that will treat `function Capital () {}` as a class due to the capital first letter of the function name. This is to improve compatibility with Babel's ES5 code generator, and is also a pretty commonly accepted standard naming convention. ([#28](https://github.com/jeffijoe/awilix/issues/28))
+* **[NEW]**: Added support for passing in a `register` function to `loadModules`. ([#28](https://github.com/jeffijoe/awilix/issues/28))
+
 ## 2.6.2
 
 * **[FIXED]**: Parsing regression in 2.6.1 ([#30](https://github.com/jeffijoe/awilix/issues/30))

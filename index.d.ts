@@ -244,4 +244,5 @@ export interface RegistrationOptions {
   lifetime?: Lifetime
   resolutionMode?: ResolutionMode
   injector?: InjectorFunction
+  register?: (...args: any[]) => Registration
 }
