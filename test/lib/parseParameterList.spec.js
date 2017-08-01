@@ -95,4 +95,17 @@ describe('parseParameterList', function () {
       )
     ).to.deep.equal(['dep1', 'dep2'])
   })
+
+  it('supports the problem posted in issue #30', function () {
+    const fn = function (a) {
+      return {}
+    }
+
+    function fn2 (a) {
+      return {}
+    }
+
+    expect(parseParameterList(fn.toString())).to.deep.equal(['a'])
+    expect(parseParameterList(fn2.toString())).to.deep.equal(['a'])
+  })
 })
