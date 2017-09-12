@@ -9,7 +9,7 @@
 export declare interface AwilixContainer {
   cradle: { [key: string]: any }
   createScope(): AwilixContainer
-  loadModules(globPatterns: string[] | Array<[string, RegistrationOptions]>, options?: LoadModulesOptions): ModuleDescriptor[]
+  loadModules(globPatterns: string[] | Array<[string, RegistrationOptions]>, options?: LoadModulesOptions): this
   registrations: Registration[]
   register(name: string, registration: Registration): this
   register(nameAndRegistrationPair: NameAndRegistrationPair): this
