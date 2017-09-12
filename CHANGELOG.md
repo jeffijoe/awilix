@@ -1,5 +1,9 @@
 # Awilix Changelog
 
+## 2.7.1
+
+* **[FIXED]**: `container.loadModules()` typing fix, thanks [@dboune](https://github.com/dboune)!
+
 ## 2.7.0
 
 * **[BREAKING]**: Custom `isClass` function that will treat `function Capital () {}` as a class due to the capital first letter of the function name. This is to improve compatibility with Babel's ES5 code generator, and is also a pretty commonly accepted standard naming convention. ([#28](https://github.com/jeffijoe/awilix/issues/28))
