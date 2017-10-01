@@ -24,6 +24,7 @@ Extremely powerful **Inversion of Control** (IoC) container for Node with depend
 * [Resolution modes](#resolution-modes)
 * [Auto-loading modules](#auto-loading-modules)
 * [Per-module local injections](#per-module-local-injections)
+* [Inlining registration options](#inlining-registration-options)
 * [API](#api)
   - [The `awilix` object](#the-awilix-object)
   - ['Registration options'](#registrationoptions)
@@ -507,8 +508,64 @@ Now `timeout` is only available to the modules it was configured for.
 
 **IMPORTANT**: the way this works is by wrapping the `cradle` in another proxy that provides the returned values from the `inject` function. This means if you pass along the injected cradle object, anything with access to it can access the local injections.
 
-# API
+# Inlining registration options
 
+Awilix 2.8 added support for inline registration options. This is best explained with an example.
+
+**services/awesome-service.js**:
+
+```js
+import { REGISTRATION, Lifetime, ResolutionMode } from 'awilix'
+
+export default class AwesomeService {
+  constructor (awesomeRepository) {
+    this.awesomeRepository = awesomeRepository
+  }
+}
+
+// `REGISTRATION` is a Symbol.
+AwesomeService[REGISTRATION] = {
+  lifetime: Lifetime.SCOPED,
+  resolutionMode: ResolutionMode.CLASSIC
+}
+```
+
+**index.js**:
+
+```js
+import { createContainer } from 'awilix'
+import AwesomeService from './services/awesome-service.js'
+
+const container = createContainer()
+  .registerClass({
+    awesomeService: AwesomeService
+  })
+
+console.log(container.registrations.awesomeService.lifetime) // 'SCOPED'
+console.log(container.registrations.awesomeService.resolutionMode) // 'CLASSIC'
+```
+
+Additionally, if we add a `name` field and use `loadModules`, the `name` is used for registration.
+
+```diff
+// `REGISTRATION` is a Symbol.
+AwesomeService[REGISTRATION] = {
++ name: 'superService',
+  lifetime: Lifetime.SCOPED,
+  resolutionMode: ResolutionMode.CLASSIC
+}
+```
+
+```js
+const container = createContainer()
+  .loadModules(['services/*.js'])
+console.log(container.registrations.superService.lifetime) // 'SCOPED'
+console.log(container.registrations.superService.resolutionMode) // 'CLASSIC'
+```
+
+**Important**: the `name` field is only used by `loadModules`.
+
+# API
 
 ## The `awilix` object
 
