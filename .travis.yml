@@ -2,6 +2,10 @@ language: node_js
 node_js:
   - "stable"
 
+cache:
+  directories:
+    - node_modules
+
 # Lint errors should trigger a failure.
 before_script: npm run lint
 
