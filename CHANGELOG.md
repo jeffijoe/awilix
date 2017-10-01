@@ -1,5 +1,9 @@
 # Awilix Changelog
 
+## 2.8.0
+
+* **[NEW]**: Support inline registration options ([#34](https://github.com/jeffijoe/awilix/issues/34))
+
 ## 2.7.1
 
 * **[FIXED]**: `container.loadModules()` typing fix, thanks [@dboune](https://github.com/dboune)!
