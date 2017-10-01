@@ -1,5 +1,9 @@
 # Awilix Changelog
 
+## 2.8.1
+
+* Remove `is-plain-object` and `is-string`, use simple checks instead. Trying to keep the dependencies as thin as possible.
+
 ## 2.8.0
 
 * **[NEW]**: Support inline registration options ([#34](https://github.com/jeffijoe/awilix/issues/34))

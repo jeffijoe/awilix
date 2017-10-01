@@ -53,8 +53,6 @@
   },
   "dependencies": {
     "camel-case": "^3.0.0",
-    "glob": "^7.1.2",
-    "is-plain-object": "^2.0.4",
-    "is-string": "^1.0.4"
+    "glob": "^7.1.2"
   }
 }
