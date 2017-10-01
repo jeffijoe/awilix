@@ -492,4 +492,16 @@ describe('createContainer', function () {
       })
     })
   })
+
+  describe('setting a name on the registration options', () => {
+    it('should not work', () => {
+      const container = createContainer()
+        .registerFunction({
+          test: [() => 42, { lifetime: Lifetime.SCOPED, name: 'lol' }]
+        })
+
+      expect(container.resolve('test')).to.equal(42)
+      expect(container.registrations.lol).to.equal(undefined)
+    })
+  })
 })

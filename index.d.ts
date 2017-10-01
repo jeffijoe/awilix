@@ -241,8 +241,24 @@ export interface Registration {
  * @interface RegistrationOptions
  */
 export interface RegistrationOptions {
+  /**
+   * Only used for inline configuration with `loadModules`.
+   */
+  name?: string
+  /**
+   * Lifetime setting.
+   */
   lifetime?: Lifetime
+  /**
+   * Resolution mode.
+   */
   resolutionMode?: ResolutionMode
+  /**
+   * Injector function to provide additional parameters.
+   */
   injector?: InjectorFunction
+  /**
+   * Registration function to use.
+   */
   register?: (...args: any[]) => Registration
 }

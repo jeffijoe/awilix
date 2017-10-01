@@ -3,7 +3,7 @@ const spy = sinon.spy
 const createContainer = require('../../lib/createContainer')
 const Lifetime = require('../../lib/Lifetime')
 const ResolutionMode = require('../../lib/ResolutionMode')
-const { asFunction } = require('../../lib/registrations')
+const { asFunction, REGISTRATION } = require('../../lib/registrations')
 
 const lookupResultFor = modules => Object.keys(modules).map(key => ({
   name: key.replace('.js', ''),
@@ -241,5 +241,86 @@ describe('loadModules', function () {
 
     container.registrations.test.resolutionMode.should.equal(ResolutionMode.PROXY)
     container.registrations.test2.resolutionMode.should.equal(ResolutionMode.CLASSIC)
+  })
+
+  describe('inline config via REGISTRATION symbol', () => {
+    it('uses the inline config over anything else', () => {
+      const container = createContainer()
+      const test1Func = spy(() => 42)
+      test1Func[REGISTRATION] = {
+        resolutionMode: ResolutionMode.PROXY
+      }
+
+      class Test2Class {
+
+      }
+
+      Test2Class[REGISTRATION] = {
+        lifetime: Lifetime.SCOPED
+      }
+
+      const modules = {
+        'test.js': test1Func,
+        'test2.js': Test2Class
+      }
+
+      const deps = {
+        container,
+        listModules: spy(
+          () => [
+            { name: 'test', path: 'test.js' },
+            { name: 'test2', path: 'test2.js' }
+          ]
+        ),
+        require: spy(path => modules[path])
+      }
+
+      loadModules(deps, 'anything', {
+        registrationOptions: {
+          resolutionMode: ResolutionMode.CLASSIC
+        }
+      })
+
+      container.registrations.test.lifetime.should.equal(Lifetime.TRANSIENT)
+      container.registrations.test.resolutionMode.should.equal(ResolutionMode.PROXY)
+      container.registrations.test2.lifetime.should.equal(Lifetime.SCOPED)
+      container.registrations.test2.resolutionMode.should.equal(ResolutionMode.CLASSIC)
+    })
+
+    it('allows setting a name to register as', () => {
+      const container = createContainer()
+      const test1Func = spy(() => 42)
+      test1Func[REGISTRATION] = {
+        name: 'awesome',
+        lifetime: Lifetime.SINGLETON
+      }
+
+      const test2Func = spy(() => 42)
+      const modules = {
+        'test.js': test1Func,
+        'test2.js': test2Func
+      }
+
+      const deps = {
+        container,
+        listModules: spy(
+          () => [
+            { name: 'test', path: 'test.js' },
+            { name: 'test2', path: 'test2.js' }
+          ]
+        ),
+        require: spy(path => modules[path])
+      }
+
+      loadModules(deps, 'anything', {
+        formatName: (desc) => 'formatNameCalled',
+        registrationOptions: {
+          lifetime: Lifetime.SCOPED
+        }
+      })
+
+      container.registrations.awesome.lifetime.should.equal(Lifetime.SINGLETON)
+      container.registrations.formatNameCalled.lifetime.should.equal(Lifetime.SCOPED)
+    })
   })
 })
