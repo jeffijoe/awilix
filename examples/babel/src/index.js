@@ -1,4 +1,4 @@
-import {  asClass, createContainer, ResolutionMode } from '../../../'
+import { asClass, createContainer, ResolutionMode } from '../../../'
 import { TestService } from './services/testService'
 import { DependentService } from './services/dependentService'
 

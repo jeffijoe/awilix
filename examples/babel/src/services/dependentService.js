@@ -1,9 +1,9 @@
 export class DependentService {
-  constructor (testService) {
+  constructor(testService) {
     this.testService = testService
   }
 
-  getInnerData () {
+  getInnerData() {
     return this.testService.getData()
   }
 }

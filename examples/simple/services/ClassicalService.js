@@ -16,10 +16,12 @@ class ClassicalService {
   // The awesome method we're calling in index.js.
   actAllCool() {
     // Look ma'! No require!
-    return this.functionalService.getStuffAndDeleteSecret('be cool').then(stuff => {
-      stuff.isCool = true
-      return stuff
-    })
+    return this.functionalService
+      .getStuffAndDeleteSecret('be cool')
+      .then(stuff => {
+        stuff.isCool = true
+        return stuff
+      })
   }
 }
 

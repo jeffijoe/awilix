@@ -1,5 +1,10 @@
 # Awilix Changelog
 
+## 2.8.2
+
+* Fix typing for `loadModules` — it didn't allow the shortcut version of `['glob.js', Lifetime.SCOPED]`
+* Added Prettier formatting as well as `lint-staged` to keep the tests passing and the code fresh before committing.
+
 ## 2.8.1
 
 * Remove `is-plain-object` and `is-string`, use simple checks instead. Trying to keep the dependencies as thin as possible.

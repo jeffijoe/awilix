@@ -9,22 +9,42 @@
 export declare interface AwilixContainer {
   cradle: { [key: string]: any }
   createScope(): AwilixContainer
-  loadModules(globPatterns: string[] | Array<[string, RegistrationOptions]>, options?: LoadModulesOptions): this
+  loadModules(
+    globPatterns: string[] | Array<LoadModulesTuple>,
+    options?: LoadModulesOptions
+  ): this
   registrations: Registration[]
   register(name: string, registration: Registration): this
   register(nameAndRegistrationPair: NameAndRegistrationPair): this
   registerClass<T>(ctor: Constructor<T>, opts?: RegistrationOptions): this
-  registerClass<T>(name: string, ctor: Constructor<T>, opts?: RegistrationOptions): this
-  registerClass<T>(name: string, ctorAndOptionsPair: [Constructor<T>, RegistrationOptions]): this
+  registerClass<T>(
+    name: string,
+    ctor: Constructor<T>,
+    opts?: RegistrationOptions
+  ): this
+  registerClass<T>(
+    name: string,
+    ctorAndOptionsPair: [Constructor<T>, RegistrationOptions]
+  ): this
   registerClass(nameAndClassPair: RegisterNameAndClassPair): this
   registerFunction(fn: Function, opts?: RegistrationOptions): this
   registerFunction(name: string, fn: Function, opts?: RegistrationOptions): this
-  registerFunction(name: string, funcAndOptionsPair: [Function, RegistrationOptions]): this
+  registerFunction(
+    name: string,
+    funcAndOptionsPair: [Function, RegistrationOptions]
+  ): this
   registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair): this
   registerValue(name: string, value: any): this
   registerValue(nameAndValuePairs: RegisterNameAndValuePair): this
   resolve<T>(name: string): T
 }
+
+/**
+ * Describes a glob pattern for modules as well as registration options to use.
+ */
+export declare type LoadModulesTuple =
+  | [string]
+  | [string, RegistrationOptions | string]
 
 /**
  * A class constructor. For example:
@@ -44,8 +64,7 @@ export type Constructor<T> = { new (...args: any[]): T }
  * @class AwilixResolutionError
  * @extends Error
  */
-export declare class AwilixResolutionError extends Error {
-}
+export declare class AwilixResolutionError extends Error {}
 
 /**
  * Creates a factory registration for classes that require `new`.
@@ -86,7 +105,7 @@ export declare function asValue(
  * @interface ContainerOptions
  */
 export interface ContainerOptions {
-  require?: (id: string) => any,
+  require?: (id: string) => any
   resolutionMode?: ResolutionMode
 }
 
@@ -95,7 +114,9 @@ export interface ContainerOptions {
  * @param {ContainerOptions} options
  * @return {AwilixContainer}
  */
-export declare function createContainer(options?: ContainerOptions): AwilixContainer
+export declare function createContainer(
+  options?: ContainerOptions
+): AwilixContainer
 
 /**
  * Gets passed the container and is expected to return an object
@@ -177,7 +198,10 @@ export interface LoadModulesOptions {
  *
  * @type {NameFormatter}
  */
-export type NameFormatter = (name: string, descriptor: ModuleDescriptor) => string
+export type NameFormatter = (
+  name: string,
+  descriptor: ModuleDescriptor
+) => string
 
 /**
  * An object containing the module name and path (full path to module).

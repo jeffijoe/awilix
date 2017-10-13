@@ -18,16 +18,16 @@ import {
  * @class TestClass
  */
 class TestClass {
-  constructor (s: string, n: number) {}
+  constructor(s: string, n: number) {}
 
-  stuff (str: string): void {}
+  stuff(str: string): void {}
 }
 
 /**
  * Test function for container.
  * @function testFunction
  */
-function testFunction(str: string) { }
+function testFunction(str: string) {}
 
 /**
  * Test value for container.
@@ -43,20 +43,20 @@ container.register({
   testValue: asValue(VALUE)
 })
 
-container.cradle.testClass;
-container.cradle.testFunction;
-container.cradle.testValue;
+container.cradle.testClass
+container.cradle.testFunction
+container.cradle.testValue
 
 container.registrations[0].resolve
 container.registrations[0].lifetime
 container.register('_testClass', asClass(TestClass))
 const testClass: TestClass = container.resolve<TestClass>('_testClass')
-testClass.stuff("Hello")
+testClass.stuff('Hello')
 
 const testFunc = container.resolve<typeof testFunction>('_testFunction')
-testFunc("")
+testFunc('')
 const testFunc2 = container.resolve<(s: string) => void>('_testFunction')
-testFunc2("")
+testFunc2('')
 
 container.register('_testValue', asValue(VALUE))
 
@@ -64,7 +64,10 @@ container.registerClass<TestClass>(TestClass)
 container.registerClass<TestClass>('__testClass', TestClass)
 container.registerClass('__testClass', TestClass)
 container.registerClass('__testClass', TestClass, { lifetime: Lifetime.SCOPED })
-container.registerClass('__testClass', [TestClass, { lifetime: Lifetime.SCOPED }])
+container.registerClass('__testClass', [
+  TestClass,
+  { lifetime: Lifetime.SCOPED }
+])
 container.registerClass({
   __testClass: TestClass,
   __testClass2: [TestClass, {}]
@@ -72,11 +75,16 @@ container.registerClass({
 
 container.registerFunction(testFunction, { lifetime: Lifetime.SCOPED })
 container.registerFunction('__testClass', testFunction)
-container.registerFunction('__testClass', testFunction, { resolutionMode: ResolutionMode.CLASSIC })
-container.registerFunction('__testClass', [testFunction, { resolutionMode: ResolutionMode.CLASSIC }])
+container.registerFunction('__testClass', testFunction, {
+  resolutionMode: ResolutionMode.CLASSIC
+})
+container.registerFunction('__testClass', [
+  testFunction,
+  { resolutionMode: ResolutionMode.CLASSIC }
+])
 container.registerFunction({
   __testFunction: testFunction,
-  __testFunction2: [testFunction, { injector: (c) => ({ hehe: 42 })}]
+  __testFunction2: [testFunction, { injector: c => ({ hehe: 42 }) }]
 })
 
 container.registerValue({
@@ -86,17 +94,21 @@ container.registerValue({
 container.loadModules(['*.js'], {
   formatName: (name, descriptor) => descriptor.path
 })
-container.loadModules([
-  ['hello.js', { lifetime: Lifetime.SCOPED, register: asClass }],
-  ['world.js', { injector: (c) => ({ hah: 123 }) }]
-], {
-  registrationOptions: {
-    register: asFunction,
-    lifetime: Lifetime.SCOPED
+
+container.loadModules(
+  [
+    ['hello.js', { lifetime: Lifetime.SCOPED, register: asClass }],
+    ['world.js', { injector: c => ({ hah: 123 }) }],
+    ['shorthand.js', Lifetime.SCOPED],
+    ['noopts.js']
+  ],
+  {
+    registrationOptions: {
+      register: asFunction,
+      lifetime: Lifetime.SCOPED
+    }
   }
-})
+)
 listModules('')
 listModules([''])
-listModules([
-  ['hello.js', { lifetime: Lifetime.SCOPED }]
-])
+listModules([['hello.js', { lifetime: Lifetime.SCOPED }]])

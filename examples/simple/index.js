@@ -12,22 +12,28 @@ const opts = {
   // We want ClassicalService to be registered as classicalService.
   formatName: 'camelCase'
 }
-container.loadModules([
-  // Glob patterns
-  'services/*.js',
-  'repositories/*.js'
-], opts)
+container.loadModules(
+  [
+    // Glob patterns
+    'services/*.js',
+    'repositories/*.js'
+  ],
+  opts
+)
 
 // 2 ways to resolve the same service.
 const classicalServiceFromCradle = container.cradle.classicalService
 const classicalService = container.resolve('classicalService')
 
-console.log('Resolved to the same instance:', classicalService === classicalServiceFromCradle)
+console.log(
+  'Resolved to the same instance:',
+  classicalService === classicalServiceFromCradle
+)
 
 // This will return false because the default is to return a new instance
 // when resolving.
 
 // Let's do something!
-return classicalService.actAllCool().then(r => {
+classicalService.actAllCool().then(r => {
   console.log('Result from classical service:', r)
 })

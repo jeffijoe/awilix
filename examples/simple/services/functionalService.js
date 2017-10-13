@@ -25,11 +25,13 @@ function getStuffAndDeleteSecret(opts, someArgument) {
 }
 
 // NOTE: When using ES6 import-export, you can simply use `export default`.
-module.exports = function (opts) {
+module.exports = function(opts) {
   // "opts" is the container "cradle", whenever a property getter is invoked, it will
   // result in a resolution.
   return {
-    getStuffAndDeleteSecret: getStuffAndDeleteSecret.bind(null, { stuffs: opts.stuffs })
+    getStuffAndDeleteSecret: getStuffAndDeleteSecret.bind(null, {
+      stuffs: opts.stuffs
+    })
   }
 }
 

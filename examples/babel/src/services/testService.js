@@ -1,9 +1,9 @@
 export class TestService {
-  constructor () {
+  constructor() {
     this.data = 'Hello world!'
   }
 
-  getData () {
+  getData() {
     return this.data
   }
 }

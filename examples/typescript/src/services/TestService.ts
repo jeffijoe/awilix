@@ -1,11 +1,11 @@
 export default class TestService {
-data: string
+  data: string
 
-  constructor () {
+  constructor() {
     this.data = 'Hello world!'
   }
 
-  getData (): string {
+  getData(): string {
     return this.data
   }
 }

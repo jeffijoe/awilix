@@ -44,7 +44,7 @@ app.use((ctx, next) => {
 })
 
 // Register a route..
-router.get('/messages', (ctx) => {
+router.get('/messages', ctx => {
   // Use the scope to resolve the message service.
   const messageService = ctx.scope.resolve('messageService')
   return messageService.findMessages().then(messages => {

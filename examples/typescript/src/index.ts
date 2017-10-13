@@ -1,7 +1,10 @@
-///<reference path="../../../index.d.ts" />
-
 // This is largely for testing, but import what we need
-import { AwilixContainer, createContainer, asClass, ResolutionMode } from '../../..'
+import {
+  AwilixContainer,
+  createContainer,
+  asClass,
+  ResolutionMode
+} from '../../..'
 import TestService from './services/TestService'
 import DependentService from './services/DependentService'
 

@@ -9,4 +9,4 @@ StuffRepository.prototype.getStuff = function(someArg) {
   })
 }
 
-module.exports = (opts) => new StuffRepository(opts)
+module.exports = opts => new StuffRepository(opts)
