@@ -1,7 +1,8 @@
 {
   "name": "awilix",
   "version": "2.8.2",
-  "description": "Simple dependency injection container + helper utilities to facilitate wiring of modules",
+  "description":
+    "Simple dependency injection container + helper utilities to facilitate wiring of modules",
   "main": "lib/awilix.js",
   "typings": "index.d.ts",
   "engines": {
@@ -11,11 +12,14 @@
     "test": "tsc --noEmit && mocha test/**/*.js --require test/index.js",
     "test-watch": "npm run test -- --watch --reporter nyan",
     "lint": "esw --fix lib test examples",
-    "format": "prettier --write \"src/**/*.{js,ts}\" \"test/**/*.{js,ts}\" \"examples/**/*.{js,ts}\"",
+    "format":
+      "prettier --write \"lib/**/*.{js,ts}\" \"test/**/*.{js,ts}\" \"examples/**/*.{js,ts}\"",
     "lint-watch": "npm run lint -- --watch",
     "precommit": "lint-staged && npm test",
-    "cover": "tsc --noEmit && istanbul cover  -x \"**example/**\" ./node_modules/mocha/bin/_mocha -- test/**/*.js --require test/index.js",
-    "coveralls": "tsc --noEmit && istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- test/**/*.js --require test/index.js && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "cover":
+      "tsc --noEmit && istanbul cover  -x \"**example/**\" ./node_modules/mocha/bin/_mocha -- test/**/*.js --require test/index.js",
+    "coveralls":
+      "tsc --noEmit && istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- test/**/*.js --require test/index.js && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "do-publish": "npm run lint && npm run cover && npm publish"
   },
   "repository": {
@@ -62,15 +66,8 @@
     "glob": "^7.1.2"
   },
   "lint-staged": {
-    "*.js": [
-      "esw --fix",
-      "prettier --write",
-      "git add"
-    ],
-    "*.ts": [
-      "prettier --write",
-      "git add"
-    ]
+    "*.js": ["esw --fix", "prettier --write", "git add"],
+    "*.ts": ["prettier --write", "git add"]
   },
   "prettier": {
     "semi": false,
