@@ -9,7 +9,7 @@
     "node": ">=6.0.0"
   },
   "scripts": {
-    "test": "tsc && mocha test/**/*.js --require test/index.js",
+    "test": "tsc --noEmit && mocha test/**/*.js --require test/index.js",
     "test-watch": "npm run test -- --watch --reporter nyan",
     "lint": "esw --fix lib test examples",
     "format":
@@ -19,7 +19,7 @@
     "cover":
       "tsc --noEmit && istanbul cover  -x \"**example/**\" ./node_modules/mocha/bin/_mocha -- test/**/*.js --require test/index.js",
     "coveralls":
-      "tsc && istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- test/**/*.js --require test/index.js && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+      "tsc --noEmit && istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- test/**/*.js --require test/index.js && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "do-publish": "npm run lint && npm run cover && npm publish"
   },
   "repository": {
