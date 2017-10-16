@@ -42,9 +42,7 @@ export declare interface AwilixContainer {
 /**
  * Describes a glob pattern for modules as well as registration options to use.
  */
-export declare type LoadModulesTuple =
-  | [string]
-  | [string, RegistrationOptions | string]
+export declare type LoadModulesTuple = [string] | [string, RegistrationOptions]
 
 /**
  * A class constructor. For example:
@@ -262,30 +260,32 @@ export interface Registration {
 
 /**
  * The options when registering a class, function or value.
- * @interface RegistrationOptions
+ * @type RegistrationOptions
  */
-export interface RegistrationOptions {
-  /**
-   * Only used for inline configuration with `loadModules`.
-   */
-  name?: string
-  /**
-   * Lifetime setting.
-   */
-  lifetime?: Lifetime
-  /**
-   * Resolution mode.
-   */
-  resolutionMode?: ResolutionMode
-  /**
-   * Injector function to provide additional parameters.
-   */
-  injector?: InjectorFunction
-  /**
-   * Registration function to use.
-   */
-  register?: (...args: any[]) => Registration
-}
+export type RegistrationOptions =
+  | string
+  | {
+      /**
+       * Only used for inline configuration with `loadModules`.
+       */
+      name?: string
+      /**
+       * Lifetime setting.
+       */
+      lifetime?: Lifetime
+      /**
+       * Resolution mode.
+       */
+      resolutionMode?: ResolutionMode
+      /**
+       * Injector function to provide additional parameters.
+       */
+      injector?: InjectorFunction
+      /**
+       * Registration function to use.
+       */
+      register?: (...args: any[]) => Registration
+    }
 
 /**
  * Symbol used to attach registration options to implementations.

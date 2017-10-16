@@ -71,7 +71,8 @@ container.registerClass('__testClass', [
 ])
 container.registerClass({
   __testClass: TestClass,
-  __testClass2: [TestClass, {}]
+  __testClass2: [TestClass, {}],
+  __testClass3: [TestClass, Lifetime.SCOPED]
 })
 
 container.registerFunction(testFunction, { lifetime: Lifetime.SCOPED })

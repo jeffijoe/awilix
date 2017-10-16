@@ -1,5 +1,9 @@
 # Awilix Changelog
 
+## 2.8.4
+
+* Change `RegistrationOptions` typing to union of string and options
+
 ## 2.8.3
 
 * Fix typing for `REGISTRATION` symbol
