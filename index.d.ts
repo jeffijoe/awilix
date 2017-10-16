@@ -286,3 +286,8 @@ export interface RegistrationOptions {
    */
   register?: (...args: any[]) => Registration
 }
+
+/**
+ * Symbol used to attach registration options to implementations.
+ */
+export declare const REGISTRATION: Symbol

@@ -1,5 +1,9 @@
 # Awilix Changelog
 
+## 2.8.3
+
+* Fix typing for `REGISTRATION` symbol
+
 ## 2.8.2
 
 * Fix typing for `loadModules` — it didn't allow the shortcut version of `['glob.js', Lifetime.SCOPED]`

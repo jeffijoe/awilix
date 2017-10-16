@@ -10,7 +10,8 @@ import {
   ContainerOptions,
   listModules,
   Lifetime,
-  ResolutionMode
+  ResolutionMode,
+  REGISTRATION
 } from '../index'
 
 /**
