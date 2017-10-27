@@ -276,6 +276,14 @@ describe('createContainer', function() {
         err.message.should.match(/nope/i)
       })
 
+      it('throws an AwilixResolutionError that supports symbols', function() {
+        const container = createContainer()
+        const S = Symbol('i am the derg')
+        const err = catchError(() => container.resolve(S))
+        err.should.be.an.instanceOf(AwilixResolutionError)
+        err.message.should.match(/i am the derg/i)
+      })
+
       it('throws an AwilixResolutionError with a resolution path when resolving an unregistered dependency', function() {
         const container = createContainer()
         container.registerFunction({
@@ -564,6 +572,39 @@ describe('createContainer', function() {
 
       expect(container.resolve('test')).to.equal(42)
       expect(container.registrations.lol).to.equal(undefined)
+    })
+  })
+
+  describe('util.inspect on the cradle', () => {
+    it('should not throw an error', () => {
+      const container = createContainer()
+      const result = util.inspect(container.cradle)
+      expect(result).to.equal('[AwilixContainer.cradle]')
+    })
+  })
+
+  describe('registering and resolving symbols', () => {
+    it('works', () => {
+      const S1 = Symbol('test 1')
+      const S2 = Symbol('test 2')
+      const container = createContainer()
+        .registerValue({
+          [S1]: 42
+        })
+        .registerValue(S2, 24)
+
+      expect(container.resolve(S1)).to.equal(42)
+      expect(container.cradle[S1]).to.equal(42)
+
+      expect(container.resolve(S2)).to.equal(24)
+      expect(container.cradle[S2]).to.equal(24)
+    })
+  })
+
+  describe('spreading the cradle', () => {
+    it('does not throw', () => {
+      const container = createContainer()
+      expect([...container.cradle])
     })
   })
 })

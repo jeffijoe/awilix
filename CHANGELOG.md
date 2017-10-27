@@ -1,5 +1,11 @@
 # Awilix Changelog
 
+## 2.9.0
+
+* Fix issue with `console.log` on the cradle throwing an error. ([#7](https://github.com/jeffijoe/awilix/issues/7))
+  - This _should_ not break anything, but just to be safe I did a minor version bump.
+* Add support for `Symbol`s (although not recommended).
+
 ## 2.8.4
 
 * Change `RegistrationOptions` typing to union of string and options
@@ -11,7 +17,7 @@
 ## 2.8.2
 
 * Fix typing for `loadModules` — it didn't allow the shortcut version of `['glob.js', Lifetime.SCOPED]`
-* Added Prettier formatting as well as `lint-staged` to keep the tests passing and the code fresh before committing.
+* Add Prettier formatting as well as `lint-staged` to keep the tests passing and the code fresh before committing.
 
 ## 2.8.1
 
