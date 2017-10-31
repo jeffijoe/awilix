@@ -566,6 +566,22 @@ describe('createContainer', function() {
           'c1'
         ])
       })
+
+      it('should return injector keys as well', () => {
+        class KeysTest {
+          constructor(cradle) {
+            this.keys = Array.from(cradle)
+          }
+        }
+        const container = createContainer()
+          .registerValue({ val1: 1, val2: 2 })
+          .register({
+            test: asClass(KeysTest).inject(() => ({ injected: true }))
+          })
+
+        const result = container.resolve('test')
+        expect(result.keys).to.deep.equal(['val1', 'val2', 'test', 'injected'])
+      })
     })
 
     describe('explicitly trying to fuck shit up', function() {
@@ -634,6 +650,104 @@ describe('createContainer', function() {
     it('does not throw', () => {
       const container = createContainer().registerValue({ val1: 1, val2: 2 })
       expect([...container.cradle]).to.deep.equal(['val1', 'val2'])
+    })
+  })
+
+  describe('using Object.keys() on the cradle', () => {
+    it('should return the registration keys', () => {
+      const container = createContainer().registerValue({ val1: 1, val2: 2 })
+      expect(Object.keys(container.cradle)).to.deep.equal(['val1', 'val2'])
+    })
+
+    it('should return injector keys', () => {
+      class KeysTest {
+        constructor(cradle) {
+          this.keys = Object.keys(cradle)
+        }
+      }
+      const container = createContainer()
+        .registerValue({ val1: 1, val2: 2 })
+        .register({
+          test: asClass(KeysTest).inject(() => ({ injected: true, val2: 10 }))
+        })
+
+      const result = container.resolve('test')
+      expect(result.keys).to.deep.equal(['val1', 'val2', 'test', 'injected'])
+    })
+  })
+
+  describe('using Object.getOwnPropertyDescriptor with injector proxy', () => {
+    it('returns expected values', () => {
+      class KeysTest {
+        constructor(cradle) {
+          this.testProp = Object.getOwnPropertyDescriptor(cradle, 'test')
+          this.nonexistentProp = Object.getOwnPropertyDescriptor(
+            cradle,
+            'nonexistent'
+          )
+        }
+      }
+      const container = createContainer()
+        .registerValue({ val1: 1, val2: 2 })
+        .register({
+          test: asClass(KeysTest).inject(() => ({ injected: true }))
+        })
+
+      const result = container.resolve('test')
+      expect(result.testProp).to.exist
+      expect(result.nonexistentProp).to.not.exist
+    })
+  })
+
+  describe('using Object.getOwnPropertyDescriptor with container cradle', () => {
+    it('returns expected values', () => {
+      class KeysTest {
+        constructor(cradle) {
+          this.testProp = Object.getOwnPropertyDescriptor(cradle, 'test')
+          this.nonexistentProp = Object.getOwnPropertyDescriptor(
+            cradle,
+            'nonexistent'
+          )
+        }
+      }
+      const container = createContainer()
+        .registerValue({ val1: 1, val2: 2 })
+        .register({
+          test: asClass(KeysTest)
+        })
+
+      const result = container.resolve('test')
+      expect(result.testProp).to.exist
+      expect(result.nonexistentProp).to.not.exist
+    })
+  })
+
+  describe('memoizing registrations', () => {
+    it('should not cause issues', () => {
+      const container = createContainer().registerValue({ val1: 123 })
+
+      const scope1 = container.createScope()
+      const scope2 = scope1.createScope()
+
+      expect(scope1.resolve('val1')).to.equal(123)
+      expect(scope2.resolve('val1')).to.equal(123)
+
+      container.registerValue({ val2: 321 })
+      expect(scope2.resolve('val2')).to.equal(321)
+      expect(scope1.resolve('val2')).to.equal(321)
+
+      container.registerValue({ val3: 1337 }).register({
+        keys: asFunction(cradle => Object.keys(cradle)).inject(() => ({
+          injected: true
+        }))
+      })
+      expect(scope2.resolve('keys')).to.deep.equal([
+        'val1',
+        'val2',
+        'val3',
+        'keys',
+        'injected'
+      ])
     })
   })
 })

@@ -4,6 +4,9 @@ module.exports = function() {
   const opts = { cwd: __dirname }
   return awilix
     .createContainer()
+    .registerValue({
+      conn: {}
+    })
     .loadModules(
       [
         ['services/*.js', awilix.Lifetime.SCOPED],

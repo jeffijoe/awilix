@@ -10,7 +10,7 @@ describe('integration tests', function() {
     anotherService.should.be.an.instanceOf(AnotherService)
     anotherService.repo.should.be.an('object')
     anotherService.repo.getAnswerFor.should.be.a('function')
-    Object.keys(container.registrations).length.should.equal(3)
+    Object.keys(container.registrations).length.should.equal(4)
   })
 
   it('registered all services as scoped', function() {
