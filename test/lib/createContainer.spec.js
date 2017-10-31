@@ -539,6 +539,35 @@ describe('createContainer', function() {
       })
     })
 
+    describe('using util.inspect on the cradle', function() {
+      it('should return a summary', function() {
+        const container = createContainer()
+          .registerValue({ val1: 1, val2: 2 })
+          .registerFunction({ fn1: () => true })
+          .registerClass({ c1: Repo })
+
+        expect(util.inspect(container.cradle)).to.equal(
+          '[AwilixContainer.cradle]'
+        )
+      })
+    })
+
+    describe('using Array.from on the cradle', function() {
+      it('should return an Array with registration names', function() {
+        const container = createContainer()
+          .registerValue({ val1: 1, val2: 2 })
+          .registerFunction({ fn1: () => true })
+          .registerClass({ c1: Repo })
+
+        expect(Array.from(container.cradle)).to.deep.equal([
+          'val1',
+          'val2',
+          'fn1',
+          'c1'
+        ])
+      })
+    })
+
     describe('explicitly trying to fuck shit up', function() {
       it('should prevent you from fucking shit up', function() {
         const container = createContainer({
@@ -603,8 +632,8 @@ describe('createContainer', function() {
 
   describe('spreading the cradle', () => {
     it('does not throw', () => {
-      const container = createContainer()
-      expect([...container.cradle])
+      const container = createContainer().registerValue({ val1: 1, val2: 2 })
+      expect([...container.cradle]).to.deep.equal(['val1', 'val2'])
     })
   })
 })
