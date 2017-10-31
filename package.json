@@ -40,7 +40,7 @@
     "@types/node": "^8.0.47",
     "chai": "^4.1.0",
     "coveralls": "^3.0.0",
-    "eslint": "^4.9.0",
+    "eslint": "^4.10.0",
     "eslint-config-prettier": "^2.6.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.8.0",
