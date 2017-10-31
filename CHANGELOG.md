@@ -1,7 +1,9 @@
 # Awilix Changelog
 
-## 2.9.1
+## 2.10.0
 
+* Add support for `Object.keys()` on the cradle; now returns the names of available modules that can be resolved by accessing them.
+  - There's a gotcha though; `Object.getOwnPropertyDescriptor()` will return a gibberish descriptor. This is required for the keys to show up in the result.
 * Fix iterating over cradle - generator now yields registration names, thanks [@neerfri](https://github.com/neerfri)! ([#40](https://github.com/jeffijoe/awilix/issues/40))
 
 ## 2.9.0
