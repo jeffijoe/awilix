@@ -1,5 +1,9 @@
 # Awilix Changelog
 
+## 2.9.1
+
+* Fix iterating over cradle - generator now yields registration names, thanks [@neerfri](https://github.com/neerfri)! ([#40](https://github.com/jeffijoe/awilix/issues/40))
+
 ## 2.9.0
 
 * Fix issue with `console.log` on the cradle throwing an error. ([#7](https://github.com/jeffijoe/awilix/issues/7))
