@@ -721,4 +721,33 @@ describe('createContainer', function() {
       expect(result.nonexistentProp).to.not.exist
     })
   })
+
+  describe('memoizing registrations', () => {
+    it('should not cause issues', () => {
+      const container = createContainer().registerValue({ val1: 123 })
+
+      const scope1 = container.createScope()
+      const scope2 = scope1.createScope()
+
+      expect(scope1.resolve('val1')).to.equal(123)
+      expect(scope2.resolve('val1')).to.equal(123)
+
+      container.registerValue({ val2: 321 })
+      expect(scope2.resolve('val2')).to.equal(321)
+      expect(scope1.resolve('val2')).to.equal(321)
+
+      container.registerValue({ val3: 1337 }).register({
+        keys: asFunction(cradle => Object.keys(cradle)).inject(() => ({
+          injected: true
+        }))
+      })
+      expect(scope2.resolve('keys')).to.deep.equal([
+        'val1',
+        'val2',
+        'val3',
+        'keys',
+        'injected'
+      ])
+    })
+  })
 })
