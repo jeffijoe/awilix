@@ -451,6 +451,8 @@ container.loadModules([
 container.resolve('userService').getUser(1)
 ```
 
+**Important**: Auto-loading relies on `glob` and therefore does not with bundlers like Webpack, Rollup and Browserify.
+
 # Per-module local injections
 
 Some modules might need some additional configuration values than just dependencies.
@@ -670,6 +672,8 @@ const result = listModules([
 console.log(result)
   // << [{ name: 'someService', path: 'path/to/services/someService.js' }]
 ```
+
+**Important**: `listModules` relies on `glob` and therefore does not with bundlers like Webpack, Rollup and Browserify.
 
 ## `AwilixResolutionError`
 
