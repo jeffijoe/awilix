@@ -38,7 +38,10 @@ export declare interface AwilixContainer {
   registerValue(name: string, value: any): this
   registerValue(nameAndValuePairs: RegisterNameAndValuePair): this
   resolve<T>(name: string): T
-  build<T>(target: ClassOrFunctionReturning<T>, opts?: RegistrationOptions): T
+  build<T>(
+    target: ClassOrFunctionReturning<T> | Registration,
+    opts?: RegistrationOptions
+  ): T
 }
 
 export declare type ClassOrFunctionReturning<T> =

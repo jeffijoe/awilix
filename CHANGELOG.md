@@ -1,5 +1,9 @@
 # Awilix Changelog
 
+## 2.11.1
+
+* Fix typings for `container.build`
+
 ## 2.11.0
 
 * Add support for `container.build()` - see [relevant docs](https://github.com/jeffijoe/awilix#containerbuild)
