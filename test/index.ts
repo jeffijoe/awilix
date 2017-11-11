@@ -114,3 +114,7 @@ container.loadModules(
 listModules('')
 listModules([''])
 listModules([['hello.js', { lifetime: Lifetime.SCOPED }]])
+
+container
+  .build(TestClass, { resolutionMode: ResolutionMode.CLASSIC })
+  .stuff('test')
