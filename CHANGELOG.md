@@ -1,5 +1,9 @@
 # Awilix Changelog
 
+## 2.11.0
+
+* Add support for `container.build()` - see [relevant docs](https://github.com/jeffijoe/awilix#containerbuild)
+
 ## 2.10.0
 
 * Add support for `Object.keys()` on the cradle; now returns the names of available modules that can be resolved by accessing them.

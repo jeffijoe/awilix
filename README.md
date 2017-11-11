@@ -1079,13 +1079,15 @@ scope.cradle.usedValue === 'scope'
 
 Builds an instance of a class (or a function) by injecting dependencies, but without registering it in the container.
 
-It's basically a shortcut for `asClass(MyClass).resolve(container)`
+It's basically a shortcut for `asClass(MyClass).resolve(container)`.
 
 Args:
   - `targetOrResolver`: A class, function or resolver (example: `asClass(..)`, `asFunction(..)`)
   - `opts`: Resolver options.
 
-Returns an instance of whatever is passed in, or the result of calling the resolver.
+Returns an instance of whatever is passed in, or the result of calling the resolver. 
+
+**Important**: if you are doing this often for the same class/function, consider using the explicit approach and save the resolver, **especially** if you are using classic resolution because it scans the class constructor/function when calling `asClass(Class)` / `asFunction(func)`.
 
 ```js
 // The following are equivelant..
@@ -1108,10 +1110,21 @@ container.registerValue({
 })
 
 // Shorthand
+// This uses `utils.isClass()` to determine whether to 
+// use `asClass` or `asFunction`. This is fine for 
+// one-time resolutions.
 const myClass = container.build(MyClass)
 const myFunc = container.build(createMyFunc)
 
 // Explicit
+// Save the resolver if you are planning on invoking often.
+// **Especially** if you're using classic resolution.
+const myClassResolver = asClass(MyClass)
+const myFuncResolver = asFunction(MyFunc)
+
+const myClass = container.build(myClassResolver)
+const myFunc = container.build(myFuncResolver)
+
 ```
 
 # Contributing
