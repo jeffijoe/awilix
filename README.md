@@ -27,7 +27,7 @@ Extremely powerful **Inversion of Control** (IoC) container for Node with depend
 * [Inlining registration options](#inlining-registration-options)
 * [API](#api)
   - [The `awilix` object](#the-awilix-object)
-  - ['Registration options'](#registrationoptions)
+  - [Registration options](#registration-options)
   - [`createContainer()`](#createcontainer)
   - [`asFunction()`](#asfunction)
   - [`asClass()`](#asclass)
@@ -46,6 +46,7 @@ Extremely powerful **Inversion of Control** (IoC) container for Node with depend
     + [`container.registerClass()`](#containerregisterclass)
     + [`container.loadModules()`](#containerloadmodules)
     + [`container.createScope()`](#containercreatescope)
+    + [`container.build()`](#containerbuild)
 * [Contributing](#contributing)
 * [What's in a name?](#whats-in-a-name)
 * [Author](#author)
@@ -903,6 +904,89 @@ container.cradle.exclaimer.exclaim()
 // << 2016-06-24T17:00:00.00Z: Hello, this is some value!!!!!
 ```
 
+### `container.loadModules()`
+
+Given an array of globs, registers the modules and returns the container.
+
+Awilix will use `require` on the loaded modules, and register the default-exported function or class as the name of the file.
+
+**This will not work for constructor functions (`function Database{} ...`), because there is no way to determine when to use `new`. Internally, Awilix uses `is-class` which only works for ES6 classes.**
+
+Args:
+
+* `globPatterns`: Array of glob patterns that match JS files to load.
+* `opts.cwd`: The `cwd` being passed to `glob`. Defaults to `process.cwd()`.
+* `opts.formatName`: Can be either `'camelCase'`, or a function that takes the current name as the first parameter and returns the new name. Default is to pass the name through as-is. The 2nd parameter is a full module descriptor.
+* `registrationOptions`: An `object` passed to the registrations. Used to configure the lifetime, resolution mode and more of the loaded modules.
+
+Example:
+
+```js
+// index.js
+container.loadModules([
+  'services/*.js',
+  'repositories/*.js',
+  'db/db.js'
+])
+
+container.cradle.userService.getUser(123)
+
+// to configure lifetime for all modules loaded..
+container.loadModules([
+  'services/*.js',
+  'repositories/*.js',
+  'db/db.js'
+], {
+  registrationOptions: {
+    lifetime: Lifetime.SINGLETON
+  }
+})
+
+container.cradle.userService.getUser(123)
+
+// to configure lifetime for specific globs..
+container.loadModules([
+  ['services/*.js', Lifetime.SCOPED], // all services will have scoped lifetime
+  'repositories/*.js',
+  'db/db.js'
+], {
+  registrationOptions: {
+    lifetime: Lifetime.SINGLETON // db and repositories will be singleton
+  }
+})
+
+container.cradle.userService.getUser(123)
+
+// to use camelCase for modules where filenames are not camelCase
+container.loadModules([
+  'repositories/account-repository.js',
+  'db/db.js'
+], {
+  formatName: 'camelCase'
+})
+
+container.cradle.accountRepository.getUser(123)
+
+// to customize how modules are named in the container (and for injection)
+container.loadModules([
+  'repository/account.js',
+  'service/email.js'
+], {
+  // This formats the module name so `repository/account.js` becomes `accountRepository`
+  formatName: (name, descriptor) => {
+    const splat = descriptor.path.split('/')
+    const namespace = splat[splat.length - 2] // `repository` or `service`
+    const upperNamespace = namespace.charAt(0).toUpperCase() + namespace.substring(1)
+    return name + upperNamespace
+  }
+})
+
+container.cradle.accountRepository.getUser(123)
+container.cradle.emailService.sendEmail('test@test.com', 'waddup')
+```
+
+The `['glob', Lifetime.SCOPED]` syntax is a shorthand for passing in registration options like so: `['glob', { lifetime: Lifetime.SCOPED }]`
+
 ### `container.createScope()`
 
 Creates a new scope. All registrations with a `Lifetime.SCOPED` will be cached inside a scope. A scope is basically a "child" container.
@@ -991,88 +1075,44 @@ container.cradle.usedValue === 'root'
 scope.cradle.usedValue === 'scope'
 ```
 
-### `container.loadModules()`
+### `container.build()`
 
-Given an array of globs, registers the modules and returns the container.
+Builds an instance of a class (or a function) by injecting dependencies, but without registering it in the container.
 
-Awilix will use `require` on the loaded modules, and register the default-exported function or class as the name of the file.
-
-**This will not work for constructor functions (`function Database{} ...`), because there is no way to determine when to use `new`. Internally, Awilix uses `is-class` which only works for ES6 classes.**
+It's basically a shortcut for `asClass(MyClass).resolve(container)`
 
 Args:
+  - `targetOrResolver`: A class, function or resolver (example: `asClass(..)`, `asFunction(..)`)
+  - `opts`: Resolver options.
 
-* `globPatterns`: Array of glob patterns that match JS files to load.
-* `opts.cwd`: The `cwd` being passed to `glob`. Defaults to `process.cwd()`.
-* `opts.formatName`: Can be either `'camelCase'`, or a function that takes the current name as the first parameter and returns the new name. Default is to pass the name through as-is. The 2nd parameter is a full module descriptor.
-* `registrationOptions`: An `object` passed to the registrations. Used to configure the lifetime, resolution mode and more of the loaded modules.
-
-Example:
+Returns an instance of whatever is passed in, or the result of calling the resolver.
 
 ```js
-// index.js
-container.loadModules([
-  'services/*.js',
-  'repositories/*.js',
-  'db/db.js'
-])
-
-container.cradle.userService.getUser(123)
-
-// to configure lifetime for all modules loaded..
-container.loadModules([
-  'services/*.js',
-  'repositories/*.js',
-  'db/db.js'
-], {
-  registrationOptions: {
-    lifetime: Lifetime.SINGLETON
+// The following are equivelant..
+class MyClass {
+  constructor ({ ping }) {
+    this.ping = ping
   }
-})
 
-container.cradle.userService.getUser(123)
-
-// to configure lifetime for specific globs..
-container.loadModules([
-  ['services/*.js', Lifetime.SCOPED], // all services will have scoped lifetime
-  'repositories/*.js',
-  'db/db.js'
-], {
-  registrationOptions: {
-    lifetime: Lifetime.SINGLETON // db and repositories will be singleton
+  pong() {
+    return this.ping
   }
+}
+
+const createMyFunc = ({ ping }) => ({
+  pong: () => ping
 })
 
-container.cradle.userService.getUser(123)
-
-// to use camelCase for modules where filenames are not camelCase
-container.loadModules([
-  'repositories/account-repository.js',
-  'db/db.js'
-], {
-  formatName: 'camelCase'
+container.registerValue({
+  ping: 'pong'
 })
 
-container.cradle.accountRepository.getUser(123)
+// Shorthand
+const myClass = container.build(MyClass)
+const myFunc = container.build(createMyFunc)
 
-// to customize how modules are named in the container (and for injection)
-container.loadModules([
-  'repository/account.js',
-  'service/email.js'
-], {
-  // This formats the module name so `repository/account.js` becomes `accountRepository`
-  formatName: (name, descriptor) => {
-    const splat = descriptor.path.split('/')
-    const namespace = splat[splat.length - 2] // `repository` or `service`
-    const upperNamespace = namespace.charAt(0).toUpperCase() + namespace.substring(1)
-    return name + upperNamespace
-  }
-})
-
-container.cradle.accountRepository.getUser(123)
-container.cradle.emailService.sendEmail('test@test.com', 'waddup')
+// Explicit
 ```
-
-The `['glob', Lifetime.SCOPED]` syntax is a shorthand for passing in registration options like so: `['glob', { lifetime: Lifetime.SCOPED }]`
 
 # Contributing
 

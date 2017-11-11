@@ -7,6 +7,7 @@
  * @interface AwilixContainer
  */
 export declare interface AwilixContainer {
+  options: ContainerOptions
   cradle: { [key: string]: any }
   createScope(): AwilixContainer
   loadModules(
@@ -37,7 +38,12 @@ export declare interface AwilixContainer {
   registerValue(name: string, value: any): this
   registerValue(nameAndValuePairs: RegisterNameAndValuePair): this
   resolve<T>(name: string): T
+  build<T>(target: ClassOrFunctionReturning<T>, opts?: RegistrationOptions): T
 }
+
+export declare type ClassOrFunctionReturning<T> =
+  | ((...args: Array<any>) => T)
+  | (new (...args: Array<any>) => T)
 
 /**
  * Describes a glob pattern for modules as well as registration options to use.
