@@ -1,36 +1,40 @@
-const { throws } = require('smid')
-const { asValue, asFunction, asClass } = require('../registrations')
-const createContainer = require('../createContainer')
-const Lifetime = require('../Lifetime')
-const ResolutionMode = require('../ResolutionMode')
-const AwilixNotAFunctionError = require('../AwilixNotAFunctionError')
+import { throws } from 'smid'
+import { asValue, asFunction, asClass } from '../registrations'
+import { createContainer, AwilixContainer } from '../container'
+import { Lifetime } from '../lifetime'
+import { ResolutionMode } from '../resolution-mode'
+import { AwilixNotAFunctionError } from '../errors'
 
 const testFn = () => 1337
-const depsFn = testClass => testClass
-const multiDeps = (testClass, needsCradle) => {
+const depsFn = (testClass: any) => testClass
+const multiDeps = (testClass: any, needsCradle: any) => {
   return { testClass, needsCradle }
 }
 
 class TestClass {}
 class WithDeps {
-  constructor(testClass) {
+  testClass: any
+  constructor(testClass: any) {
     this.testClass = testClass
   }
 }
 class NeedsCradle {
-  constructor(cradle) {
+  testClass: any
+  constructor(cradle: any) {
     this.testClass = cradle.testClass
   }
 }
 class MultipleDeps {
-  constructor(testClass, needsCradle) {
+  testClass: any
+  needsCradle: any
+  constructor(testClass: any, needsCradle: any) {
     this.testClass = testClass
     this.needsCradle = needsCradle
   }
 }
 
 describe('registrations', function() {
-  let container
+  let container: AwilixContainer
   beforeEach(function() {
     container = createContainer()
   })
@@ -82,8 +86,8 @@ describe('registrations', function() {
     })
 
     it('supports arrow functions', function() {
-      const arrowWithParen = dep => dep
-      const arrowWithoutParen = dep => dep
+      const arrowWithParen = (dep: any) => dep
+      const arrowWithoutParen: ((arg: any) => any) = dep => dep
       container.register({
         withParen: asFunction(arrowWithParen).classic(),
         withoutParen: asFunction(arrowWithoutParen).classic(),
@@ -95,7 +99,7 @@ describe('registrations', function() {
     })
 
     it('throws AwilixNotAFunctionError when given null', function() {
-      const err = throws(() => asFunction(null))
+      const err = throws(() => asFunction(null as any))
       expect(err).toBeInstanceOf(AwilixNotAFunctionError)
     })
   })
@@ -146,14 +150,19 @@ describe('registrations', function() {
     })
 
     it('throws an Error when given null', function() {
-      const err = throws(() => asClass(null))
+      const err = throws(() => asClass(null!))
       expect(err).toBeInstanceOf(AwilixNotAFunctionError)
     })
   })
 
   describe('asClass and asFunction fluid interface', function() {
     it('supports all lifetimes and returns the object itself', function() {
-      const subjects = [asClass(TestClass), asFunction(() => {})]
+      const subjects = [
+        asClass(TestClass),
+        asFunction(() => {
+          /**/
+        })
+      ]
 
       subjects.forEach(x => {
         let retVal = x.setLifetime(Lifetime.SCOPED)
@@ -175,7 +184,12 @@ describe('registrations', function() {
     })
 
     it('supports inject()', function() {
-      const subjects = [asClass(TestClass), asFunction(() => {})]
+      const subjects = [
+        asClass(TestClass),
+        asFunction(() => {
+          /**/
+        })
+      ]
 
       subjects.forEach(x => {
         const retVal = x.inject(() => ({ value: 42 }))

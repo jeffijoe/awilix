@@ -1,4 +1,4 @@
-const parseParameterList = require('../parseParameterList')
+import { parseParameterList } from '../param-parser'
 
 describe('parseParameterList', function() {
   it('returns an empty array when invalid input is given', function() {
@@ -7,52 +7,90 @@ describe('parseParameterList', function() {
 
   it('supports regular functions', function() {
     expect(
-      parseParameterList(function hello(dep1, dep2) {}.toString())
+      parseParameterList(
+        function hello(dep1: any, dep2: any) {
+          /**/
+        }.toString()
+      )
     ).toEqual(['dep1', 'dep2'])
-    expect(parseParameterList(function(dep1, dep2) {}.toString())).toEqual([
-      'dep1',
-      'dep2'
-    ])
     expect(
-      parseParameterList(function(dep1, dep2, dep3) {}.toString())
+      parseParameterList(
+        function(dep1: any, dep2: any) {
+          /**/
+        }.toString()
+      )
+    ).toEqual(['dep1', 'dep2'])
+    expect(
+      parseParameterList(
+        function(dep1: any, dep2: any, dep3: any) {
+          /**/
+        }.toString()
+      )
     ).toEqual(['dep1', 'dep2', 'dep3'])
-    expect(parseParameterList(function hello() {}.toString())).toEqual([])
-    expect(parseParameterList(function() {}.toString())).toEqual([])
+    expect(
+      parseParameterList(
+        function hello() {
+          /**/
+        }.toString()
+      )
+    ).toEqual([])
+    expect(
+      parseParameterList(
+        function() {
+          /**/
+        }.toString()
+      )
+    ).toEqual([])
   })
 
   it('supports regular functions with default params', function() {
     expect(
       parseParameterList(
-        function hello(
+        `function hello(
           dep1 = 'frick off ricky',
           dep2 = 'shut up randy, go eat some cheeseburgers'
-        ) {}.toString()
+        ) {
+        }`
       )
     ).toEqual(['dep1', 'dep2'])
   })
 
   it('supports arrow functions', function() {
-    expect(parseParameterList(((dep1, dep2) => {}).toString())).toEqual([
-      'dep1',
-      'dep2'
-    ])
-    expect(parseParameterList(((dep1, dep2) => 42).toString())).toEqual([
-      'dep1',
-      'dep2'
-    ])
-    expect(parseParameterList(((dep1, dep2, dep3) => {}).toString())).toEqual([
-      'dep1',
-      'dep2',
-      'dep3'
-    ])
-    expect(parseParameterList((() => {}).toString())).toEqual([])
+    expect(
+      parseParameterList(
+        ((dep1: any, dep2: any) => {
+          /**/
+        }).toString()
+      )
+    ).toEqual(['dep1', 'dep2'])
+    expect(
+      parseParameterList(((dep1: any, dep2: any) => 42).toString())
+    ).toEqual(['dep1', 'dep2'])
+    expect(
+      parseParameterList(
+        ((dep1: any, dep2: any, dep3: any) => {
+          /**/
+        }).toString()
+      )
+    ).toEqual(['dep1', 'dep2', 'dep3'])
+    expect(
+      parseParameterList(
+        (() => {
+          /**/
+        }).toString()
+      )
+    ).toEqual([])
     expect(parseParameterList((() => 42).toString())).toEqual([])
-    expect(parseParameterList((dep1 => expect).toString())).toEqual(['dep1'])
+    expect(parseParameterList(`dep1 => lol`)).toEqual(['dep1'])
   })
 
   it('supports arrow function with default params', function() {
     expect(
-      parseParameterList(((dep1 = 123, dep2 = 456) => {}).toString())
+      parseParameterList(
+        ((dep1 = 123, dep2 = 456) => {
+          /**/
+        }).toString()
+      )
     ).toEqual(['dep1', 'dep2'])
     expect(
       parseParameterList(((dep1 = 123, dep2 = 456) => 789).toString())
@@ -61,11 +99,14 @@ describe('parseParameterList', function() {
 
   it('supports class constructors', function() {
     class Test {
-      constructor(dep1, dep2) {
+      dep1: any
+      constructor(dep1: any, dep2: any) {
         this.dep1 = dep1
       }
 
-      method() {}
+      method() {
+        /**/
+      }
     }
 
     expect(parseParameterList(Test.prototype.constructor.toString())).toEqual([
@@ -88,11 +129,11 @@ describe('parseParameterList', function() {
   })
 
   it('supports the problem posted in issue #30', function() {
-    const fn = function(a) {
+    const fn = function(a: any) {
       return {}
     }
 
-    function fn2(a) {
+    function fn2(a: any) {
       return {}
     }
 

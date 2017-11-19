@@ -1,22 +1,25 @@
-const createContainer = require('../createContainer')
-const { asClass } = require('../registrations')
-const ResolutionMode = require('../ResolutionMode')
+import { createContainer } from '../container'
+import { asClass } from '../registrations'
+import { ResolutionMode } from '../resolution-mode'
 
 class Test {
-  constructor({ value }) {
+  value: any
+  constructor({ value }: any) {
     this.value = value
   }
 }
 
 class TestClassic {
-  constructor(test, value) {
+  test: any
+  value: any
+  constructor(test: any, value: any) {
     this.test = test
     this.value = value
   }
 }
 
-const makeTest = ({ value }) => ({ value, isTest: true })
-const makeCLassicTest = (test, value) => ({ value, test })
+const makeTest = ({ value }: any) => ({ value, isTest: true })
+const makeCLassicTest = (test: any, value: any) => ({ value, test })
 
 const injector = () => ({ value: 42 })
 

@@ -1,7 +1,8 @@
+import { Lifetime } from '../lifetime'
+
 const AnotherService = require('./fixture/services/anotherService')
   .AnotherService
 const fixture = require('./fixture')
-const Lifetime = require('../Lifetime')
 
 describe('integration tests', function() {
   it('bootstraps everything so the answer can be resolved', function() {

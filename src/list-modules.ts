@@ -1,6 +1,32 @@
-const glob = require('glob')
-const path = require('path')
-const { flatten } = require('./utils')
+import * as glob from 'glob'
+import * as path from 'path'
+import { flatten } from './utils'
+import { RegistrationOptions } from './registrations'
+
+/**
+ * The options when invoking listModules().
+ * @interface ListModulesOptions
+ */
+export interface ListModulesOptions {
+  cwd?: string
+  glob?: typeof glob.sync
+}
+
+/**
+ * An object containing the module name and path (full path to module).
+ *
+ * @interface ModuleDescriptor
+ */
+export interface ModuleDescriptor {
+  name: string
+  path: string
+  opts: any
+}
+
+/**
+ * A glob pattern with associated registration options.
+ */
+export type GlobWithOptions = [string] | [string, RegistrationOptions]
 
 // Regex to extract the module name.
 const nameExpr = /(.*)\..*/i
@@ -20,18 +46,21 @@ const nameExpr = /(.*)\..*/i
  *
  * @api private
  */
-function _listModules(globPattern, opts) {
+function _listModules(
+  globPattern: string | GlobWithOptions,
+  opts?: ListModulesOptions
+): Array<ModuleDescriptor> {
   opts = Object.assign({ cwd: process.cwd(), glob: glob.sync }, opts)
-  let patternOpts = null
+  let patternOpts: RegistrationOptions | null = null
   if (globPattern instanceof Array) {
-    patternOpts = globPattern[1]
+    patternOpts = globPattern[1] as RegistrationOptions
     globPattern = globPattern[0]
   }
 
-  const result = opts.glob(globPattern, { cwd: opts.cwd })
+  const result = opts.glob!(globPattern, { cwd: opts.cwd })
   const mapped = result.map(p => ({
-    name: nameExpr.exec(path.basename(p))[1],
-    path: path.resolve(opts.cwd, p),
+    name: nameExpr.exec(path.basename(p))![1],
+    path: path.resolve(opts!.cwd, p),
     opts: patternOpts
   }))
   return mapped
@@ -52,8 +81,11 @@ function _listModules(globPattern, opts) {
  * @return {[{name, path}]}
  * An array of objects with the module names and paths.
  */
-module.exports = function listModules(globPatterns, opts) {
-  if (globPatterns instanceof Array) {
+export function listModules(
+  globPatterns: string | Array<string | GlobWithOptions>,
+  opts?: ListModulesOptions
+) {
+  if (Array.isArray(globPatterns)) {
     return flatten(globPatterns.map(p => _listModules(p, opts)))
   }
 

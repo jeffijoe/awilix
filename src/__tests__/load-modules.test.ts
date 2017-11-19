@@ -1,10 +1,10 @@
-const loadModules = require('../loadModules')
-const createContainer = require('../createContainer')
-const Lifetime = require('../Lifetime')
-const ResolutionMode = require('../ResolutionMode')
-const { asFunction, REGISTRATION } = require('../registrations')
+import { loadModules, LoadModulesOptions } from '../load-modules'
+import { createContainer } from '../container'
+import { Lifetime } from '../lifetime'
+import { ResolutionMode } from '../resolution-mode'
+import { asFunction, REGISTRATION, BuildRegistration } from '../registrations'
 
-const lookupResultFor = modules =>
+const lookupResultFor = (modules: any) =>
   Object.keys(modules).map(key => ({
     name: key.replace('.js', ''),
     path: key
@@ -16,7 +16,7 @@ describe('loadModules', function() {
 
     class SomeClass {}
 
-    const modules = {
+    const modules: any = {
       'nope.js': undefined,
       'standard.js': jest.fn(() => 42),
       'default.js': { default: jest.fn(() => 1337) },
@@ -39,7 +39,7 @@ describe('loadModules', function() {
 
   it('uses built-in formatter when given a formatName as a string', function() {
     const container = createContainer()
-    const modules = {
+    const modules: any = {
       'SomeClass.js': jest.fn(() => 42)
     }
     const moduleLookupResult = lookupResultFor(modules)
@@ -48,7 +48,7 @@ describe('loadModules', function() {
       listModules: jest.fn(() => moduleLookupResult),
       require: jest.fn(path => modules[path])
     }
-    const opts = {
+    const opts: LoadModulesOptions = {
       formatName: 'camelCase'
     }
     const result = loadModules(deps, 'anything', opts)
@@ -59,7 +59,7 @@ describe('loadModules', function() {
 
   it('uses the function passed in as formatName', function() {
     const container = createContainer()
-    const modules = {
+    const modules: any = {
       'SomeClass.js': jest.fn(() => 42)
     }
     const moduleLookupResult = lookupResultFor(modules)
@@ -68,7 +68,7 @@ describe('loadModules', function() {
       listModules: jest.fn(() => moduleLookupResult),
       require: jest.fn(path => modules[path])
     }
-    const opts = {
+    const opts: LoadModulesOptions = {
       formatName: (name, descriptor) => {
         expect(descriptor.path).toBeTruthy()
         return name + 'IsGreat'
@@ -82,7 +82,7 @@ describe('loadModules', function() {
 
   it('does nothing with the name if the string formatName does not match a formatter', function() {
     const container = createContainer()
-    const modules = {
+    const modules: any = {
       'SomeClass.js': jest.fn(() => 42)
     }
     const moduleLookupResult = lookupResultFor(modules)
@@ -91,7 +91,7 @@ describe('loadModules', function() {
       listModules: jest.fn(() => moduleLookupResult),
       require: jest.fn(path => modules[path])
     }
-    const opts = {
+    const opts: any = {
       formatName: 'unknownformatternope'
     }
     const result = loadModules(deps, 'anything', opts)
@@ -102,7 +102,7 @@ describe('loadModules', function() {
 
   it('defaults to transient lifetime if option is unreadable', function() {
     const container = createContainer()
-    const modules = {
+    const modules: any = {
       'test.js': jest.fn(() => 42)
     }
     const moduleLookupResult = lookupResultFor(modules)
@@ -123,7 +123,7 @@ describe('loadModules', function() {
   it('supports passing in a register function', function() {
     const container = createContainer()
     const moduleSpy = jest.fn(() => () => 42)
-    const modules = {
+    const modules: any = {
       'test.js': moduleSpy
     }
     const moduleLookupResult = lookupResultFor(modules)
@@ -149,7 +149,7 @@ describe('loadModules', function() {
 
   it('supports array opts syntax with string (lifetime)', function() {
     const container = createContainer()
-    const modules = {
+    const modules: any = {
       'test.js': jest.fn(() => 42),
       'test2.js': jest.fn(() => 42)
     }
@@ -175,7 +175,7 @@ describe('loadModules', function() {
 
   it('supports array opts syntax with object', function() {
     const container = createContainer()
-    const modules = {
+    const modules: any = {
       'test.js': jest.fn(() => 42),
       'test2.js': jest.fn(() => 42)
     }
@@ -201,7 +201,7 @@ describe('loadModules', function() {
 
   it('supports passing in a default resolutionMode', function() {
     const container = createContainer()
-    const modules = {
+    const modules: any = {
       'test.js': jest.fn(() => 42),
       'test2.js': jest.fn(() => 42)
     }
@@ -225,29 +225,29 @@ describe('loadModules', function() {
       }
     })
 
-    expect(container.registrations.test.resolutionMode).toBe(
-      ResolutionMode.PROXY
-    )
-    expect(container.registrations.test2.resolutionMode).toBe(
-      ResolutionMode.CLASSIC
-    )
+    expect(
+      (container.registrations.test as BuildRegistration).resolutionMode
+    ).toBe(ResolutionMode.PROXY)
+    expect(
+      (container.registrations.test2 as BuildRegistration).resolutionMode
+    ).toBe(ResolutionMode.CLASSIC)
   })
 
   describe('inline config via REGISTRATION symbol', () => {
     it('uses the inline config over anything else', () => {
       const container = createContainer()
       const test1Func = jest.fn(() => 42)
-      test1Func[REGISTRATION] = {
+      ;(test1Func as any)[REGISTRATION] = {
         resolutionMode: ResolutionMode.PROXY
       }
 
       class Test2Class {}
 
-      Test2Class[REGISTRATION] = {
+      ;(Test2Class as any)[REGISTRATION] = {
         lifetime: Lifetime.SCOPED
       }
 
-      const modules = {
+      const modules: any = {
         'test.js': test1Func,
         'test2.js': Test2Class
       }
@@ -268,25 +268,25 @@ describe('loadModules', function() {
       })
 
       expect(container.registrations.test.lifetime).toBe(Lifetime.TRANSIENT)
-      expect(container.registrations.test.resolutionMode).toBe(
-        ResolutionMode.PROXY
-      )
+      expect(
+        (container.registrations.test as BuildRegistration).resolutionMode
+      ).toBe(ResolutionMode.PROXY)
       expect(container.registrations.test2.lifetime).toBe(Lifetime.SCOPED)
-      expect(container.registrations.test2.resolutionMode).toBe(
-        ResolutionMode.CLASSIC
-      )
+      expect(
+        (container.registrations.test2 as BuildRegistration).resolutionMode
+      ).toBe(ResolutionMode.CLASSIC)
     })
 
     it('allows setting a name to register as', () => {
       const container = createContainer()
       const test1Func = jest.fn(() => 42)
-      test1Func[REGISTRATION] = {
+      ;(test1Func as any)[REGISTRATION] = {
         name: 'awesome',
         lifetime: Lifetime.SINGLETON
       }
 
       const test2Func = jest.fn(() => 42)
-      const modules = {
+      const modules: any = {
         'test.js': test1Func,
         'test2.js': test2Func
       }

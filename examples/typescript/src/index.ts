@@ -4,7 +4,7 @@ import {
   createContainer,
   asClass,
   ResolutionMode
-} from '../../..'
+} from '../../../src/awilix'
 import TestService from './services/TestService'
 import DependentService from './services/DependentService'
 

@@ -1,15 +1,81 @@
-const Lifetime = require('./Lifetime')
-const ResolutionMode = require('./ResolutionMode')
-const { isFunction, uniq } = require('./utils')
-const parseParameterList = require('./parseParameterList')
-const AwilixNotAFunctionError = require('./AwilixNotAFunctionError')
+import { Lifetime, LifetimeType } from './lifetime'
+import { ResolutionMode, ResolutionModeType } from './resolution-mode'
+import { isFunction, uniq } from './utils'
+import { parseParameterList } from './param-parser'
+import { AwilixNotAFunctionError } from './errors'
+import { AwilixContainer } from './container'
 
 /**
  * REGISTRATION symbol can be used by modules loaded by
  * `loadModules` to configure their lifetime, resolution mode, etc.
  */
-const REGISTRATION = Symbol('Awilix Registration Config')
-module.exports.REGISTRATION = REGISTRATION
+export const REGISTRATION = Symbol('Awilix Registration Config')
+
+/**
+ * Gets passed the container and is expected to return an object
+ * whose properties are accessible at construction time for the
+ * configured registration.
+ *
+ * @type {Function}
+ */
+export type InjectorFunction = (container: AwilixContainer) => object
+
+/**
+ * A registration object returned by asClass(), asFunction() or asValue().
+ */
+export interface Registration {
+  lifetime: LifetimeType
+  resolve(container: AwilixContainer): any
+}
+
+/**
+ * Setter function helpers for build registrations.
+ */
+export interface BuildSetters {
+  setLifetime(lifetime: LifetimeType): this
+  setResolutionMode(mode: ResolutionModeType): this
+  singleton(): this
+  scoped(): this
+  transient(): this
+  proxy(): this
+  classic(): this
+  inject(injector: InjectorFunction): this
+}
+
+/**
+ * A registration object created by asClass() or asFunction().
+ */
+export interface BuildRegistration extends Registration, BuildSetters {
+  resolutionMode?: ResolutionModeType
+  injector?: InjectorFunction
+}
+
+/**
+ * The options when registering a class, function or value.
+ * @type RegistrationOptions
+ */
+export interface RegistrationOptions {
+  /**
+   * Only used for inline configuration with `loadModules`.
+   */
+  name?: string
+  /**
+   * Lifetime setting.
+   */
+  lifetime?: LifetimeType
+  /**
+   * Resolution mode.
+   */
+  resolutionMode?: ResolutionModeType
+  /**
+   * Injector function to provide additional parameters.
+   */
+  injector?: InjectorFunction
+  /**
+   * Registration function to use.
+   */
+  register?: (...args: any[]) => Registration
+}
 
 /**
  * Makes an options object based on defaults.
@@ -22,8 +88,8 @@ module.exports.REGISTRATION = REGISTRATION
  *
  * @return {object}
  */
-const makeOptions = (defaults, ...rest) => {
-  return Object.assign({}, defaults, ...rest)
+function makeOptions<T, O>(defaults: T, ...rest: Array<O | undefined>): T & O {
+  return Object.assign({}, defaults, ...rest) as T & O
 }
 
 /**
@@ -39,20 +105,23 @@ const makeOptions = (defaults, ...rest) => {
  * @return {object}
  * The interface.
  */
-const makeFluidInterface = obj => {
-  const setLifetime = value => {
-    obj.lifetime = value
-    return obj
+function makeFluidInterface(obj: Registration): BuildSetters {
+  // For TS.
+  const buildRegistration = obj as BuildRegistration
+
+  function setLifetime(value: LifetimeType) {
+    buildRegistration.lifetime = value
+    return buildRegistration
   }
 
-  const setResolutionMode = value => {
-    obj.resolutionMode = value
-    return obj
+  function setResolutionMode(value: ResolutionModeType) {
+    buildRegistration.resolutionMode = value
+    return buildRegistration
   }
 
-  const inject = injector => {
-    obj.injector = injector
-    return obj
+  function inject(injector: InjectorFunction) {
+    buildRegistration.injector = injector
+    return buildRegistration
   }
 
   return {
@@ -79,7 +148,7 @@ const makeFluidInterface = obj => {
  * @return {object}
  * The registration.
  */
-const asValue = value => {
+export function asValue(value: any): Registration {
   const resolve = () => {
     return value
   }
@@ -89,8 +158,6 @@ const asValue = value => {
     lifetime: Lifetime.TRANSIENT
   }
 }
-
-module.exports.asValue = asValue
 
 /**
  * Creates a factory registration, where the given factory function
@@ -108,7 +175,10 @@ module.exports.asValue = asValue
  * @return {object}
  * The registration.
  */
-const asFunction = (fn, opts) => {
+export function asFunction(
+  fn: Function,
+  opts?: RegistrationOptions
+): BuildRegistration {
   if (!isFunction(fn)) {
     throw new AwilixNotAFunctionError('asFunction', 'function', typeof fn)
   }
@@ -117,21 +187,28 @@ const asFunction = (fn, opts) => {
     lifetime: Lifetime.TRANSIENT
   }
 
-  opts = makeOptions(defaults, opts, fn[REGISTRATION])
+  opts = makeOptions(defaults, opts, (fn as any)[REGISTRATION])
 
   const resolve = generateResolve(fn)
   const result = {
     resolve,
-    lifetime: opts.lifetime,
+    lifetime: opts.lifetime!,
     injector: opts.injector,
     resolutionMode: opts.resolutionMode
   }
   result.resolve = resolve.bind(result)
-  Object.assign(result, makeFluidInterface(result))
-  return result
+  return Object.assign(result, makeFluidInterface(result))
 }
 
-module.exports.asFunction = asFunction
+/**
+ * A class constructor. For example:
+ *
+ *    class MyClass {}
+ *
+ *    container.registerClass('myClass', MyClass)
+ *                                       ^^^^^^^
+ */
+export type Constructor<T> = { new (...args: any[]): T }
 
 /**
  * Like a factory registration, but for classes that require `new`.
@@ -148,7 +225,10 @@ module.exports.asFunction = asFunction
  * @return {object}
  * The registration.
  */
-const asClass = (Type, opts) => {
+export function asClass<T = {}>(
+  Type: Constructor<T>,
+  opts?: RegistrationOptions
+): BuildRegistration {
   if (!isFunction(Type)) {
     throw new AwilixNotAFunctionError('asClass', 'class', typeof Type)
   }
@@ -157,23 +237,23 @@ const asClass = (Type, opts) => {
     lifetime: Lifetime.TRANSIENT
   }
 
-  opts = makeOptions(defaults, opts, Type[REGISTRATION])
+  opts = makeOptions(defaults, opts, (Type as any)[REGISTRATION])
 
   // A function to handle object construction for us, as to make the generateResolve more reusable
   const newClass = function newClass() {
-    return new Type(...arguments)
+    return new Type(...(arguments as any))
   }
 
   const resolve = generateResolve(newClass, Type.prototype.constructor)
   const result = {
-    lifetime: opts.lifetime,
+    lifetime: opts.lifetime!,
     injector: opts.injector,
-    resolutionMode: opts.resolutionMode
+    resolutionMode: opts.resolutionMode,
+    resolve: resolve
   }
-  result.resolve = resolve.bind(result)
-  Object.assign(result, makeFluidInterface(result))
 
-  return result
+  result.resolve = resolve.bind(result)
+  return Object.assign(result, makeFluidInterface(result))
 }
 
 /**
@@ -181,11 +261,11 @@ const asClass = (Type, opts) => {
  * from the injector and defers to `container.resolve`.
  *
  * @param  {AwilixContainer} container
- * @param  {Function} injector
+ * @param  {Object} locals
  * @return {Function}
  */
-function wrapWithLocals(container, locals) {
-  return function wrappedResolve(name) {
+function wrapWithLocals(container: AwilixContainer, locals: any) {
+  return function wrappedResolve(name: string) {
     if (name in locals) {
       return locals[name]
     }
@@ -200,10 +280,13 @@ function wrapWithLocals(container, locals) {
  *
  * @param  {Object} cradle
  * @param  {Function} injector
- * @return {Object}
+ * @return {Proxy}
  */
-function createInjectorProxy(container, injector) {
-  const locals = injector(container)
+function createInjectorProxy(
+  container: AwilixContainer,
+  injector: InjectorFunction
+) {
+  const locals = injector(container) as any
   const allKeys = uniq([
     ...Reflect.ownKeys(container.cradle),
     ...Reflect.ownKeys(locals)
@@ -216,7 +299,7 @@ function createInjectorProxy(container, injector) {
       /**
        * Resolves the value by first checking the locals, then the container.
        */
-      get(target, name) {
+      get(target: any, name: string | symbol) {
         if (name === Symbol.iterator) {
           return function* iterateRegistrationsAndLocals() {
             for (const prop in container.cradle) {
@@ -230,7 +313,7 @@ function createInjectorProxy(container, injector) {
         if (name in locals) {
           return locals[name]
         }
-        return container.resolve(name)
+        return container.resolve(name as string)
       },
 
       /**
@@ -243,7 +326,7 @@ function createInjectorProxy(container, injector) {
       /**
        * Used for `Object.keys`.
        */
-      getOwnPropertyDescriptor(target, key) {
+      getOwnPropertyDescriptor(target: any, key: string) {
         if (allKeys.indexOf(key) > -1) {
           return {
             enumerable: true,
@@ -277,7 +360,7 @@ function createInjectorProxy(container, injector) {
  * @return {Function}
  * The function used for dependency resolution
  */
-function generateResolve(fn, dependencyParseTarget) {
+function generateResolve(fn: Function, dependencyParseTarget?: Function) {
   // If the function used for dependency parsing is falsy, use the supplied function
   if (!dependencyParseTarget) {
     dependencyParseTarget = fn
@@ -287,7 +370,7 @@ function generateResolve(fn, dependencyParseTarget) {
   const dependencies = parseParameterList(dependencyParseTarget.toString())
 
   // Use a regular function instead of an arrow function to facilitate binding to the registration.
-  return function resolve(container) {
+  return function resolve(this: BuildRegistration, container: AwilixContainer) {
     // Because the container holds a global reolutionMode we need to determine it in the proper order or precedence:
     // registration -> container -> default value
     const resolutionMode =

@@ -1,8 +1,8 @@
-const awilix = require('../awilix')
-const createContainer = require('../createContainer')
-const listModules = require('../listModules')
-const AwilixResolutionError = require('../AwilixResolutionError')
-const { asValue, asClass, asFunction } = require('../registrations')
+import * as awilix from '../awilix'
+import { createContainer } from '../container'
+import { listModules } from '../list-modules'
+import { AwilixResolutionError } from '../errors'
+import { asValue, asClass, asFunction } from '../registrations'
 
 describe('awilix', function() {
   it('exists', function() {

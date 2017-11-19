@@ -1,11 +1,11 @@
-const {
+import {
   flatten,
   isClass,
   isFunction,
   last,
   nameValueToObject,
   uniq
-} = require('../utils')
+} from '../utils'
 
 describe('flatten', function() {
   it('flattens the array', function() {
@@ -15,16 +15,24 @@ describe('flatten', function() {
 
 describe('isClass', function() {
   it('returns true for function that start with a capital letter', function() {
-    expect(isClass(function Stuff() {})).toBe(true)
+    expect(
+      isClass(function Stuff() {
+        /**/
+      })
+    ).toBe(true)
   })
 
   it('returns false for function that do not start with a capital letter', function() {
-    expect(isClass(function stuff() {})).toBe(false)
+    expect(
+      isClass(function stuff() {
+        /**/
+      })
+    ).toBe(false)
   })
 
   it('returns false for other stuff', function() {
-    expect(isClass('hello')).toBe(false)
-    expect(isClass(123)).toBe(false)
+    expect(isClass('hello' as any)).toBe(false)
+    expect(isClass(123 as any)).toBe(false)
   })
 
   it('returns true for classes', function() {
@@ -35,8 +43,16 @@ describe('isClass', function() {
 
 describe('isFunction', function() {
   it('returns true when the value is a function', function() {
-    expect(isFunction(() => {})).toBe(true)
-    expect(isFunction(function() {})).toBe(true)
+    expect(
+      isFunction(() => {
+        /**/
+      })
+    ).toBe(true)
+    expect(
+      isFunction(function() {
+        /**/
+      })
+    ).toBe(true)
     expect(isFunction(class {})).toBe(true)
   })
 

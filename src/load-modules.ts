@@ -1,7 +1,53 @@
+import { ModuleDescriptor, GlobWithOptions, listModules } from './list-modules'
+import { Lifetime } from './lifetime'
+import {
+  RegistrationOptions,
+  REGISTRATION,
+  asClass,
+  asFunction
+} from './registrations'
+import { AwilixContainer } from './container'
+import { isClass, isFunction } from './utils'
+
 const camelCase = require('camel-case')
-const Lifetime = require('./Lifetime')
-const { isClass, isFunction } = require('./utils')
-const registrations = require('./registrations')
+
+/**
+ * The options when invoking loadModules().
+ * @interface LoadModulesOptions
+ */
+export interface LoadModulesOptions {
+  cwd?: string
+  formatName?: NameFormatter | BuiltInNameFormatters
+  registrationOptions?: RegistrationOptions
+}
+
+/**
+ * Name formatting options when using loadModules().
+ * @type BuiltInNameFormatters
+ */
+export type BuiltInNameFormatters = 'camelCase'
+
+/**
+ * Takes in the filename of the module being loaded as well as the module descriptor,
+ * and returns a string which is used to register the module in the container.
+ *
+ * `descriptor.name` is the same as `name`.
+ *
+ * @type {NameFormatter}
+ */
+export type NameFormatter = (
+  name: string,
+  descriptor: ModuleDescriptor
+) => string
+
+/**
+ * Dependencies for `loadModules`
+ */
+export interface LoadModulesDeps {
+  listModules: typeof listModules
+  container: AwilixContainer
+  require(path: string): any
+}
 
 const nameFormatters = {
   camelCase
@@ -33,7 +79,11 @@ const nameFormatters = {
  * @return {Object}
  * Returns an object describing the result.
  */
-module.exports = function loadModules(dependencies, globPatterns, opts) {
+export function loadModules(
+  dependencies: LoadModulesDeps,
+  globPatterns: string | Array<string | GlobWithOptions>,
+  opts?: LoadModulesOptions
+) {
   const container = dependencies.container
   opts = optsWithDefaults(opts, container)
   const modules = dependencies.listModules(globPatterns, opts)
@@ -76,7 +126,10 @@ module.exports = function loadModules(dependencies, globPatterns, opts) {
 /**
  * Returns a new options object with defaults applied.
  */
-function optsWithDefaults(opts, container) {
+function optsWithDefaults(
+  opts: Partial<LoadModulesOptions> | undefined,
+  container: AwilixContainer
+): LoadModulesOptions {
   return Object.assign(
     {},
     {
@@ -100,8 +153,12 @@ function optsWithDefaults(opts, container) {
  * @param {LoadModulesOptions} opts
  * @param {ModuleDescriptor} moduleDescriptor
  */
-function registerDescriptor(container, opts, moduleDescriptor) {
-  const inlineConfig = moduleDescriptor.value[registrations.REGISTRATION]
+function registerDescriptor(
+  container: AwilixContainer,
+  opts: LoadModulesOptions,
+  moduleDescriptor: ModuleDescriptor & { value: any }
+) {
+  const inlineConfig = moduleDescriptor.value[REGISTRATION]
   let name = inlineConfig && inlineConfig.name
   if (!name) {
     name = moduleDescriptor.name
@@ -112,7 +169,7 @@ function registerDescriptor(container, opts, moduleDescriptor) {
       }
 
       if (formatter) {
-        name = formatter(name, moduleDescriptor)
+        name = (formatter as NameFormatter)(name, moduleDescriptor)
       }
     }
   }
@@ -131,9 +188,7 @@ function registerDescriptor(container, opts, moduleDescriptor) {
 
   const reg = regOpts.register
     ? regOpts.register
-    : isClass(moduleDescriptor.value)
-      ? registrations.asClass
-      : registrations.asFunction
+    : isClass(moduleDescriptor.value) ? asClass : asFunction
 
   container.register(name, reg(moduleDescriptor.value, regOpts))
 }
