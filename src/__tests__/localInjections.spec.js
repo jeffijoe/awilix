@@ -1,6 +1,6 @@
-const createContainer = require('../../lib/createContainer')
-const { asClass } = require('../../lib/registrations')
-const ResolutionMode = require('../../lib/ResolutionMode')
+const createContainer = require('../createContainer')
+const { asClass } = require('../registrations')
+const ResolutionMode = require('../ResolutionMode')
 
 class Test {
   constructor({ value }) {
@@ -30,12 +30,12 @@ describe('local injections', function() {
       test2: asClass(Test)
     })
 
-    expect(container.cradle.test.value).to.equal(42)
+    expect(container.cradle.test.value).toBe(42)
 
-    expect(container.cradle.testClassic.test).to.be.an.instanceOf(Test)
-    expect(container.cradle.testClassic.value).to.equal(42)
+    expect(container.cradle.testClassic.test).toBeInstanceOf(Test)
+    expect(container.cradle.testClassic.value).toBe(42)
 
-    expect(() => container.cradle.test2.value).to.throw(
+    expect(() => container.cradle.test2.value).toThrowError(
       /Could not resolve 'value'/
     )
   })
@@ -50,11 +50,11 @@ describe('local injections', function() {
       test2: Test
     })
 
-    expect(container.cradle.test.value).to.equal(42)
+    expect(container.cradle.test.value).toBe(42)
 
-    expect(container.cradle.testClassic.test).to.be.an.instanceOf(Test)
-    expect(container.cradle.testClassic.value).to.equal(42)
-    expect(() => container.cradle.test2.value).to.throw(
+    expect(container.cradle.testClassic.test).toBeInstanceOf(Test)
+    expect(container.cradle.testClassic.value).toBe(42)
+    expect(() => container.cradle.test2.value).toThrowError(
       /Could not resolve 'value'/
     )
   })
@@ -69,11 +69,11 @@ describe('local injections', function() {
       test2: makeTest
     })
 
-    expect(container.cradle.test.value).to.equal(42)
+    expect(container.cradle.test.value).toBe(42)
 
-    expect(container.cradle.testClassic.test.isTest).to.be.true
-    expect(container.cradle.testClassic.value).to.equal(42)
-    expect(() => container.cradle.test2.value).to.throw(
+    expect(container.cradle.testClassic.test.isTest).toBe(true)
+    expect(container.cradle.testClassic.value).toBe(42)
+    expect(() => container.cradle.test2.value).toThrowError(
       /Could not resolve 'value'/
     )
   })

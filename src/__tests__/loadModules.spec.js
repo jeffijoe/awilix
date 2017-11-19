@@ -1,9 +1,8 @@
-const loadModules = require('../../lib/loadModules')
-const spy = sinon.spy
-const createContainer = require('../../lib/createContainer')
-const Lifetime = require('../../lib/Lifetime')
-const ResolutionMode = require('../../lib/ResolutionMode')
-const { asFunction, REGISTRATION } = require('../../lib/registrations')
+const loadModules = require('../loadModules')
+const createContainer = require('../createContainer')
+const Lifetime = require('../Lifetime')
+const ResolutionMode = require('../ResolutionMode')
+const { asFunction, REGISTRATION } = require('../registrations')
 
 const lookupResultFor = modules =>
   Object.keys(modules).map(key => ({
@@ -19,120 +18,120 @@ describe('loadModules', function() {
 
     const modules = {
       'nope.js': undefined,
-      'standard.js': spy(() => 42),
-      'default.js': { default: spy(() => 1337) },
+      'standard.js': jest.fn(() => 42),
+      'default.js': { default: jest.fn(() => 1337) },
       'someClass.js': SomeClass
     }
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
       container,
-      listModules: spy(() => moduleLookupResult),
-      require: spy(path => modules[path])
+      listModules: jest.fn(() => moduleLookupResult),
+      require: jest.fn(path => modules[path])
     }
 
     const result = loadModules(deps, 'anything')
-    result.should.deep.equal({ loadedModules: moduleLookupResult })
-    Object.keys(container.registrations).length.should.equal(3)
-    container.resolve('standard').should.equal(42)
-    container.resolve('default').should.equal(1337)
-    container.resolve('someClass').should.be.an.instanceOf(SomeClass)
+    expect(result).toEqual({ loadedModules: moduleLookupResult })
+    expect(Object.keys(container.registrations).length).toBe(3)
+    expect(container.resolve('standard')).toBe(42)
+    expect(container.resolve('default')).toBe(1337)
+    expect(container.resolve('someClass')).toBeInstanceOf(SomeClass)
   })
 
   it('uses built-in formatter when given a formatName as a string', function() {
     const container = createContainer()
     const modules = {
-      'SomeClass.js': spy(() => 42)
+      'SomeClass.js': jest.fn(() => 42)
     }
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
       container,
-      listModules: spy(() => moduleLookupResult),
-      require: spy(path => modules[path])
+      listModules: jest.fn(() => moduleLookupResult),
+      require: jest.fn(path => modules[path])
     }
     const opts = {
       formatName: 'camelCase'
     }
     const result = loadModules(deps, 'anything', opts)
-    result.should.deep.equal({ loadedModules: moduleLookupResult })
+    expect(result).toEqual({ loadedModules: moduleLookupResult })
     const reg = container.registrations.someClass
-    expect(reg).to.be.ok
+    expect(reg).toBeTruthy()
   })
 
   it('uses the function passed in as formatName', function() {
     const container = createContainer()
     const modules = {
-      'SomeClass.js': spy(() => 42)
+      'SomeClass.js': jest.fn(() => 42)
     }
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
       container,
-      listModules: spy(() => moduleLookupResult),
-      require: spy(path => modules[path])
+      listModules: jest.fn(() => moduleLookupResult),
+      require: jest.fn(path => modules[path])
     }
     const opts = {
       formatName: (name, descriptor) => {
-        expect(descriptor.path).to.be.ok
+        expect(descriptor.path).toBeTruthy()
         return name + 'IsGreat'
       }
     }
     const result = loadModules(deps, 'anything', opts)
-    result.should.deep.equal({ loadedModules: moduleLookupResult })
+    expect(result).toEqual({ loadedModules: moduleLookupResult })
     const reg = container.registrations.SomeClassIsGreat
-    expect(reg).to.be.ok
+    expect(reg).toBeTruthy()
   })
 
   it('does nothing with the name if the string formatName does not match a formatter', function() {
     const container = createContainer()
     const modules = {
-      'SomeClass.js': spy(() => 42)
+      'SomeClass.js': jest.fn(() => 42)
     }
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
       container,
-      listModules: spy(() => moduleLookupResult),
-      require: spy(path => modules[path])
+      listModules: jest.fn(() => moduleLookupResult),
+      require: jest.fn(path => modules[path])
     }
     const opts = {
       formatName: 'unknownformatternope'
     }
     const result = loadModules(deps, 'anything', opts)
-    result.should.deep.equal({ loadedModules: moduleLookupResult })
+    expect(result).toEqual({ loadedModules: moduleLookupResult })
     const reg = container.registrations.SomeClass
-    expect(reg).to.be.ok
+    expect(reg).toBeTruthy()
   })
 
   it('defaults to transient lifetime if option is unreadable', function() {
     const container = createContainer()
     const modules = {
-      'test.js': spy(() => 42)
+      'test.js': jest.fn(() => 42)
     }
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
       container,
-      listModules: spy(() => moduleLookupResult),
-      require: spy(path => modules[path])
+      listModules: jest.fn(() => moduleLookupResult),
+      require: jest.fn(path => modules[path])
     }
     const opts = {
       registrationOptions: {}
     }
     const result = loadModules(deps, 'anything', opts)
-    result.should.deep.equal({ loadedModules: moduleLookupResult })
+    expect(result).toEqual({ loadedModules: moduleLookupResult })
     const reg = container.registrations.test
-    expect(reg).to.be.ok
+    expect(reg).toBeTruthy()
   })
 
   it('supports passing in a register function', function() {
     const container = createContainer()
-    const moduleSpy = spy(() => () => 42)
+    const moduleSpy = jest.fn(() => () => 42)
     const modules = {
       'test.js': moduleSpy
     }
     const moduleLookupResult = lookupResultFor(modules)
-    const registerSpy = spy(asFunction)
+    const registerSpy = jest.fn(asFunction)
     const deps = {
       container,
-      listModules: spy(() => moduleLookupResult),
-      require: spy(path => modules[path])
+      listModules: jest.fn(() => moduleLookupResult),
+      require: jest.fn(path => modules[path])
     }
     const regOpts = {
       register: registerSpy,
@@ -142,26 +141,26 @@ describe('loadModules', function() {
       registrationOptions: regOpts
     }
     const result = loadModules(deps, 'anything', opts)
-    result.should.deep.equal({ loadedModules: moduleLookupResult })
+    expect(result).toEqual({ loadedModules: moduleLookupResult })
     const reg = container.registrations.test
-    expect(reg).to.be.ok
-    expect(registerSpy).to.have.been.calledWith(moduleSpy, regOpts)
+    expect(reg).toBeTruthy()
+    expect(registerSpy).toHaveBeenCalledWith(moduleSpy, regOpts)
   })
 
   it('supports array opts syntax with string (lifetime)', function() {
     const container = createContainer()
     const modules = {
-      'test.js': spy(() => 42),
-      'test2.js': spy(() => 42)
+      'test.js': jest.fn(() => 42),
+      'test2.js': jest.fn(() => 42)
     }
 
     const deps = {
       container,
-      listModules: spy(() => [
+      listModules: jest.fn(() => [
         { name: 'test', path: 'test.js', opts: Lifetime.SCOPED },
         { name: 'test2', path: 'test2.js' }
       ]),
-      require: spy(path => modules[path])
+      require: jest.fn(path => modules[path])
     }
 
     loadModules(deps, 'anything', {
@@ -170,24 +169,24 @@ describe('loadModules', function() {
       }
     })
 
-    container.registrations.test.lifetime.should.equal(Lifetime.SCOPED)
-    container.registrations.test2.lifetime.should.equal(Lifetime.SINGLETON)
+    expect(container.registrations.test.lifetime).toBe(Lifetime.SCOPED)
+    expect(container.registrations.test2.lifetime).toBe(Lifetime.SINGLETON)
   })
 
   it('supports array opts syntax with object', function() {
     const container = createContainer()
     const modules = {
-      'test.js': spy(() => 42),
-      'test2.js': spy(() => 42)
+      'test.js': jest.fn(() => 42),
+      'test2.js': jest.fn(() => 42)
     }
 
     const deps = {
       container,
-      listModules: spy(() => [
+      listModules: jest.fn(() => [
         { name: 'test', path: 'test.js', opts: { lifetime: Lifetime.SCOPED } },
         { name: 'test2', path: 'test2.js' }
       ]),
-      require: spy(path => modules[path])
+      require: jest.fn(path => modules[path])
     }
 
     loadModules(deps, 'anything', {
@@ -196,20 +195,20 @@ describe('loadModules', function() {
       }
     })
 
-    container.registrations.test.lifetime.should.equal(Lifetime.SCOPED)
-    container.registrations.test2.lifetime.should.equal(Lifetime.SINGLETON)
+    expect(container.registrations.test.lifetime).toBe(Lifetime.SCOPED)
+    expect(container.registrations.test2.lifetime).toBe(Lifetime.SINGLETON)
   })
 
   it('supports passing in a default resolutionMode', function() {
     const container = createContainer()
     const modules = {
-      'test.js': spy(() => 42),
-      'test2.js': spy(() => 42)
+      'test.js': jest.fn(() => 42),
+      'test2.js': jest.fn(() => 42)
     }
 
     const deps = {
       container,
-      listModules: spy(() => [
+      listModules: jest.fn(() => [
         {
           name: 'test',
           path: 'test.js',
@@ -217,7 +216,7 @@ describe('loadModules', function() {
         },
         { name: 'test2', path: 'test2.js' }
       ]),
-      require: spy(path => modules[path])
+      require: jest.fn(path => modules[path])
     }
 
     loadModules(deps, 'anything', {
@@ -226,10 +225,10 @@ describe('loadModules', function() {
       }
     })
 
-    container.registrations.test.resolutionMode.should.equal(
+    expect(container.registrations.test.resolutionMode).toBe(
       ResolutionMode.PROXY
     )
-    container.registrations.test2.resolutionMode.should.equal(
+    expect(container.registrations.test2.resolutionMode).toBe(
       ResolutionMode.CLASSIC
     )
   })
@@ -237,7 +236,7 @@ describe('loadModules', function() {
   describe('inline config via REGISTRATION symbol', () => {
     it('uses the inline config over anything else', () => {
       const container = createContainer()
-      const test1Func = spy(() => 42)
+      const test1Func = jest.fn(() => 42)
       test1Func[REGISTRATION] = {
         resolutionMode: ResolutionMode.PROXY
       }
@@ -255,11 +254,11 @@ describe('loadModules', function() {
 
       const deps = {
         container,
-        listModules: spy(() => [
+        listModules: jest.fn(() => [
           { name: 'test', path: 'test.js' },
           { name: 'test2', path: 'test2.js' }
         ]),
-        require: spy(path => modules[path])
+        require: jest.fn(path => modules[path])
       }
 
       loadModules(deps, 'anything', {
@@ -268,25 +267,25 @@ describe('loadModules', function() {
         }
       })
 
-      container.registrations.test.lifetime.should.equal(Lifetime.TRANSIENT)
-      container.registrations.test.resolutionMode.should.equal(
+      expect(container.registrations.test.lifetime).toBe(Lifetime.TRANSIENT)
+      expect(container.registrations.test.resolutionMode).toBe(
         ResolutionMode.PROXY
       )
-      container.registrations.test2.lifetime.should.equal(Lifetime.SCOPED)
-      container.registrations.test2.resolutionMode.should.equal(
+      expect(container.registrations.test2.lifetime).toBe(Lifetime.SCOPED)
+      expect(container.registrations.test2.resolutionMode).toBe(
         ResolutionMode.CLASSIC
       )
     })
 
     it('allows setting a name to register as', () => {
       const container = createContainer()
-      const test1Func = spy(() => 42)
+      const test1Func = jest.fn(() => 42)
       test1Func[REGISTRATION] = {
         name: 'awesome',
         lifetime: Lifetime.SINGLETON
       }
 
-      const test2Func = spy(() => 42)
+      const test2Func = jest.fn(() => 42)
       const modules = {
         'test.js': test1Func,
         'test2.js': test2Func
@@ -294,11 +293,11 @@ describe('loadModules', function() {
 
       const deps = {
         container,
-        listModules: spy(() => [
+        listModules: jest.fn(() => [
           { name: 'test', path: 'test.js' },
           { name: 'test2', path: 'test2.js' }
         ]),
-        require: spy(path => modules[path])
+        require: jest.fn(path => modules[path])
       }
 
       loadModules(deps, 'anything', {
@@ -308,8 +307,8 @@ describe('loadModules', function() {
         }
       })
 
-      container.registrations.awesome.lifetime.should.equal(Lifetime.SINGLETON)
-      container.registrations.formatNameCalled.lifetime.should.equal(
+      expect(container.registrations.awesome.lifetime).toBe(Lifetime.SINGLETON)
+      expect(container.registrations.formatNameCalled.lifetime).toBe(
         Lifetime.SCOPED
       )
     })

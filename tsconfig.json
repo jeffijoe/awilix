@@ -1,23 +1,13 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "experimentalDecorators": true,
     "module": "commonjs",
     "outDir": "dist",
-    "sourceMap": false,
+    "sourceMap": true,
     "target": "es6",
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "noImplicitReturns": true,
-    "strictNullChecks": true
+    "strict": true,
+    "skipLibCheck": true
   },
-  "include": [
-    "test/**/*.ts"
-  ],
-  "exclude": [
-    "examples",
-    "lib",
-    "node_modules",
-    "**/.baseDir.ts"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["examples", "lib", "node_modules"]
 }

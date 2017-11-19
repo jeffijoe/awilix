@@ -2,5 +2,13 @@
   "extends": ["standard", "prettier"],
   "rules": {
     "prefer-const": 1
+  },
+  "globals": {
+    "describe": true,
+    "it": true,
+    "beforeAll": true,
+    "beforeEach": true,
+    "expect": true,
+    "jest": true
   }
 }

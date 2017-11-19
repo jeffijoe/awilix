@@ -1,9 +1,9 @@
-const { asValue, asFunction, asClass } = require('../../lib/registrations')
-const createContainer = require('../../lib/createContainer')
-const Lifetime = require('../../lib/Lifetime')
-const ResolutionMode = require('../../lib/ResolutionMode')
-const AwilixNotAFunctionError = require('../../lib/AwilixNotAFunctionError')
-const { catchError } = require('../helpers/errorHelpers')
+const { throws } = require('smid')
+const { asValue, asFunction, asClass } = require('../registrations')
+const createContainer = require('../createContainer')
+const Lifetime = require('../Lifetime')
+const ResolutionMode = require('../ResolutionMode')
+const AwilixNotAFunctionError = require('../AwilixNotAFunctionError')
 
 const testFn = () => 1337
 const depsFn = testClass => testClass
@@ -37,22 +37,22 @@ describe('registrations', function() {
 
   describe('asValue', function() {
     it('creates a registration with a resolve method', function() {
-      asValue(42).resolve.should.be.a('function')
+      expect(typeof asValue(42).resolve).toBe('function')
     })
   })
 
   describe('asFunction', function() {
     it('creates a registration with a resolve method', function() {
-      asFunction(testFn).resolve.should.be.a('function')
+      expect(typeof asFunction(testFn).resolve).toBe('function')
     })
 
     it('defaults to transient', function() {
-      const testSpy = sinon.spy(testFn)
+      const testSpy = jest.fn(testFn)
       const reg = asFunction(() => testSpy())
       reg.resolve(container)
       reg.resolve(container)
 
-      testSpy.should.have.been.calledTwice
+      expect(testSpy).toHaveBeenCalledTimes(2)
     })
 
     it('manually resolves function dependencies', function() {
@@ -61,8 +61,8 @@ describe('registrations', function() {
       })
       const reg = asFunction(depsFn).classic()
       const result = reg.resolve(container)
-      reg.resolve.should.be.a('function')
-      result.should.be.an.instanceOf(TestClass)
+      expect(typeof reg.resolve).toBe('function')
+      expect(result).toBeInstanceOf(TestClass)
     })
 
     it('manually resolves multiple function dependencies', function() {
@@ -76,9 +76,9 @@ describe('registrations', function() {
         resolutionMode: ResolutionMode.CLASSIC
       })
       const result = reg.resolve(container)
-      reg.resolve.should.be.a('function')
-      result.testClass.should.be.an.instanceOf(TestClass)
-      result.needsCradle.should.be.an.instanceOf(NeedsCradle)
+      expect(typeof reg.resolve).toBe('function')
+      expect(result.testClass).toBeInstanceOf(TestClass)
+      expect(result.needsCradle).toBeInstanceOf(NeedsCradle)
     })
 
     it('supports arrow functions', function() {
@@ -90,25 +90,25 @@ describe('registrations', function() {
         dep: asValue(42)
       })
 
-      expect(container.resolve('withParen')).to.equal(42)
-      expect(container.resolve('withoutParen')).to.equal(42)
+      expect(container.resolve('withParen')).toBe(42)
+      expect(container.resolve('withoutParen')).toBe(42)
     })
 
     it('throws AwilixNotAFunctionError when given null', function() {
-      const err = catchError(() => asFunction(null))
-      err.should.be.an.instanceof(AwilixNotAFunctionError)
+      const err = throws(() => asFunction(null))
+      expect(err).toBeInstanceOf(AwilixNotAFunctionError)
     })
   })
 
   describe('asClass', function() {
     it('creates a registration with a resolve method', function() {
-      asClass(TestClass).resolve.should.be.a('function')
+      expect(typeof asClass(TestClass).resolve).toBe('function')
     })
 
     it('resolves the class by newing it up', function() {
       const reg = asClass(TestClass)
       const result = reg.resolve(container)
-      result.should.be.an.instanceOf(TestClass)
+      expect(result).toBeInstanceOf(TestClass)
     })
 
     it('resolves dependencies manually', function() {
@@ -117,8 +117,8 @@ describe('registrations', function() {
       })
       const withDepsReg = asClass(WithDeps).classic()
       const result = withDepsReg.resolve(container)
-      result.should.be.an.instanceOf(WithDeps)
-      result.testClass.should.be.an.instanceOf(TestClass)
+      expect(result).toBeInstanceOf(WithDeps)
+      expect(result.testClass).toBeInstanceOf(TestClass)
     })
 
     it('resolves single dependency as cradle', function() {
@@ -127,8 +127,8 @@ describe('registrations', function() {
       })
       const reg = asClass(NeedsCradle).proxy()
       const result = reg.resolve(container)
-      result.should.be.an.instanceOf(NeedsCradle)
-      result.testClass.should.be.an.instanceOf(TestClass)
+      expect(result).toBeInstanceOf(NeedsCradle)
+      expect(result.testClass).toBeInstanceOf(TestClass)
     })
 
     it('resolves multiple dependencies manually', function() {
@@ -140,14 +140,14 @@ describe('registrations', function() {
         resolutionMode: ResolutionMode.CLASSIC
       })
       const result = reg.resolve(container)
-      result.should.be.an.instanceOf(MultipleDeps)
-      result.testClass.should.be.an.instanceOf(TestClass)
-      result.needsCradle.should.be.an.instanceOf(NeedsCradle)
+      expect(result).toBeInstanceOf(MultipleDeps)
+      expect(result.testClass).toBeInstanceOf(TestClass)
+      expect(result.needsCradle).toBeInstanceOf(NeedsCradle)
     })
 
     it('throws an Error when given null', function() {
-      const err = catchError(() => asClass(null))
-      err.should.be.an.instanceof(AwilixNotAFunctionError)
+      const err = throws(() => asClass(null))
+      expect(err).toBeInstanceOf(AwilixNotAFunctionError)
     })
   })
 
@@ -157,20 +157,20 @@ describe('registrations', function() {
 
       subjects.forEach(x => {
         let retVal = x.setLifetime(Lifetime.SCOPED)
-        retVal.should.equal(x)
-        retVal.lifetime.should.equal(Lifetime.SCOPED)
+        expect(retVal).toBe(x)
+        expect(retVal.lifetime).toBe(Lifetime.SCOPED)
 
         retVal = retVal.transient()
-        retVal.should.equal(x)
-        retVal.lifetime.should.equal(Lifetime.TRANSIENT)
+        expect(retVal).toBe(x)
+        expect(retVal.lifetime).toBe(Lifetime.TRANSIENT)
 
         retVal = retVal.singleton()
-        retVal.should.equal(x)
-        retVal.lifetime.should.equal(Lifetime.SINGLETON)
+        expect(retVal).toBe(x)
+        expect(retVal.lifetime).toBe(Lifetime.SINGLETON)
 
         retVal = retVal.scoped()
-        retVal.should.equal(x)
-        retVal.lifetime.should.equal(Lifetime.SCOPED)
+        expect(retVal).toBe(x)
+        expect(retVal.lifetime).toBe(Lifetime.SCOPED)
       })
     })
 
@@ -179,7 +179,7 @@ describe('registrations', function() {
 
       subjects.forEach(x => {
         const retVal = x.inject(() => ({ value: 42 }))
-        expect(retVal).to.equal(x)
+        expect(retVal).toBe(x)
       })
     })
   })
