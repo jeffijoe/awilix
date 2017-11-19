@@ -17,7 +17,7 @@
     "precommit": "lint-staged && npm test",
     "cover": "npm run test -- --coverage",
     "coveralls":
-      "tsc --noEmit && istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- test/**/*.js --require test/index.js && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+      "npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "do-publish": "npm run lint && npm run cover && npm publish"
   },
   "files": ["lib", "LICENSE.md", "README.md"],
