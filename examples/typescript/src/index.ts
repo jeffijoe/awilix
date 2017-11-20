@@ -9,7 +9,7 @@ import TestService from './services/TestService'
 import DependentService from './services/DependentService'
 
 // Create the container
-const container: AwilixContainer = createContainer({
+const container = createContainer({
   injectionMode: InjectionMode.CLASSIC
 })
 
@@ -19,8 +19,11 @@ container.register({
   depService: asClass(DependentService).classic()
 })
 
-// Resolve a dependency
-let dep: DependentService = container.cradle.depService
+// Resolve a dependency using the cradle.
+let dep1: DependentService = container.cradle.depService
+// Resolve a dependency using `resolve`
+let dep2 = container.resolve<DependentService>('depService')
 
 // Test that all is well, should produce 'Hello world!'
-console.log(dep.getInnerData())
+console.log(dep1.getInnerData())
+console.log(dep2.getInnerData())
