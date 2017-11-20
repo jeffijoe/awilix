@@ -24,10 +24,10 @@ Extremely powerful **Inversion of Control** (IoC) container for Node with depend
 * [Resolution modes](#resolution-modes)
 * [Auto-loading modules](#auto-loading-modules)
 * [Per-module local injections](#per-module-local-injections)
-* [Inlining registration options](#inlining-registration-options)
+* [Inlining resolver options](#inlining-resolver-options)
 * [API](#api)
   - [The `awilix` object](#the-awilix-object)
-  - [Registration options](#registration-options)
+  - [Resolver options](#resolver-options)
   - [`createContainer()`](#createcontainer)
   - [`asFunction()`](#asfunction)
   - [`asClass()`](#asclass)
@@ -173,8 +173,8 @@ Awilix supports managing the lifetime of instances. This means that you can cont
 There are 3 lifetime types available.
 
 * `Lifetime.TRANSIENT`: This is the default. The registration is resolved every time it is needed. This means if you resolve a class more than once, you will get back a new instance every time.
-* `Lifetime.SCOPED`: The registration is scoped to the container - that means that the resolved value will be reused when resolved from the same scope.
-* `Lifetime.SINGLETON`: The registration is always reused no matter what.
+* `Lifetime.SCOPED`: The registration is scoped to the container - that means that the resolved value will be reused when resolved from the same scope (or a child scope).
+* `Lifetime.SINGLETON`: The registration is always reused no matter what - that means that the resolved value is cached in the root container.
 
 They are exposed on the `awilix.Lifetime` object.
 
@@ -191,7 +191,7 @@ container.registerClass({
   mailService: [MailService, { lifetime: Lifetime.SINGLETON }]
 })
 
-// or using the registration functions directly..
+// or using the resolver functions directly..
 const { asClass, asFunction, asValue } = awilix
 container.register({
   mailService: asClass(MailService).lifetime(Lifetime.SINGLETON)
@@ -328,7 +328,7 @@ Awilix v2.3.0 introduced an alternative resolution mode: `CLASSIC`. The resoluti
     }
     ```
 
-Resolution modes can be set per-container and per-registration. The most specific one wins.
+Resolution modes can be set per-container and per-resolver. The most specific one wins.
 
 > Note: I personally don't see why you would want to have different resolution modes in a project, but
 > if the need arises, Awilix supports it.
@@ -368,7 +368,7 @@ container.loadModules([
   'services/**/*.js',
   'repositories/**/*.js'
 ], {
-  registrationOptions: {
+  resolverOptions: {
     resolutionMode: ResolutionMode.CLASSIC
   }
 })
@@ -435,8 +435,8 @@ container.loadModules([
   // by default loaded modules are registered with the
   // name of the file (minus the extension)
   formatName: 'camelCase',
-  // Apply registration options to all modules.
-  registrationOptions: {
+  // Apply resolver options to all modules.
+  resolverOptions: {
     // We can give these auto-loaded modules
     // the deal of a lifetime! (see what I did there?)
     // By default it's `TRANSIENT`.
@@ -511,9 +511,9 @@ Now `timeout` is only available to the modules it was configured for.
 
 **IMPORTANT**: the way this works is by wrapping the `cradle` in another proxy that provides the returned values from the `inject` function. This means if you pass along the injected cradle object, anything with access to it can access the local injections.
 
-# Inlining registration options
+# Inlining resolver options
 
-Awilix 2.8 added support for inline registration options. This is best explained with an example.
+Awilix 2.8 added support for inline resolver options. This is best explained with an example.
 
 **services/awesome-service.js**:
 
@@ -585,9 +585,9 @@ When importing `awilix`, you get the following top-level API:
 
 These are documented below.
 
-## Registration options
+## Resolver options
 
-Whenever you see a place where you can pass in **registration options**, you can pass in an object with the following props:
+Whenever you see a place where you can pass in **resolver options**, you can pass in an object with the following props:
 
 * `lifetime`: An `awilix.Lifetime.*` string, such as `awilix.Lifetime.SCOPED`
 * `resolutionMode`: An `awilix.ResolutionMode.*` string, such as `awilix.ResolutionMode.CLASSIC`
@@ -604,7 +604,7 @@ container.register({
 container.loadModules([
   ['some/path/to/*.js', { register: asClass }]
 ], {
-  registrationOptions: {
+  resolverOptions: {
     lifetime: Lifetime.SCOPED
   }
 })
@@ -626,7 +626,7 @@ Args:
 
 Used with `container.register({ userService: asFunction(makeUserService) })`. Tells Awilix to invoke the function without any context.
 
-The returned registration has the following chainable (fluid) API:
+The returned resolver has the following chainable (fluid) API:
 
 * `asFunction(fn).setLifetime(lifetime: string)`: sets the lifetime of the registration to the given value.
 * `asFunction(fn).transient()`: same as `asFunction(fn).setLifetime(Lifetime.TRANSIENT)`.
@@ -638,7 +638,7 @@ The returned registration has the following chainable (fluid) API:
 
 Used with `container.register({ userService: asClass(UserService) })`. Tells Awilix to instantiate the given function as a class using `new`.
 
-The returned registration has the same chainable API as [`asFunction`](#asfunction).
+The returned resolver has the same chainable API as [`asFunction`](#asfunction).
 
 ## `asValue()`
 
@@ -736,13 +736,13 @@ container.cradle.leet === 1337
 
 **Signatures**
 
-* `register(name: string, registration: Registration): AwilixContainer`
-* `register(nameAndRegistrationPair: NameAndRegistrationPair): AwilixContainer`
+* `register(name: string, resolver: Resolver): AwilixContainer`
+* `register(nameAndResolverPair: NameAndResolverPair): AwilixContainer`
 
 Registers modules with the container. This function is used by the `registerValue`, `registerFunction` and `registerClass` functions.
 
 Awilix needs to know how to resolve the modules, so let's pull out the
-registration functions:
+resolver functions:
 
 ```js
 const awilix = require('awilix')
@@ -758,7 +758,7 @@ Now we need to use them. There are multiple syntaxes for the `register` function
 **Both styles supports chaining! `register` returns the container!**
 
 ```js
-// name-registration)
+// name-registration
 container.register('connectionString', asValue('localhost:1433;user=...'))
 container.register('mailService', asFunction(makeMailService))
 container.register('context', asClass(SessionContext))
@@ -812,14 +812,14 @@ container
 
 **Signatures**
 
-* `registerFunction(fn: Function, opts?: RegistrationOptions): AwilixContainer` (infers the name using `fn.name`)
-* `registerFunction(name: string, fn: Function, opts?: RegistrationOptions): AwilixContainer`
-* `registerFunction(name: string, funcAndOptionsPair: [Function, RegistrationOptions]): AwilixContainer`
+* `registerFunction(fn: Function, opts?: ResolverOptions): AwilixContainer` (infers the name using `fn.name`)
+* `registerFunction(name: string, fn: Function, opts?: ResolverOptions): AwilixContainer`
+* `registerFunction(name: string, funcAndOptionsPair: [Function, ResolverOptions]): AwilixContainer`
 * `registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair): AwilixContainer`
 
 Registers a standard function to be called whenever being resolved. The factory function can return anything it wants, and whatever it returns is what is passed to dependents.
 
-By default all registrations are `TRANSIENT`, meaning resolutions will **not** be cached. This is configurable on a per-registration level.
+By default all registrations are `TRANSIENT`, meaning resolutions will **not** be cached. This is configurable on a per-resolver level.
 
 **The array syntax for values means `[value, options]`.** This is also valid for `registerClass`.
 
@@ -865,15 +865,14 @@ setTimeout(() => {
 
 **Signatures**
 
-* `registerClass(ctor: Constructor<T>, opts?: RegistrationOptions): AwilixContainer` (infers the name using `ctor.name`)
-
-* `registerClass<T>(name: string, ctor: Constructor<T>, opts?: RegistrationOptions): AwilixContainer`
-* `registerClass<T>(name: string, ctorAndOptionsPair: [Constructor<T>, RegistrationOptions]): AwilixContainer`
+* `registerClass<T>(ctor: Constructor<T>, opts?: ResolverOptions): AwilixContainer` (infers the name using `ctor.name`)
+* `registerClass<T>(name: string, ctor: Constructor<T>, opts?: ResolverOptions): AwilixContainer`
+* `registerClass<T>(name: string, ctorAndOptionsPair: [Constructor<T>, ResolverOptions]): AwilixContainer`
 * `registerClass(nameAndClassPair: RegisterNameAndClassPair): AwilixContainer`
 
 Same as `registerFunction`, except it will use `new`.
 
-By default all registrations are `TRANSIENT`, meaning resolutions will **not** be cached. This is configurable on a per-registration level.
+By default all registrations are `TRANSIENT`, meaning resolutions will **not** be cached. This is configurable on a per-resolver level.
 
 ```js
 class Exclaimer {
@@ -917,7 +916,7 @@ Args:
 * `globPatterns`: Array of glob patterns that match JS files to load.
 * `opts.cwd`: The `cwd` being passed to `glob`. Defaults to `process.cwd()`.
 * `opts.formatName`: Can be either `'camelCase'`, or a function that takes the current name as the first parameter and returns the new name. Default is to pass the name through as-is. The 2nd parameter is a full module descriptor.
-* `registrationOptions`: An `object` passed to the registrations. Used to configure the lifetime, resolution mode and more of the loaded modules.
+* `resolverOptions`: An `object` passed to the resolvers. Used to configure the lifetime, resolution mode and more of the loaded modules.
 
 Example:
 
@@ -937,7 +936,7 @@ container.loadModules([
   'repositories/*.js',
   'db/db.js'
 ], {
-  registrationOptions: {
+  resolverOptions: {
     lifetime: Lifetime.SINGLETON
   }
 })
@@ -950,7 +949,7 @@ container.loadModules([
   'repositories/*.js',
   'db/db.js'
 ], {
-  registrationOptions: {
+  resolverOptions: {
     lifetime: Lifetime.SINGLETON // db and repositories will be singleton
   }
 })
@@ -985,7 +984,7 @@ container.cradle.accountRepository.getUser(123)
 container.cradle.emailService.sendEmail('test@test.com', 'waddup')
 ```
 
-The `['glob', Lifetime.SCOPED]` syntax is a shorthand for passing in registration options like so: `['glob', { lifetime: Lifetime.SCOPED }]`
+The `['glob', Lifetime.SCOPED]` syntax is a shorthand for passing in resolver options like so: `['glob', { lifetime: Lifetime.SCOPED }]`
 
 ### `container.createScope()`
 
@@ -1051,7 +1050,7 @@ scope.cradle.scopedValue === 'Hello scope'
 container.cradle.someValue
 // throws AwilixResolutionException
 // because the root container does not know
-// of the registration.
+// of the resolver.
 ```
 
 Things registered in the scope take precedence over it's parent.

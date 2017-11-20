@@ -16,7 +16,6 @@
     "declaration": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": "./",
     "lib": ["es6", "es7"]
   }
 }

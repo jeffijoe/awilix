@@ -3,7 +3,7 @@ import * as util from 'util'
 import { createContainer, AwilixContainer } from '../container'
 import { Lifetime } from '../lifetime'
 import { AwilixResolutionError } from '../errors'
-import { asClass, asFunction, asValue } from '../registrations'
+import { asClass, asFunction, asValue } from '../resolvers'
 import { ResolutionMode } from '../resolution-mode'
 
 class Test {
@@ -770,9 +770,7 @@ describe('memoizing registrations', () => {
       expect(container.build(asClass(BuildTest).proxy())).toBeInstanceOf(
         BuildTest
       )
-      expect(container.build<BuildTest>(asClass(BuildTest).proxy()).val).toBe(
-        1337
-      )
+      expect(container.build(asClass(BuildTest).proxy()).val).toBe(1337)
     })
 
     it('returns resolved value when passed a function', () => {

@@ -1,7 +1,7 @@
 import * as glob from 'glob'
 import * as path from 'path'
 import { flatten } from './utils'
-import { RegistrationOptions } from './registrations'
+import { ResolverOptions } from './resolvers'
 
 /**
  * The options when invoking listModules().
@@ -26,7 +26,7 @@ export interface ModuleDescriptor {
 /**
  * A glob pattern with associated registration options.
  */
-export type GlobWithOptions = [string] | [string, RegistrationOptions]
+export type GlobWithOptions = [string] | [string, ResolverOptions<any>]
 
 // Regex to extract the module name.
 const nameExpr = /(.*)\..*/i
@@ -51,9 +51,9 @@ function _listModules(
   opts?: ListModulesOptions
 ): Array<ModuleDescriptor> {
   opts = Object.assign({ cwd: process.cwd(), glob: glob.sync }, opts)
-  let patternOpts: RegistrationOptions | null = null
+  let patternOpts: ResolverOptions<any> | null = null
   if (globPattern instanceof Array) {
-    patternOpts = globPattern[1] as RegistrationOptions
+    patternOpts = globPattern[1] as ResolverOptions<any>
     globPattern = globPattern[0]
   }
 

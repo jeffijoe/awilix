@@ -1,5 +1,5 @@
 import { createContainer } from '../container'
-import { asClass } from '../registrations'
+import { asClass } from '../resolvers'
 import { ResolutionMode } from '../resolution-mode'
 
 class Test {

@@ -1,5 +1,5 @@
 import { throws } from 'smid'
-import { asValue, asFunction, asClass } from '../registrations'
+import { asValue, asFunction, asClass } from '../resolvers'
 import { createContainer, AwilixContainer } from '../container'
 import { Lifetime } from '../lifetime'
 import { ResolutionMode } from '../resolution-mode'

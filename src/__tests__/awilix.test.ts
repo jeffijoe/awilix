@@ -2,7 +2,7 @@ import * as awilix from '../awilix'
 import { createContainer } from '../container'
 import { listModules } from '../list-modules'
 import { AwilixResolutionError } from '../errors'
-import { asValue, asClass, asFunction } from '../registrations'
+import { asValue, asClass, asFunction } from '../resolvers'
 
 describe('awilix', function() {
   it('exists', function() {

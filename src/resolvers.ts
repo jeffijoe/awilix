@@ -3,33 +3,33 @@ import { ResolutionMode, ResolutionModeType } from './resolution-mode'
 import { isFunction, uniq } from './utils'
 import { parseParameterList } from './param-parser'
 import { AwilixNotAFunctionError } from './errors'
-import { AwilixContainer } from './container'
+import { AwilixContainer, FunctionReturning } from './container'
 
 /**
- * REGISTRATION symbol can be used by modules loaded by
+ * RESOLVER symbol can be used by modules loaded by
  * `loadModules` to configure their lifetime, resolution mode, etc.
  */
-export const REGISTRATION = Symbol('Awilix Registration Config')
+export const RESOLVER = Symbol('Awilix Resolver Config')
 
 /**
  * Gets passed the container and is expected to return an object
  * whose properties are accessible at construction time for the
- * configured registration.
+ * configured resolver.
  *
  * @type {Function}
  */
 export type InjectorFunction = (container: AwilixContainer) => object
 
 /**
- * A registration object returned by asClass(), asFunction() or asValue().
+ * A resolver object returned by asClass(), asFunction() or asValue().
  */
-export interface Registration {
+export interface Resolver<T> {
   lifetime: LifetimeType
-  resolve(container: AwilixContainer): any
+  resolve(container: AwilixContainer): T
 }
 
 /**
- * Setter function helpers for build registrations.
+ * Setter function helpers for build resolvers.
  */
 export interface BuildSetters {
   setLifetime(lifetime: LifetimeType): this
@@ -43,9 +43,9 @@ export interface BuildSetters {
 }
 
 /**
- * A registration object created by asClass() or asFunction().
+ * A resolver object created by asClass() or asFunction().
  */
-export interface BuildRegistration extends Registration, BuildSetters {
+export interface BuildResolver<T> extends Resolver<T>, BuildSetters {
   resolutionMode?: ResolutionModeType
   injector?: InjectorFunction
 }
@@ -54,7 +54,7 @@ export interface BuildRegistration extends Registration, BuildSetters {
  * The options when registering a class, function or value.
  * @type RegistrationOptions
  */
-export interface RegistrationOptions {
+export interface ResolverOptions<T> {
   /**
    * Only used for inline configuration with `loadModules`.
    */
@@ -74,7 +74,7 @@ export interface RegistrationOptions {
   /**
    * Registration function to use.
    */
-  register?: (...args: any[]) => Registration
+  resolver?: (...args: any[]) => Resolver<T>
 }
 
 /**
@@ -105,9 +105,9 @@ function makeOptions<T, O>(defaults: T, ...rest: Array<O | undefined>): T & O {
  * @return {object}
  * The interface.
  */
-function makeFluidInterface(obj: Registration): BuildSetters {
+function makeFluidInterface<T>(obj: Resolver<T>): BuildSetters {
   // For TS.
-  const buildRegistration = obj as BuildRegistration
+  const buildRegistration = obj as BuildResolver<T>
 
   function setLifetime(value: LifetimeType) {
     buildRegistration.lifetime = value
@@ -137,7 +137,7 @@ function makeFluidInterface(obj: Registration): BuildSetters {
 }
 
 /**
- * Creates a simple value registration where the given value will always be resolved.
+ * Creates a simple value resolver where the given value will always be resolved.
  *
  * @param  {string} name
  * The name to register the value as.
@@ -146,9 +146,9 @@ function makeFluidInterface(obj: Registration): BuildSetters {
  * The value to resolve.
  *
  * @return {object}
- * The registration.
+ * The resolver.
  */
-export function asValue(value: any): Registration {
+export function asValue<T>(value: T): Resolver<T> {
   const resolve = () => {
     return value
   }
@@ -160,7 +160,7 @@ export function asValue(value: any): Registration {
 }
 
 /**
- * Creates a factory registration, where the given factory function
+ * Creates a factory resolver, where the given factory function
  * will be invoked with `new` when requested.
  *
  * @param  {string} name
@@ -173,12 +173,12 @@ export function asValue(value: any): Registration {
  * Additional options for the resolver.
  *
  * @return {object}
- * The registration.
+ * The resolver.
  */
-export function asFunction(
-  fn: Function,
-  opts?: RegistrationOptions
-): BuildRegistration {
+export function asFunction<T>(
+  fn: FunctionReturning<T>,
+  opts?: ResolverOptions<T>
+): BuildResolver<T> {
   if (!isFunction(fn)) {
     throw new AwilixNotAFunctionError('asFunction', 'function', typeof fn)
   }
@@ -187,7 +187,7 @@ export function asFunction(
     lifetime: Lifetime.TRANSIENT
   }
 
-  opts = makeOptions(defaults, opts, (fn as any)[REGISTRATION])
+  opts = makeOptions(defaults, opts, (fn as any)[RESOLVER])
 
   const resolve = generateResolve(fn)
   const result = {
@@ -197,7 +197,7 @@ export function asFunction(
     resolutionMode: opts.resolutionMode
   }
   result.resolve = resolve.bind(result)
-  return Object.assign(result, makeFluidInterface(result))
+  return Object.assign(result, makeFluidInterface<T>(result))
 }
 
 /**
@@ -211,7 +211,7 @@ export function asFunction(
 export type Constructor<T> = { new (...args: any[]): T }
 
 /**
- * Like a factory registration, but for classes that require `new`.
+ * Like a factory resolver, but for classes that require `new`.
  *
  * @param  {string} name
  * The name to register the value as.
@@ -223,12 +223,12 @@ export type Constructor<T> = { new (...args: any[]): T }
  * Additional options for the resolver.
  *
  * @return {object}
- * The registration.
+ * The resolver.
  */
 export function asClass<T = {}>(
   Type: Constructor<T>,
-  opts?: RegistrationOptions
-): BuildRegistration {
+  opts?: ResolverOptions<T>
+): BuildResolver<T> {
   if (!isFunction(Type)) {
     throw new AwilixNotAFunctionError('asClass', 'class', typeof Type)
   }
@@ -237,7 +237,7 @@ export function asClass<T = {}>(
     lifetime: Lifetime.TRANSIENT
   }
 
-  opts = makeOptions(defaults, opts, (Type as any)[REGISTRATION])
+  opts = makeOptions(defaults, opts, (Type as any)[RESOLVER])
 
   // A function to handle object construction for us, as to make the generateResolve more reusable
   const newClass = function newClass() {
@@ -253,7 +253,7 @@ export function asClass<T = {}>(
   }
 
   result.resolve = resolve.bind(result)
-  return Object.assign(result, makeFluidInterface(result))
+  return Object.assign(result, makeFluidInterface<T>(result))
 }
 
 /**
@@ -346,7 +346,7 @@ function createInjectorProxy(
  * Returns a resolve function used to construct the dependency graph
  *
  * @this {Registration}
- * The `this` context is a registration.
+ * The `this` context is a resolver.
  *
  * @param {Function} fn
  * The function to construct
@@ -369,10 +369,13 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
   // Try to resolve the dependencies
   const dependencies = parseParameterList(dependencyParseTarget.toString())
 
-  // Use a regular function instead of an arrow function to facilitate binding to the registration.
-  return function resolve(this: BuildRegistration, container: AwilixContainer) {
+  // Use a regular function instead of an arrow function to facilitate binding to the resolver.
+  return function resolve(
+    this: BuildResolver<any>,
+    container: AwilixContainer
+  ) {
     // Because the container holds a global reolutionMode we need to determine it in the proper order or precedence:
-    // registration -> container -> default value
+    // resolver -> container -> default value
     const resolutionMode =
       this.resolutionMode ||
       container.options.resolutionMode ||

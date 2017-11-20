@@ -2,7 +2,7 @@ import { loadModules, LoadModulesOptions } from '../load-modules'
 import { createContainer } from '../container'
 import { Lifetime } from '../lifetime'
 import { ResolutionMode } from '../resolution-mode'
-import { asFunction, REGISTRATION, BuildRegistration } from '../registrations'
+import { asFunction, RESOLVER, BuildResolver } from '../resolvers'
 
 const lookupResultFor = (modules: any) =>
   Object.keys(modules).map(key => ({
@@ -112,7 +112,7 @@ describe('loadModules', function() {
       require: jest.fn(path => modules[path])
     }
     const opts = {
-      registrationOptions: {}
+      resolverOptions: {}
     }
     const result = loadModules(deps, 'anything', opts)
     expect(result).toEqual({ loadedModules: moduleLookupResult })
@@ -138,7 +138,7 @@ describe('loadModules', function() {
       lifetime: Lifetime.SCOPED
     }
     const opts = {
-      registrationOptions: regOpts
+      resolverOptions: regOpts
     }
     const result = loadModules(deps, 'anything', opts)
     expect(result).toEqual({ loadedModules: moduleLookupResult })
@@ -164,7 +164,7 @@ describe('loadModules', function() {
     }
 
     loadModules(deps, 'anything', {
-      registrationOptions: {
+      resolverOptions: {
         lifetime: Lifetime.SINGLETON
       }
     })
@@ -190,7 +190,7 @@ describe('loadModules', function() {
     }
 
     loadModules(deps, 'anything', {
-      registrationOptions: {
+      resolverOptions: {
         lifetime: Lifetime.SINGLETON
       }
     })
@@ -220,16 +220,16 @@ describe('loadModules', function() {
     }
 
     loadModules(deps, 'anything', {
-      registrationOptions: {
+      resolverOptions: {
         resolutionMode: ResolutionMode.CLASSIC
       }
     })
 
     expect(
-      (container.registrations.test as BuildRegistration).resolutionMode
+      (container.registrations.test as BuildResolver<any>).resolutionMode
     ).toBe(ResolutionMode.PROXY)
     expect(
-      (container.registrations.test2 as BuildRegistration).resolutionMode
+      (container.registrations.test2 as BuildResolver<any>).resolutionMode
     ).toBe(ResolutionMode.CLASSIC)
   })
 
@@ -237,13 +237,13 @@ describe('loadModules', function() {
     it('uses the inline config over anything else', () => {
       const container = createContainer()
       const test1Func = jest.fn(() => 42)
-      ;(test1Func as any)[REGISTRATION] = {
+      ;(test1Func as any)[RESOLVER] = {
         resolutionMode: ResolutionMode.PROXY
       }
 
       class Test2Class {}
 
-      ;(Test2Class as any)[REGISTRATION] = {
+      ;(Test2Class as any)[RESOLVER] = {
         lifetime: Lifetime.SCOPED
       }
 
@@ -262,25 +262,25 @@ describe('loadModules', function() {
       }
 
       loadModules(deps, 'anything', {
-        registrationOptions: {
+        resolverOptions: {
           resolutionMode: ResolutionMode.CLASSIC
         }
       })
 
       expect(container.registrations.test.lifetime).toBe(Lifetime.TRANSIENT)
       expect(
-        (container.registrations.test as BuildRegistration).resolutionMode
+        (container.registrations.test as BuildResolver<any>).resolutionMode
       ).toBe(ResolutionMode.PROXY)
       expect(container.registrations.test2.lifetime).toBe(Lifetime.SCOPED)
       expect(
-        (container.registrations.test2 as BuildRegistration).resolutionMode
+        (container.registrations.test2 as BuildResolver<any>).resolutionMode
       ).toBe(ResolutionMode.CLASSIC)
     })
 
     it('allows setting a name to register as', () => {
       const container = createContainer()
       const test1Func = jest.fn(() => 42)
-      ;(test1Func as any)[REGISTRATION] = {
+      ;(test1Func as any)[RESOLVER] = {
         name: 'awesome',
         lifetime: Lifetime.SINGLETON
       }
@@ -302,7 +302,7 @@ describe('loadModules', function() {
 
       loadModules(deps, 'anything', {
         formatName: desc => 'formatNameCalled',
-        registrationOptions: {
+        resolverOptions: {
           lifetime: Lifetime.SCOPED
         }
       })

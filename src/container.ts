@@ -5,13 +5,13 @@ import {
   loadModules as realLoadModules
 } from './load-modules'
 import {
-  Registration,
+  Resolver,
   Constructor,
-  RegistrationOptions,
+  ResolverOptions,
   asClass,
   asFunction,
   asValue
-} from './registrations'
+} from './resolvers'
 import { last, nameValueToObject, isClass } from './utils'
 import { ResolutionMode, ResolutionModeType } from './resolution-mode'
 import { Lifetime, LifetimeType } from './lifetime'
@@ -63,7 +63,7 @@ export interface AwilixContainer {
   /**
    * Adds a single registration that using a pre-constructed resolver.
    */
-  register(name: string | symbol, registration: Registration): this
+  register<T>(name: string | symbol, registration: Resolver<T>): this
   /**
    * Pairs resolvers to registration names and registers them.
    */
@@ -74,7 +74,7 @@ export interface AwilixContainer {
    */
   registerClass<T>(
     ctor: Constructor<T>,
-    opts?: RegistrationOptionsOrLifetime
+    opts?: RegistrationOptionsOrLifetime<T>
   ): this
   /**
    * Registers a class that will be instantiated when resolved.
@@ -82,14 +82,14 @@ export interface AwilixContainer {
   registerClass<T>(
     name: string | symbol,
     ctor: Constructor<T>,
-    opts?: RegistrationOptionsOrLifetime
+    opts?: RegistrationOptionsOrLifetime<T>
   ): this
   /**
    * Registers a class with options.
    */
   registerClass<T>(
     name: string | symbol,
-    ctorAndOptionsPair: [Constructor<T>, RegistrationOptionsOrLifetime]
+    ctorAndOptionsPair: [Constructor<T>, RegistrationOptionsOrLifetime<T>]
   ): this
   /**
    * Pairs classes to registration names and registers them.
@@ -100,7 +100,10 @@ export interface AwilixContainer {
    * with dependencies when resolved, using it's `name` property as the
    * registration name.
    */
-  registerFunction(fn: Function, opts?: RegistrationOptionsOrLifetime): this
+  registerFunction(
+    fn: Function,
+    opts?: RegistrationOptionsOrLifetime<any>
+  ): this
   /**
    * Registers the given value as a function that will be invoked
    * with dependencies when resolved.
@@ -108,14 +111,14 @@ export interface AwilixContainer {
   registerFunction(
     name: string | symbol,
     fn: Function,
-    opts?: RegistrationOptionsOrLifetime
+    opts?: RegistrationOptionsOrLifetime<any>
   ): this
   /**
    * Registers a function with options.
    */
   registerFunction(
     name: string | symbol,
-    funcAndOptionsPair: [Function, RegistrationOptionsOrLifetime]
+    funcAndOptionsPair: [Function, RegistrationOptionsOrLifetime<any>]
   ): this
   /**
    * Pairs functions to registration names and registers them.
@@ -140,30 +143,30 @@ export interface AwilixContainer {
    */
   resolve<T>(name: string | symbol): T
   /**
-   * Given a registration, class or function, builds it up and returns it.
+   * Given a resolver, class or function, builds it up and returns it.
    * Does not cache it, this means that any lifetime configured in case of passing
-   * a registration will not be used.
+   * a resolver will not be used.
    *
-   * @param {Registration|Class|Function} targetOrResolver
-   * @param {RegistrationOptions} opts
+   * @param {Resolver|Class|Function} targetOrResolver
+   * @param {ResolverOptions} opts
    */
   build<T>(
-    target: ClassOrFunctionReturning<T> | Registration,
-    opts?: RegistrationOptions
+    targetOrResolver: ClassOrFunctionReturning<T> | Resolver<T>,
+    opts?: ResolverOptions<T>
   ): T
 }
 
 /**
  * Registration options or a lifetime type.
  */
-export type RegistrationOptionsOrLifetime = RegistrationOptions | LifetimeType
+export type RegistrationOptionsOrLifetime<T> = ResolverOptions<T> | LifetimeType
 
 /**
  * Register a Registration
  * @interface NameAndRegistrationPair
  */
 export interface NameAndRegistrationPair {
-  [key: string]: Registration
+  [key: string]: Resolver<any>
 }
 
 /**
@@ -172,7 +175,7 @@ export interface NameAndRegistrationPair {
  */
 export interface RegisterNameAndClassPair {
   [key: string]:
-    | [Constructor<any>, RegistrationOptionsOrLifetime]
+    | [Constructor<any>, RegistrationOptionsOrLifetime<any>]
     | Constructor<any>
 }
 
@@ -181,7 +184,9 @@ export interface RegisterNameAndClassPair {
  * @interface RegisterNameAndFunctionPair
  */
 export interface RegisterNameAndFunctionPair {
-  [key: string]: [Function, RegistrationOptionsOrLifetime] | Function
+  [key: string]:
+    | [FunctionReturning<any>, RegistrationOptionsOrLifetime<any>]
+    | FunctionReturning<any>
 }
 
 /**
@@ -193,11 +198,14 @@ export interface RegisterNameAndValuePair {
 }
 
 /**
+ * Function that returns T.
+ */
+export type FunctionReturning<T> = (...args: Array<any>) => T
+
+/**
  * A class or function returning T.
  */
-export type ClassOrFunctionReturning<T> =
-  | ((...args: Array<any>) => T)
-  | (new (...args: Array<any>) => T)
+export type ClassOrFunctionReturning<T> = FunctionReturning<T> | Constructor<T>
 
 /**
  * The options for the createContainer function.
@@ -212,7 +220,7 @@ export interface ContainerOptions {
  * Contains a hash of registrations where the name is the key.
  */
 export interface RegistrationHash {
-  [key: string]: Registration
+  [key: string]: Resolver<any>
 }
 
 /**
@@ -418,7 +426,7 @@ export function createContainer(
     const obj = nameValueToObject(arg1, arg2)
     const keys = [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)]
     for (const key of keys) {
-      const value = obj[key] as Registration
+      const value = obj[key] as Resolver<any>
       registrations[key] = value
     }
     // Invalidates the computed registrations.
@@ -437,13 +445,13 @@ export function createContainer(
    * When set to true, treat the value as-is, don't check if its an value-opts-array.
    */
   function makeRegister(
-    fn: ((value: any, opts?: RegistrationOptions) => Registration),
+    fn: ((value: any, opts?: ResolverOptions<any>) => Resolver<any>),
     verbatimValue?: boolean
   ) {
     return function registerShortcut(
       name: any,
       value: any,
-      opts?: RegistrationOptions
+      opts?: ResolverOptions<any>
     ) {
       // Supports infering the class/function name.
       if (typeof name === 'function' && !verbatimValue) {
@@ -609,15 +617,15 @@ export function createContainer(
    * Does not cache it, this means that any lifetime configured in case of passing
    * a registration will not be used.
    *
-   * @param {Registration|Class|Function} targetOrResolver
-   * @param {RegistrationOptions} opts
+   * @param {Resolver|Class|Function} targetOrResolver
+   * @param {ResolverOptions} opts
    */
   function build<T>(
-    targetOrResolver: Registration | ClassOrFunctionReturning<T>,
-    opts?: RegistrationOptions
-  ) {
-    if (targetOrResolver && (targetOrResolver as Registration).resolve) {
-      return (targetOrResolver as Registration).resolve(container)
+    targetOrResolver: Resolver<T> | ClassOrFunctionReturning<T>,
+    opts?: ResolverOptions<T>
+  ): T {
+    if (targetOrResolver && (targetOrResolver as Resolver<T>).resolve) {
+      return (targetOrResolver as Resolver<T>).resolve(container)
     }
 
     const funcName = 'build'
@@ -639,7 +647,7 @@ export function createContainer(
 
     const resolver = isClass(targetOrResolver as any)
       ? asClass(targetOrResolver as Constructor<T>, opts)
-      : asFunction(targetOrResolver as Function, opts)
+      : asFunction(targetOrResolver as FunctionReturning<T>, opts)
     return resolver.resolve(container)
   }
 
