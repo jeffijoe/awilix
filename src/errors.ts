@@ -141,25 +141,3 @@ export class AwilixResolutionError extends AwilixError {
     super(msg)
   }
 }
-
-/**
- * Error thrown to indicate Awilix was expecting a function (or a class)
- */
-export class AwilixNotAFunctionError extends AwilixError {
-  /**
-   * Constructor, takes the function name, expected and given
-   * type to produce an error.
-   *
-   * @param {string} functionName
-   * Name of the function being guarded.
-   *
-   * @param {string} expectedType
-   * Name of the expected type.
-   *
-   * @param {string} givenType
-   * Name of the given type.
-   */
-  constructor(functionName: string, expectedType: string, givenType: string) {
-    super(`${functionName} expected a ${expectedType}, ${givenType} given.`)
-  }
-}

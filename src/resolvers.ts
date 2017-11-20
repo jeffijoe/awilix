@@ -2,7 +2,7 @@ import { Lifetime, LifetimeType } from './lifetime'
 import { ResolutionMode, ResolutionModeType } from './resolution-mode'
 import { isFunction, uniq } from './utils'
 import { parseParameterList } from './param-parser'
-import { AwilixNotAFunctionError } from './errors'
+import { AwilixTypeError } from './errors'
 import { AwilixContainer, FunctionReturning } from './container'
 
 /**
@@ -180,7 +180,7 @@ export function asFunction<T>(
   opts?: ResolverOptions<T>
 ): BuildResolver<T> {
   if (!isFunction(fn)) {
-    throw new AwilixNotAFunctionError('asFunction', 'function', typeof fn)
+    throw new AwilixTypeError('asFunction', 'fn', 'function', fn)
   }
 
   const defaults = {
@@ -230,7 +230,7 @@ export function asClass<T = {}>(
   opts?: ResolverOptions<T>
 ): BuildResolver<T> {
   if (!isFunction(Type)) {
-    throw new AwilixNotAFunctionError('asClass', 'class', typeof Type)
+    throw new AwilixTypeError('asClass', 'Type', 'class', Type)
   }
 
   const defaults = {

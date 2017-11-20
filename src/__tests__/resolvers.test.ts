@@ -3,7 +3,7 @@ import { asValue, asFunction, asClass } from '../resolvers'
 import { createContainer, AwilixContainer } from '../container'
 import { Lifetime } from '../lifetime'
 import { ResolutionMode } from '../resolution-mode'
-import { AwilixNotAFunctionError } from '../errors'
+import { AwilixTypeError } from '../errors'
 
 const testFn = () => 1337
 const depsFn = (testClass: any) => testClass
@@ -98,9 +98,9 @@ describe('registrations', function() {
       expect(container.resolve('withoutParen')).toBe(42)
     })
 
-    it('throws AwilixNotAFunctionError when given null', function() {
+    it('throws AwilixTypeError when given null', function() {
       const err = throws(() => asFunction(null as any))
-      expect(err).toBeInstanceOf(AwilixNotAFunctionError)
+      expect(err).toBeInstanceOf(AwilixTypeError)
     })
   })
 
@@ -151,7 +151,7 @@ describe('registrations', function() {
 
     it('throws an Error when given null', function() {
       const err = throws(() => asClass(null!))
-      expect(err).toBeInstanceOf(AwilixNotAFunctionError)
+      expect(err).toBeInstanceOf(AwilixTypeError)
     })
   })
 
