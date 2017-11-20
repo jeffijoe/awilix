@@ -1,14 +1,34 @@
 /**
+ * Token type.
+ */
+export type TokenType = 'ident' | '(' | ')' | ',' | '=' | 'EOF'
+
+/**
+ * Lexer Token.
+ */
+export interface Token {
+  type: TokenType
+  value?: string
+}
+
+/**
  * Tokenizes the given source string.
  *
  * @param  {string} source
+ * The source.
+ *
+ * @param  {number} stopAfter
+ * Stops parsing after having parsed this amount of tokens.
  *
  * @return {Array<{ type: string, value: string }>}
  */
-module.exports = function tokenizeFunction(source, stopAfter) {
+export function tokenizeFunction(
+  source: string,
+  stopAfter?: number
+): Array<Token> {
   let pos = 0
   let ch
-  const tokens = []
+  const tokens: Array<Token> = []
   while (true) {
     if (stopAfter && tokens.length >= stopAfter) {
       return tokens
@@ -52,7 +72,7 @@ module.exports = function tokenizeFunction(source, stopAfter) {
       }
       let isInString = false
       do {
-        ch = source[pos]
+        ch = source[pos++]
         if (pos === source.length) {
           tokens.push({ type: 'EOF' })
           break
@@ -61,8 +81,8 @@ module.exports = function tokenizeFunction(source, stopAfter) {
         if (isStringQuote(ch)) {
           isInString = !isInString
         }
-        pos++
       } while ((ch !== ',' && ch !== ')') || isInString)
+      pos--
     }
 
     const identBuf = []
@@ -92,7 +112,7 @@ module.exports = function tokenizeFunction(source, stopAfter) {
  * @param  {string}  ch
  * @return {Boolean}
  */
-function isWhiteSpace(ch) {
+function isWhiteSpace(ch: string) {
   switch (ch) {
     case '\r':
     case '\n':
@@ -107,7 +127,7 @@ function isWhiteSpace(ch) {
  * @param  {string}  ch
  * @return {Boolean}
  */
-function isStringQuote(ch) {
+function isStringQuote(ch: string) {
   switch (ch) {
     case "'":
     case '"':

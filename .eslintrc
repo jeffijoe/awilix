@@ -1,6 +1,0 @@
-{
-  "extends": ["standard", "prettier"],
-  "rules": {
-    "prefer-const": 1
-  }
-}

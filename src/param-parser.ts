@@ -1,4 +1,4 @@
-const tokenizeFunction = require('./tokenizeFunction')
+import { tokenizeFunction } from './function-tokenizer'
 
 /*
  * Parses the parameter list of a function string, including ES6 class constructors.
@@ -12,7 +12,7 @@ const tokenizeFunction = require('./tokenizeFunction')
  * @return {Array<string>}
  * Returns an array of parameter names
  */
-module.exports = function parseParameterList(source) {
+export function parseParameterList(source: string): Array<string> {
   const tokens = tokenizeFunction(source)
   const params = []
   for (let i = 0; i < tokens.length; i++) {
@@ -46,14 +46,14 @@ module.exports = function parseParameterList(source) {
             while (t.type !== ')') {
               t = tokens[++i]
               if (t.type === 'ident') {
-                params.push(t.value)
+                params.push(t.value!)
               }
             }
             return params
           }
         } while (true)
       }
-      params.push(t.value)
+      params.push(t.value!)
     }
   }
   return params

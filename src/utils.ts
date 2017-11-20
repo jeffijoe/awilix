@@ -1,4 +1,5 @@
-const tokenizeFunction = require('./tokenizeFunction')
+import { tokenizeFunction } from './function-tokenizer'
+import { Constructor } from './resolvers'
 
 /**
  * Quick flatten utility to flatten a 2-dimensional array.
@@ -9,8 +10,8 @@ const tokenizeFunction = require('./tokenizeFunction')
  * @return {Array<Item>}
  * The flattened array.
  */
-module.exports.flatten = function flatten(array) {
-  const result = []
+export function flatten<T>(array: Array<Array<T>>): Array<T> {
+  const result: Array<T> = []
   array.forEach(arr => {
     arr.forEach(item => {
       result.push(item)
@@ -31,10 +32,13 @@ module.exports.flatten = function flatten(array) {
  *
  * @return {object}
  */
-module.exports.nameValueToObject = function nameValueToObject(name, value) {
+export function nameValueToObject(
+  name: string | symbol | object,
+  value?: any
+): { [key: string]: any } {
   let obj = name
   if (typeof obj === 'string' || typeof obj === 'symbol') {
-    obj = Object.assign({ [name]: value })
+    obj = { [name as string]: value }
   }
 
   return obj
@@ -49,7 +53,7 @@ module.exports.nameValueToObject = function nameValueToObject(name, value) {
  * @return {*}
  * The last element.
  */
-module.exports.last = function last(arr) {
+export function last<T>(arr: Array<T>): T {
   return arr[arr.length - 1]
 }
 
@@ -59,7 +63,8 @@ module.exports.last = function last(arr) {
  * @param  {Function} fn
  * @return {Boolean}
  */
-module.exports.isClass = function isClass(fn) {
+export function isClass(fn: Function | Constructor<any>) {
+  /*tslint:disable-next-line*/
   if (typeof fn !== 'function') {
     return false
   }
@@ -90,7 +95,7 @@ module.exports.isClass = function isClass(fn) {
  * @return {Boolean}
  * true if the value is a function, false otherwise.
  */
-module.exports.isFunction = function isFunction(val) {
+export function isFunction(val: any) {
   return typeof val === 'function'
 }
 
@@ -103,8 +108,8 @@ module.exports.isFunction = function isFunction(val) {
  * @return {Array<T>}
  * The deduped array.
  */
-module.exports.uniq = function uniq(arr) {
-  const result = []
+export function uniq<T>(arr: Array<T>): Array<T> {
+  const result: Array<T> = []
   for (const idx in arr) {
     const item = arr[idx]
     if (result.indexOf(item) === -1) {
