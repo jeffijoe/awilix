@@ -1,12 +1,12 @@
 /**
- * Resolution mode type.
+ * Injection mode type.
  */
-export type ResolutionModeType = 'PROXY' | 'CLASSIC'
+export type InjectionModeType = 'PROXY' | 'CLASSIC'
 
 /**
  * Resolution modes.
  */
-export const ResolutionMode: Record<ResolutionModeType, ResolutionModeType> = {
+export const InjectionMode: Record<InjectionModeType, InjectionModeType> = {
   /**
    * The dependencies will be resolved by injecting the cradle proxy.
    *

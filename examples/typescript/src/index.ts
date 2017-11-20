@@ -3,14 +3,14 @@ import {
   AwilixContainer,
   createContainer,
   asClass,
-  ResolutionMode
+  InjectionMode
 } from '../../../src/awilix'
 import TestService from './services/TestService'
 import DependentService from './services/DependentService'
 
 // Create the container
 const container: AwilixContainer = createContainer({
-  resolutionMode: ResolutionMode.CLASSIC
+  injectionMode: InjectionMode.CLASSIC
 })
 
 // Register the classes

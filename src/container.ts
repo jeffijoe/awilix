@@ -13,7 +13,7 @@ import {
   asValue
 } from './resolvers'
 import { last, nameValueToObject, isClass } from './utils'
-import { ResolutionMode, ResolutionModeType } from './resolution-mode'
+import { InjectionMode, InjectionModeType } from './injection-mode'
 import { Lifetime, LifetimeType } from './lifetime'
 import { AwilixResolutionError, AwilixTypeError, AwilixError } from './errors'
 
@@ -27,7 +27,7 @@ export interface AwilixContainer {
    */
   options: ContainerOptions
   /**
-   * The proxy injected when using `PROXY` resolution mode.
+   * The proxy injected when using `PROXY` injection mode.
    * Can be used as-is.
    */
   readonly cradle: { [key: string]: any } & Iterable<string>
@@ -213,7 +213,7 @@ export type ClassOrFunctionReturning<T> = FunctionReturning<T> | Constructor<T>
  */
 export interface ContainerOptions {
   require?: (id: string) => any
-  resolutionMode?: ResolutionModeType
+  injectionMode?: InjectionModeType
 }
 
 /**
@@ -246,7 +246,7 @@ const ROLL_UP_REGISTRATIONS = Symbol('rollUpRegistrations')
  * @param {Function} options.require
  * The require function to use. Defaults to require.
  *
- * @param {string} options.resolutionMode
+ * @param {string} options.injectionMode
  * The mode used by the container to resolve dependencies. Defaults to 'Proxy'.
  *
  * @return {object}
@@ -258,7 +258,7 @@ export function createContainer(
 ): AwilixContainer {
   options = Object.assign(
     {
-      resolutionMode: ResolutionMode.PROXY
+      injectionMode: InjectionMode.PROXY
     },
     options
   )
@@ -361,7 +361,13 @@ export function createContainer(
   const familyTree: Array<AwilixContainer> = parentContainer
     ? [container].concat((parentContainer as any)[FAMILY_TREE])
     : [container]
+
+  // Save it so we can access it from a scoped container.
   ;(container as any)[FAMILY_TREE] = familyTree
+
+  // We need a reference to the root container,
+  // so we can retrieve and store singletons.
+  const rootContainer = last(familyTree)
 
   return container
 
@@ -516,10 +522,6 @@ export function createContainer(
       rollUpRegistrations(true)
     }
 
-    // We need a reference to the root container,
-    // so we can retrieve and store singletons.
-    const root = last(familyTree)
-
     try {
       // Grab the registration by name.
       const registration = computedRegistrations![name]
@@ -565,10 +567,10 @@ export function createContainer(
           break
         case Lifetime.SINGLETON:
           // Singleton lifetime means cache at all times, regardless of scope.
-          cached = root.cache[name]
+          cached = rootContainer.cache[name]
           if (cached === undefined) {
             resolved = registration.resolve(container)
-            root.cache[name] = resolved
+            rootContainer.cache[name] = resolved
           } else {
             resolved = cached
           }

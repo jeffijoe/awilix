@@ -4,7 +4,7 @@ import { createContainer, AwilixContainer } from '../container'
 import { Lifetime } from '../lifetime'
 import { AwilixResolutionError } from '../errors'
 import { asClass, asFunction, asValue } from '../resolvers'
-import { ResolutionMode } from '../resolution-mode'
+import { InjectionMode } from '../injection-mode'
 
 class Test {
   repo: any
@@ -54,9 +54,9 @@ describe('container', function() {
     expect(test.someValue).toBe(42)
   })
 
-  it('lets me register something and resolve it via classic resolution mode', function() {
+  it('lets me register something and resolve it via classic injection mode', function() {
     const container = createContainer({
-      resolutionMode: ResolutionMode.CLASSIC
+      injectionMode: InjectionMode.CLASSIC
     })
     container.register({
       manual: asClass(ManualTest),
@@ -578,7 +578,7 @@ describe('container', function() {
   describe('explicitly trying to fuck shit up', function() {
     it('should prevent you from fucking shit up', function() {
       const container = createContainer({
-        resolutionMode: null as any
+        injectionMode: null as any
       })
         .registerValue({ answer: 42 })
         .registerFunction('theAnswer', ({ answer }: any) => () => answer)
@@ -587,9 +587,9 @@ describe('container', function() {
       expect(theAnswer()).toBe(42)
     })
 
-    it('should default to PROXY resolution mode when unknown', function() {
+    it('should default to PROXY injection mode when unknown', function() {
       const container = createContainer({
-        resolutionMode: 'I dunno maaaang...' as any
+        injectionMode: 'I dunno maaaang...' as any
       })
         .registerValue({ answer: 42 })
         .registerFunction('theAnswer', ({ answer }: any) => () => answer)
@@ -775,7 +775,7 @@ describe('memoizing registrations', () => {
 
     it('returns resolved value when passed a function', () => {
       expect(
-        container.build(fn, { resolutionMode: ResolutionMode.CLASSIC })
+        container.build(fn, { injectionMode: InjectionMode.CLASSIC })
       ).toBe(1337)
     })
 
@@ -784,9 +784,9 @@ describe('memoizing registrations', () => {
       expect(container.build(BuildTest).val).toBe(1337)
     })
 
-    it('uses containers resolution mode by default', () => {
+    it('uses containers injection mode by default', () => {
       const otherContainer = createContainer({
-        resolutionMode: ResolutionMode.CLASSIC
+        injectionMode: InjectionMode.CLASSIC
       })
       otherContainer.registerValue({ val: 1337 })
       expect(otherContainer.build(fn)).toBe(1337)

@@ -1,6 +1,6 @@
 import { createContainer } from '../container'
 import { asClass } from '../resolvers'
-import { ResolutionMode } from '../resolution-mode'
+import { InjectionMode } from '../injection-mode'
 
 class Test {
   value: any
@@ -48,7 +48,7 @@ describe('local injections', function() {
       test: [Test, { injector }],
       testClassic: [
         TestClassic,
-        { injector, resolutionMode: ResolutionMode.CLASSIC }
+        { injector, injectionMode: InjectionMode.CLASSIC }
       ],
       test2: Test
     })
@@ -67,7 +67,7 @@ describe('local injections', function() {
       test: [makeTest, { injector }],
       testClassic: [
         makeCLassicTest,
-        { injector, resolutionMode: ResolutionMode.CLASSIC }
+        { injector, injectionMode: InjectionMode.CLASSIC }
       ],
       test2: makeTest
     })

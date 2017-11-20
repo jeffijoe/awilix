@@ -1,5 +1,5 @@
 import { Lifetime, LifetimeType } from './lifetime'
-import { ResolutionMode, ResolutionModeType } from './resolution-mode'
+import { InjectionMode, InjectionModeType } from './injection-mode'
 import { isFunction, uniq } from './utils'
 import { parseParameterList } from './param-parser'
 import { AwilixTypeError } from './errors'
@@ -7,7 +7,7 @@ import { AwilixContainer, FunctionReturning } from './container'
 
 /**
  * RESOLVER symbol can be used by modules loaded by
- * `loadModules` to configure their lifetime, resolution mode, etc.
+ * `loadModules` to configure their lifetime, injection mode, etc.
  */
 export const RESOLVER = Symbol('Awilix Resolver Config')
 
@@ -33,7 +33,7 @@ export interface Resolver<T> {
  */
 export interface BuildSetters {
   setLifetime(lifetime: LifetimeType): this
-  setResolutionMode(mode: ResolutionModeType): this
+  setInjectionMode(mode: InjectionModeType): this
   singleton(): this
   scoped(): this
   transient(): this
@@ -46,7 +46,7 @@ export interface BuildSetters {
  * A resolver object created by asClass() or asFunction().
  */
 export interface BuildResolver<T> extends Resolver<T>, BuildSetters {
-  resolutionMode?: ResolutionModeType
+  injectionMode?: InjectionModeType
   injector?: InjectorFunction
 }
 
@@ -66,7 +66,7 @@ export interface ResolverOptions<T> {
   /**
    * Resolution mode.
    */
-  resolutionMode?: ResolutionModeType
+  injectionMode?: InjectionModeType
   /**
    * Injector function to provide additional parameters.
    */
@@ -78,19 +78,14 @@ export interface ResolverOptions<T> {
 }
 
 /**
- * Makes an options object based on defaults.
+ * A class constructor. For example:
  *
- * @param  {object} defaults
- * Default options.
+ *    class MyClass {}
  *
- * @param  {...} rest
- * The input to check and possibly assign to the resulting object
- *
- * @return {object}
+ *    container.registerClass('myClass', MyClass)
+ *                                       ^^^^^^^
  */
-function makeOptions<T, O>(defaults: T, ...rest: Array<O | undefined>): T & O {
-  return Object.assign({}, defaults, ...rest) as T & O
-}
+export type Constructor<T> = { new (...args: any[]): T }
 
 /**
  * Given an options object, creates a fluid interface
@@ -105,7 +100,7 @@ function makeOptions<T, O>(defaults: T, ...rest: Array<O | undefined>): T & O {
  * @return {object}
  * The interface.
  */
-function makeFluidInterface<T>(obj: Resolver<T>): BuildSetters {
+export function makeFluidInterface<T>(obj: Resolver<T>): BuildSetters {
   // For TS.
   const buildRegistration = obj as BuildResolver<T>
 
@@ -114,8 +109,8 @@ function makeFluidInterface<T>(obj: Resolver<T>): BuildSetters {
     return buildRegistration
   }
 
-  function setResolutionMode(value: ResolutionModeType) {
-    buildRegistration.resolutionMode = value
+  function setInjectionMode(value: InjectionModeType) {
+    buildRegistration.injectionMode = value
     return buildRegistration
   }
 
@@ -130,9 +125,9 @@ function makeFluidInterface<T>(obj: Resolver<T>): BuildSetters {
     transient: () => setLifetime(Lifetime.TRANSIENT),
     scoped: () => setLifetime(Lifetime.SCOPED),
     singleton: () => setLifetime(Lifetime.SINGLETON),
-    setResolutionMode,
-    proxy: () => setResolutionMode(ResolutionMode.PROXY),
-    classic: () => setResolutionMode(ResolutionMode.CLASSIC)
+    setInjectionMode,
+    proxy: () => setInjectionMode(InjectionMode.PROXY),
+    classic: () => setInjectionMode(InjectionMode.CLASSIC)
   }
 }
 
@@ -194,21 +189,11 @@ export function asFunction<T>(
     resolve,
     lifetime: opts.lifetime!,
     injector: opts.injector,
-    resolutionMode: opts.resolutionMode
+    injectionMode: opts.injectionMode
   }
   result.resolve = resolve.bind(result)
   return Object.assign(result, makeFluidInterface<T>(result))
 }
-
-/**
- * A class constructor. For example:
- *
- *    class MyClass {}
- *
- *    container.registerClass('myClass', MyClass)
- *                                       ^^^^^^^
- */
-export type Constructor<T> = { new (...args: any[]): T }
 
 /**
  * Like a factory resolver, but for classes that require `new`.
@@ -248,12 +233,27 @@ export function asClass<T = {}>(
   const result = {
     lifetime: opts.lifetime!,
     injector: opts.injector,
-    resolutionMode: opts.resolutionMode,
+    injectionMode: opts.injectionMode,
     resolve: resolve
   }
 
   result.resolve = resolve.bind(result)
   return Object.assign(result, makeFluidInterface<T>(result))
+}
+
+/**
+ * Makes an options object based on defaults.
+ *
+ * @param  {object} defaults
+ * Default options.
+ *
+ * @param  {...} rest
+ * The input to check and possibly assign to the resulting object
+ *
+ * @return {object}
+ */
+function makeOptions<T, O>(defaults: T, ...rest: Array<O | undefined>): T & O {
+  return Object.assign({}, defaults, ...rest) as T & O
 }
 
 /**
@@ -376,12 +376,12 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
   ) {
     // Because the container holds a global reolutionMode we need to determine it in the proper order or precedence:
     // resolver -> container -> default value
-    const resolutionMode =
-      this.resolutionMode ||
-      container.options.resolutionMode ||
-      ResolutionMode.PROXY
+    const injectionMode =
+      this.injectionMode ||
+      container.options.injectionMode ||
+      InjectionMode.PROXY
 
-    if (resolutionMode !== ResolutionMode.CLASSIC) {
+    if (injectionMode !== InjectionMode.CLASSIC) {
       // If we have a custom injector, we need to wrap the cradle.
       const cradle = this.injector
         ? createInjectorProxy(container, this.injector)

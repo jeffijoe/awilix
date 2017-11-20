@@ -132,7 +132,7 @@ function optsWithDefaults(
       registrationOptions: Object.assign(
         {
           lifetime: Lifetime.TRANSIENT,
-          resolutionMode: container.options.resolutionMode
+          injectionMode: container.options.injectionMode
         },
         opts && opts.resolverOptions
       )

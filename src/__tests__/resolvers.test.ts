@@ -2,7 +2,7 @@ import { throws } from 'smid'
 import { asValue, asFunction, asClass } from '../resolvers'
 import { createContainer, AwilixContainer } from '../container'
 import { Lifetime } from '../lifetime'
-import { ResolutionMode } from '../resolution-mode'
+import { InjectionMode } from '../injection-mode'
 import { AwilixTypeError } from '../errors'
 
 const testFn = () => 1337
@@ -72,12 +72,12 @@ describe('registrations', function() {
     it('manually resolves multiple function dependencies', function() {
       container.register({
         testClass: asClass(TestClass, {
-          resolutionMode: ResolutionMode.CLASSIC
+          injectionMode: InjectionMode.CLASSIC
         }),
         needsCradle: asClass(NeedsCradle).proxy()
       })
       const reg = asFunction(multiDeps, {
-        resolutionMode: ResolutionMode.CLASSIC
+        injectionMode: InjectionMode.CLASSIC
       })
       const result = reg.resolve(container)
       expect(typeof reg.resolve).toBe('function')
@@ -141,7 +141,7 @@ describe('registrations', function() {
         needsCradle: NeedsCradle
       })
       const reg = asClass(MultipleDeps, {
-        resolutionMode: ResolutionMode.CLASSIC
+        injectionMode: InjectionMode.CLASSIC
       })
       const result = reg.resolve(container)
       expect(result).toBeInstanceOf(MultipleDeps)

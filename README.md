@@ -21,7 +21,7 @@ Extremely powerful **Inversion of Control** (IoC) container for Node with depend
 * [Installation](#installation)
 * [Usage](#usage)
 * [Lifetime management](#lifetime-management)
-* [Resolution modes](#resolution-modes)
+* [Injection modes](#injection-modes)
 * [Auto-loading modules](#auto-loading-modules)
 * [Per-module local injections](#per-module-local-injections)
 * [Inlining resolver options](#inlining-resolver-options)
@@ -72,9 +72,9 @@ Awilix has a pretty simple API (but with many possible ways to invoke it). At mi
 ```javascript
 const awilix = require('awilix')
 
-// Create the container and set the resolutionMode to PROXY (which is also the default).
+// Create the container and set the injectionMode to PROXY (which is also the default).
 const container = awilix.createContainer({
-  resolutionMode: awilix.ResolutionMode.PROXY
+  injectionMode: awilix.InjectionMode.PROXY
 })
 
 // This is our app code... We can use
@@ -121,7 +121,7 @@ container.registerFunction({
 // Notice how the dependency is referenced by name 
 // directly instead of destructuring an object.
 // This is because we register it in "CLASSIC" 
-// resolution mode below.
+// injection mode below.
 function Database(connectionString, timeout) {
   // We can inject plain values as well!
   this.conn = connectToYourDatabaseSomehow(connectionString, timeout)
@@ -135,8 +135,8 @@ Database.prototype.query = function(sql) {
 
 // We use register coupled with asClass to tell Awilix to 
 // use `new Database(...)` instead of just `Database(...)`.
-// We also want to use `CLASSIC` resolution mode for this 
-// registration. Read more about resolution modes below.
+// We also want to use `CLASSIC` injection mode for this 
+// registration. Read more about injection modes below.
 container.register({
   db: awilix.asClass(Database).classic()
 })
@@ -288,14 +288,14 @@ container.resolve('printTime')()
 
 Read the documentation for [`container.createScope()`](#containercreatescope) for more examples.
 
-# Resolution modes
+# Injection modes
 
-The resolution mode determines how a function/constructor receives its dependencies. Pre-2.3.0, only one mode was
+The injection mode determines how a function/constructor receives its dependencies. Pre-2.3.0, only one mode was
 supported - `PROXY` - which remains the default mode.
 
-Awilix v2.3.0 introduced an alternative resolution mode: `CLASSIC`. The resolution modes are available on `awilix.ResolutionMode`
+Awilix v2.3.0 introduced an alternative injection mode: `CLASSIC`. The injection modes are available on `awilix.InjectionMode`
 
-* `ResolutionMode.PROXY` (default): Injects a proxy to functions/constructors which looks like a regular object.
+* `InjectionMode.PROXY` (default): Injects a proxy to functions/constructors which looks like a regular object.
     
     ```js
     class UserService {
@@ -317,7 +317,7 @@ Awilix v2.3.0 introduced an alternative resolution mode: `CLASSIC`. The resoluti
     }
     ```
 
-* `ResolutionMode.CLASSIC`: Parses the function/constructor parameters, and matches them with registrations in the container.
+* `InjectionMode.CLASSIC`: Parses the function/constructor parameters, and matches them with registrations in the container.
     
     ```js
     class UserService {
@@ -328,20 +328,20 @@ Awilix v2.3.0 introduced an alternative resolution mode: `CLASSIC`. The resoluti
     }
     ```
 
-Resolution modes can be set per-container and per-resolver. The most specific one wins.
+Injection modes can be set per-container and per-resolver. The most specific one wins.
 
-> Note: I personally don't see why you would want to have different resolution modes in a project, but
+> Note: I personally don't see why you would want to have different injection modes in a project, but
 > if the need arises, Awilix supports it.
 
 **Container-wide**:
 
 ```js
-const { createContainer, ResolutionMode } = require('awilix')
+const { createContainer, InjectionMode } = require('awilix')
 
-const container = createContainer({ resolutionMode: ResolutionMode.CLASSIC })
+const container = createContainer({ injectionMode: InjectionMode.CLASSIC })
 ```
 
-**Per registration**:
+**Per resolver**:
 
 ```js
 const container = createContainer()
@@ -351,12 +351,12 @@ container.register({
   // or..
   emailService: asFunction(makeEmailService).proxy()
   // or..
-  notificationService: asClass(NotificationService).setResolutionMode(ResolutionMode.CLASSIC)
+  notificationService: asClass(NotificationService).setInjectionMode(InjectionMode.CLASSIC)
 })
 
 // or..
 container.registerClass({
-  logger: [Logger, { resolutionMode: ResolutionMode.CLASSIC }]
+  logger: [Logger, { injectionMode: InjectionMode.CLASSIC }]
 })
 ```
 
@@ -369,7 +369,7 @@ container.loadModules([
   'repositories/**/*.js'
 ], {
   resolverOptions: {
-    resolutionMode: ResolutionMode.CLASSIC
+    injectionMode: InjectionMode.CLASSIC
   }
 })
 ```
@@ -518,7 +518,7 @@ Awilix 2.8 added support for inline resolver options. This is best explained wit
 **services/awesome-service.js**:
 
 ```js
-import { REGISTRATION, Lifetime, ResolutionMode } from 'awilix'
+import { RESOLVER, Lifetime, InjectionMode } from 'awilix'
 
 export default class AwesomeService {
   constructor (awesomeRepository) {
@@ -526,10 +526,10 @@ export default class AwesomeService {
   }
 }
 
-// `REGISTRATION` is a Symbol.
-AwesomeService[REGISTRATION] = {
+// `RESOLVER` is a Symbol.
+AwesomeService[RESOLVER] = {
   lifetime: Lifetime.SCOPED,
-  resolutionMode: ResolutionMode.CLASSIC
+  injectionMode: InjectionMode.CLASSIC
 }
 ```
 
@@ -545,17 +545,17 @@ const container = createContainer()
   })
 
 console.log(container.registrations.awesomeService.lifetime) // 'SCOPED'
-console.log(container.registrations.awesomeService.resolutionMode) // 'CLASSIC'
+console.log(container.registrations.awesomeService.injectionMode) // 'CLASSIC'
 ```
 
 Additionally, if we add a `name` field and use `loadModules`, the `name` is used for registration.
 
 ```diff
-// `REGISTRATION` is a Symbol.
-AwesomeService[REGISTRATION] = {
+// `RESOLVER` is a Symbol.
+AwesomeService[RESOLVER] = {
 + name: 'superService',
   lifetime: Lifetime.SCOPED,
-  resolutionMode: ResolutionMode.CLASSIC
+  injectionMode: InjectionMode.CLASSIC
 }
 ```
 
@@ -563,7 +563,7 @@ AwesomeService[REGISTRATION] = {
 const container = createContainer()
   .loadModules(['services/*.js'])
 console.log(container.registrations.superService.lifetime) // 'SCOPED'
-console.log(container.registrations.superService.resolutionMode) // 'CLASSIC'
+console.log(container.registrations.superService.injectionMode) // 'CLASSIC'
 ```
 
 **Important**: the `name` field is only used by `loadModules`.
@@ -581,7 +581,7 @@ When importing `awilix`, you get the following top-level API:
 * `asFunction`
 * `asClass`
 * `Lifetime` - documented above.
-* `ResolutionMode` - documented above.
+* `InjectionMode` - documented above.
 
 These are documented below.
 
@@ -590,7 +590,7 @@ These are documented below.
 Whenever you see a place where you can pass in **resolver options**, you can pass in an object with the following props:
 
 * `lifetime`: An `awilix.Lifetime.*` string, such as `awilix.Lifetime.SCOPED`
-* `resolutionMode`: An `awilix.ResolutionMode.*` string, such as `awilix.ResolutionMode.CLASSIC`
+* `injectionMode`: An `awilix.InjectionMode.*` string, such as `awilix.InjectionMode.CLASSIC`
 * `injector`: An injector function - see [Per-module local injections](#per-module-local-injections)
 * `register`: Only used in `loadModules`, determines how to register a loaded module explicitly
 
@@ -598,7 +598,7 @@ Whenever you see a place where you can pass in **resolver options**, you can pas
 
 ```js
 container.register({
-  stuff: asClass(MyClass, { resolutionMode: ResolutionMode.CLASSIC })
+  stuff: asClass(MyClass, { injectionMode: InjectionMode.CLASSIC })
 })
 
 container.loadModules([
@@ -618,8 +618,8 @@ Args:
 
 * `options`: Options object. Optional.
   - `options.require`: The function to use when requiring modules. Defaults to `require`. Useful when using something like [`require-stack`](https://npmjs.org/package/require-stack). Optional.
-  - `options.resolutionMode`: Determines the method for resolving dependencies. Valid modes are:
-    - `PROXY`: Uses the `awilix` default dependency resolution mechanism (I.E. injects the cradle into the function or class). This is the default resolution mode.
+  - `options.injectionMode`: Determines the method for resolving dependencies. Valid modes are:
+    - `PROXY`: Uses the `awilix` default dependency resolution mechanism (I.E. injects the cradle into the function or class). This is the default injection mode.
     - `CLASSIC`: Uses the named dependency resolution mechanism. Dependencies ___must___ be named exactly like they are in the registration. For example, a dependency registered as `repository` cannot be referenced in a class constructor as `repo`.
 
 ## `asFunction()`
@@ -758,7 +758,7 @@ Now we need to use them. There are multiple syntaxes for the `register` function
 **Both styles supports chaining! `register` returns the container!**
 
 ```js
-// name-registration
+// name-resolver
 container.register('connectionString', asValue('localhost:1433;user=...'))
 container.register('mailService', asFunction(makeMailService))
 container.register('context', asClass(SessionContext))
@@ -916,7 +916,7 @@ Args:
 * `globPatterns`: Array of glob patterns that match JS files to load.
 * `opts.cwd`: The `cwd` being passed to `glob`. Defaults to `process.cwd()`.
 * `opts.formatName`: Can be either `'camelCase'`, or a function that takes the current name as the first parameter and returns the new name. Default is to pass the name through as-is. The 2nd parameter is a full module descriptor.
-* `resolverOptions`: An `object` passed to the resolvers. Used to configure the lifetime, resolution mode and more of the loaded modules.
+* `resolverOptions`: An `object` passed to the resolvers. Used to configure the lifetime, injection mode and more of the loaded modules.
 
 Example:
 

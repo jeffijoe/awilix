@@ -1,7 +1,7 @@
 import { loadModules, LoadModulesOptions } from '../load-modules'
 import { createContainer } from '../container'
 import { Lifetime } from '../lifetime'
-import { ResolutionMode } from '../resolution-mode'
+import { InjectionMode } from '../injection-mode'
 import { asFunction, RESOLVER, BuildResolver } from '../resolvers'
 
 const lookupResultFor = (modules: any) =>
@@ -199,7 +199,7 @@ describe('loadModules', function() {
     expect(container.registrations.test2.lifetime).toBe(Lifetime.SINGLETON)
   })
 
-  it('supports passing in a default resolutionMode', function() {
+  it('supports passing in a default injectionMode', function() {
     const container = createContainer()
     const modules: any = {
       'test.js': jest.fn(() => 42),
@@ -212,7 +212,7 @@ describe('loadModules', function() {
         {
           name: 'test',
           path: 'test.js',
-          opts: { resolutionMode: ResolutionMode.PROXY }
+          opts: { injectionMode: InjectionMode.PROXY }
         },
         { name: 'test2', path: 'test2.js' }
       ]),
@@ -221,16 +221,16 @@ describe('loadModules', function() {
 
     loadModules(deps, 'anything', {
       resolverOptions: {
-        resolutionMode: ResolutionMode.CLASSIC
+        injectionMode: InjectionMode.CLASSIC
       }
     })
 
     expect(
-      (container.registrations.test as BuildResolver<any>).resolutionMode
-    ).toBe(ResolutionMode.PROXY)
+      (container.registrations.test as BuildResolver<any>).injectionMode
+    ).toBe(InjectionMode.PROXY)
     expect(
-      (container.registrations.test2 as BuildResolver<any>).resolutionMode
-    ).toBe(ResolutionMode.CLASSIC)
+      (container.registrations.test2 as BuildResolver<any>).injectionMode
+    ).toBe(InjectionMode.CLASSIC)
   })
 
   describe('inline config via REGISTRATION symbol', () => {
@@ -238,7 +238,7 @@ describe('loadModules', function() {
       const container = createContainer()
       const test1Func = jest.fn(() => 42)
       ;(test1Func as any)[RESOLVER] = {
-        resolutionMode: ResolutionMode.PROXY
+        injectionMode: InjectionMode.PROXY
       }
 
       class Test2Class {}
@@ -263,18 +263,18 @@ describe('loadModules', function() {
 
       loadModules(deps, 'anything', {
         resolverOptions: {
-          resolutionMode: ResolutionMode.CLASSIC
+          injectionMode: InjectionMode.CLASSIC
         }
       })
 
       expect(container.registrations.test.lifetime).toBe(Lifetime.TRANSIENT)
       expect(
-        (container.registrations.test as BuildResolver<any>).resolutionMode
-      ).toBe(ResolutionMode.PROXY)
+        (container.registrations.test as BuildResolver<any>).injectionMode
+      ).toBe(InjectionMode.PROXY)
       expect(container.registrations.test2.lifetime).toBe(Lifetime.SCOPED)
       expect(
-        (container.registrations.test2 as BuildResolver<any>).resolutionMode
-      ).toBe(ResolutionMode.CLASSIC)
+        (container.registrations.test2 as BuildResolver<any>).injectionMode
+      ).toBe(InjectionMode.CLASSIC)
     })
 
     it('allows setting a name to register as', () => {
