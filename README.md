@@ -32,6 +32,7 @@ Extremely powerful **Inversion of Control** (IoC) container for Node with depend
   - [`asFunction()`](#asfunction)
   - [`asClass()`](#asclass)
   - [`asValue()`](#asvalue)
+  - [`aliasTo()`](#aliasto)
   - [`listModules()`](#listmodules)
   - [`AwilixResolutionError`](#awilixresolutionerror)
   - [The `AwilixContainer` object](#the-awilixcontainer-object)
@@ -580,6 +581,7 @@ When importing `awilix`, you get the following top-level API:
 * `asValue`
 * `asFunction`
 * `asClass`
+* `aliasTo`
 * `Lifetime` - documented above.
 * `InjectionMode` - documented above.
 
@@ -643,6 +645,19 @@ The returned resolver has the same chainable API as [`asFunction`](#asfunction).
 ## `asValue()`
 
 Used with `container.register({ dbHost: asValue('localhost') })`. Tells Awilix to provide the given value as-is.
+
+## `aliasTo()`
+
+Resolves the dependency specified.
+
+```js
+container.register({
+  val: asValue(123),
+  aliasVal: aliasTo('val)
+})
+
+container.resolve('aliasVal') === container.resolve('val')
+```
 
 ## `listModules()`
 
@@ -917,7 +932,7 @@ Given an array of globs, registers the modules and returns the container.
 
 Awilix will use `require` on the loaded modules, and register the default-exported function or class as the name of the file.
 
-**This will not work for constructor functions (`function Database{} ...`), because there is no way to determine when to use `new`. Internally, Awilix uses `is-class` which only works for ES6 classes.**
+**This uses a heuristic to determine if it's a constructor function (`function Database() {...}`); if the function name starts with a capital letter, it will be `new`ed!**
 
 Args:
 

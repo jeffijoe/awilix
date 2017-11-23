@@ -2,7 +2,7 @@ import * as awilix from '../awilix'
 import { createContainer } from '../container'
 import { listModules } from '../list-modules'
 import { AwilixResolutionError } from '../errors'
-import { asValue, asClass, asFunction } from '../resolvers'
+import { asValue, asClass, asFunction, aliasTo } from '../resolvers'
 
 describe('awilix', function() {
   it('exists', function() {
@@ -24,9 +24,10 @@ describe('awilix', function() {
     expect(awilix.AwilixResolutionError).toBe(AwilixResolutionError)
   })
 
-  it('has the asValue, asClass and asFunction functions', function() {
+  it('has the asValue, asClass, asFunction and aliasTo functions', function() {
     expect(awilix.asValue).toBe(asValue)
     expect(awilix.asClass).toBe(asClass)
     expect(awilix.asFunction).toBe(asFunction)
+    expect(awilix.aliasTo).toBe(aliasTo)
   })
 })
