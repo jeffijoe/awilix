@@ -397,7 +397,7 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
         ? wrapWithLocals(container, this.injector(container))
         : container.resolve
 
-      const children = dependencies.map(resolve)
+      const children = dependencies.map(p => resolve(p.name))
       return fn(...children)
     }
 
