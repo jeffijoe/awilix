@@ -95,90 +95,6 @@ export interface ResolverOptions<T> {
 export type Constructor<T> = { new (...args: any[]): T }
 
 /**
- * Given an options object, creates a fluid interface
- * to manage it.
- *
- * @param {*} obj
- * The object to return.
- *
- * @return {object}
- * The interface.
- */
-export function createBuildResolver<T, B extends Resolver<T>>(
-  obj: B
-): BuildResolver<T> & B {
-  function setLifetime(value: LifetimeType) {
-    return createBuildResolver({
-      ...(obj as any),
-      lifetime: value
-    })
-  }
-
-  function setInjectionMode(value: InjectionModeType) {
-    return createBuildResolver({
-      ...(obj as any),
-      injectionMode: value
-    })
-  }
-
-  function inject(injector: InjectorFunction) {
-    return createBuildResolver({
-      ...(obj as any),
-      injector
-    })
-  }
-
-  return updateResolver(obj, {
-    setLifetime,
-    inject,
-    transient: () => setLifetime(Lifetime.TRANSIENT),
-    scoped: () => setLifetime(Lifetime.SCOPED),
-    singleton: () => setLifetime(Lifetime.SINGLETON),
-    setInjectionMode,
-    proxy: () => setInjectionMode(InjectionMode.PROXY),
-    classic: () => setInjectionMode(InjectionMode.CLASSIC)
-  })
-}
-
-/**
- * Given a resolver, returns an object with methods to manage the disposer
- * function.
- * @param obj
- */
-export function createDisposableResolver<T, B extends Resolver<T>>(
-  obj: B
-): DisposableResolver<T> & B {
-  function disposer(dispose: Disposer<T>) {
-    return createDisposableResolver({
-      ...(obj as any),
-      dispose
-    })
-  }
-
-  return updateResolver(obj, {
-    dispose: undefined,
-    disposer
-  })
-}
-
-/**
- * Creates a new resolver with props merged from both.
- *
- * @param source
- * @param target
- */
-function updateResolver<T, A extends Resolver<T>, B>(
-  source: A,
-  target: B
-): Resolver<T> & A & B {
-  const result = {
-    ...(source as any),
-    ...(target as any)
-  }
-  return result
-}
-
-/**
  * Creates a simple value resolver where the given value will always be resolved.
  *
  * @param  {string} name
@@ -190,15 +106,15 @@ function updateResolver<T, A extends Resolver<T>, B>(
  * @return {object}
  * The resolver.
  */
-export function asValue<T>(value: T): Resolver<T> {
+export function asValue<T>(value: T): Resolver<T> & DisposableResolver<T> {
   const resolve = () => {
     return value
   }
 
-  return {
+  return createDisposableResolver({
     resolve,
     lifetime: Lifetime.TRANSIENT
-  }
+  })
 }
 
 /**
@@ -220,7 +136,7 @@ export function asValue<T>(value: T): Resolver<T> {
 export function asFunction<T>(
   fn: FunctionReturning<T>,
   opts?: ResolverOptions<T>
-): BuildResolver<T> {
+): BuildResolver<T> & DisposableResolver<T> {
   if (!isFunction(fn)) {
     throw new AwilixTypeError('asFunction', 'fn', 'function', fn)
   }
@@ -239,7 +155,7 @@ export function asFunction<T>(
     injectionMode: opts.injectionMode
   }
 
-  return createBuildResolver(result)
+  return createDisposableResolver(createBuildResolver(result))
 }
 
 /**
@@ -260,7 +176,7 @@ export function asFunction<T>(
 export function asClass<T = {}>(
   Type: Constructor<T>,
   opts?: ResolverOptions<T>
-): BuildResolver<T> {
+): BuildResolver<T> & DisposableResolver<T> {
   if (!isFunction(Type)) {
     throw new AwilixTypeError('asClass', 'Type', 'class', Type)
   }
@@ -277,12 +193,14 @@ export function asClass<T = {}>(
   }
 
   const resolve = generateResolve(newClass, Type.prototype.constructor)
-  return createBuildResolver({
-    lifetime: opts.lifetime!,
-    injector: opts.injector,
-    injectionMode: opts.injectionMode,
-    resolve
-  })
+  return createDisposableResolver(
+    createBuildResolver({
+      lifetime: opts.lifetime!,
+      injector: opts.injector,
+      injectionMode: opts.injectionMode,
+      resolve
+    })
+  )
 }
 
 /**
@@ -300,6 +218,81 @@ export function aliasTo<T>(name: string): Resolver<T> {
 }
 
 /**
+ * Given an options object, creates a fluid interface
+ * to manage it.
+ *
+ * @param {*} obj
+ * The object to return.
+ *
+ * @return {object}
+ * The interface.
+ */
+export function createBuildResolver<T, B extends Resolver<T>>(
+  obj: B
+): BuildResolver<T> & B {
+  function setLifetime(this: any, value: LifetimeType) {
+    return createBuildResolver({
+      ...this,
+      lifetime: value
+    })
+  }
+
+  function setInjectionMode(this: any, value: InjectionModeType) {
+    return createBuildResolver({
+      ...this,
+      injectionMode: value
+    })
+  }
+
+  function inject(this: any, injector: InjectorFunction) {
+    return createBuildResolver({
+      ...this,
+      injector
+    })
+  }
+
+  return updateResolver(obj, {
+    setLifetime,
+    inject,
+    transient: partial(setLifetime, Lifetime.TRANSIENT),
+    scoped: partial(setLifetime, Lifetime.SCOPED),
+    singleton: partial(setLifetime, Lifetime.SINGLETON),
+    setInjectionMode,
+    proxy: partial(setInjectionMode, InjectionMode.PROXY),
+    classic: partial(setInjectionMode, InjectionMode.CLASSIC)
+  })
+}
+
+/**
+ * Given a resolver, returns an object with methods to manage the disposer
+ * function.
+ * @param obj
+ */
+export function createDisposableResolver<T, B extends Resolver<T>>(
+  obj: B
+): DisposableResolver<T> & B {
+  function disposer(this: any, dispose: Disposer<T>) {
+    return createDisposableResolver({
+      ...this,
+      dispose
+    })
+  }
+
+  return updateResolver(obj, {
+    disposer
+  })
+}
+
+/**
+ * Partially apply arguments to the given function.
+ */
+function partial<T1, R>(fn: (arg1: T1) => R, arg1: T1): () => R {
+  return function partiallyApplied(this: any): R {
+    return fn.call(this, arg1)
+  }
+}
+
+/**
  * Makes an options object based on defaults.
  *
  * @param  {object} defaults
@@ -312,6 +305,23 @@ export function aliasTo<T>(name: string): Resolver<T> {
  */
 function makeOptions<T, O>(defaults: T, ...rest: Array<O | undefined>): T & O {
   return Object.assign({}, defaults, ...rest) as T & O
+}
+
+/**
+ * Creates a new resolver with props merged from both.
+ *
+ * @param source
+ * @param target
+ */
+function updateResolver<T, A extends Resolver<T>, B>(
+  source: A,
+  target: B
+): Resolver<T> & A & B {
+  const result = {
+    ...(source as any),
+    ...(target as any)
+  }
+  return result
 }
 
 /**

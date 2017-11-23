@@ -12,7 +12,11 @@ const multiDeps = (testClass: any, needsCradle: any) => {
   return { testClass, needsCradle }
 }
 
-class TestClass {}
+class TestClass {
+  dispose() {
+    /**/
+  }
+}
 class WithDeps {
   testClass: any
   constructor(testClass: any) {
@@ -159,9 +163,9 @@ describe('registrations', function() {
   describe('asClass and asFunction fluid interface', function() {
     it('supports all lifetimes and returns the object itself', function() {
       const subjects = [
-        asClass(TestClass),
+        asClass<TestClass>(TestClass),
         asFunction(() => {
-          /**/
+          return new TestClass()
         })
       ]
 
@@ -177,6 +181,12 @@ describe('registrations', function() {
 
         retVal = retVal.scoped()
         expect(retVal.lifetime).toBe(Lifetime.SCOPED)
+
+        const d = (t: TestClass) => {
+          return t.dispose()
+        }
+        retVal = retVal.disposer(d)
+        expect(retVal.dispose).toBe(d)
       })
     })
 
