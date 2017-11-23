@@ -3,7 +3,7 @@ import { InjectionMode, InjectionModeType } from './injection-mode'
 import { isFunction, uniq } from './utils'
 import { parseParameterList } from './param-parser'
 import { AwilixTypeError } from './errors'
-import { AwilixContainer, FunctionReturning } from './container'
+import { AwilixContainer, FunctionReturning, ResolveOptions } from './container'
 
 /**
  * RESOLVER symbol can be used by modules loaded by
@@ -265,12 +265,12 @@ function makeOptions<T, O>(defaults: T, ...rest: Array<O | undefined>): T & O {
  * @return {Function}
  */
 function wrapWithLocals(container: AwilixContainer, locals: any) {
-  return function wrappedResolve(name: string) {
+  return function wrappedResolve(name: string, resolveOpts: ResolveOptions) {
     if (name in locals) {
       return locals[name]
     }
 
-    return container.resolve(name)
+    return container.resolve(name, resolveOpts)
   }
 }
 
@@ -397,7 +397,9 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
         ? wrapWithLocals(container, this.injector(container))
         : container.resolve
 
-      const children = dependencies.map(resolve)
+      const children = dependencies.map(p =>
+        resolve(p.name, { allowUnregistered: p.optional })
+      )
       return fn(...children)
     }
 

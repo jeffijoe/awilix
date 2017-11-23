@@ -723,6 +723,10 @@ container.cradle.count === 2
 
 Resolves the registration with the given name. Used by the cradle.
 
+**Signature**
+
+* `resolve<T>(name: string, [resolveOpts: ResolveOptions]): T`
+
 ```js
 container.registerFunction({
   leet: () => 1337
@@ -731,6 +735,10 @@ container.registerFunction({
 container.resolve('leet') === 1337
 container.cradle.leet === 1337
 ```
+
+The optional `resolveOpts` has the following fields:
+
+* `allowUnregistered`: if `true`, returns `undefined` when the dependency does not exist, instead of throwing an error.
 
 ### `container.register()`
 

@@ -1,8 +1,7 @@
 {
   "name": "awilix",
   "version": "2.11.1",
-  "description":
-    "Simple dependency injection container + helper utilities to facilitate wiring of modules",
+  "description": "Simple dependency injection container + helper utilities to facilitate wiring of modules",
   "main": "lib/awilix.js",
   "typings": "lib/awilix.d.ts",
   "engines": {
@@ -12,15 +11,17 @@
     "build": "rimraf lib && tsc -p tsconfig.build.json",
     "test": "tsc -p tsconfig.json --noEmit && jest",
     "test-watch": "npm run test -- --watch --reporter nyan",
-    "lint":
-      "tslint --project tsconfig.json --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",
+    "lint": "tslint --project tsconfig.json --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",
     "precommit": "lint-staged && npm test",
     "cover": "npm run test -- --coverage",
-    "coveralls":
-      "npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "coveralls": "npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "do-publish": "npm run lint && npm run cover && npm publish"
   },
-  "files": ["lib", "LICENSE.md", "README.md"],
+  "files": [
+    "lib",
+    "LICENSE.md",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jeffijoe/awilix.git"
@@ -40,7 +41,7 @@
   "homepage": "https://github.com/jeffijoe/awilix#readme",
   "devDependencies": {
     "@types/glob": "^5.0.33",
-    "@types/jest": "^21.1.6",
+    "@types/jest": "^21.1.8",
     "@types/node": "^8.0.53",
     "@types/prettier": "^1.8.0",
     "coveralls": "^3.0.0",
@@ -76,8 +77,15 @@
     "mapCoverage": true,
     "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
     "testEnvironment": "node",
-    "coveragePathIgnorePatterns": ["/node_modules/", "__tests__"],
-    "moduleFileExtensions": ["ts", "tsx", "js"],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "__tests__"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
     "transform": {
       "^.+\\.(j|t)sx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     }

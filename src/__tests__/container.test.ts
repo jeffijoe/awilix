@@ -471,6 +471,37 @@ describe('container', function() {
       expect(scope.cradle.usedValue).toBe('scope')
     })
 
+    it('supports default parameters in CLASSIC mode', () => {
+      const container = createContainer({
+        injectionMode: InjectionMode.CLASSIC
+      })
+
+      class ClassWithDefaults {
+        method(p1 = 123) {
+          /**/
+        }
+
+        // tslint:disable-next-line:member-ordering
+        constructor(public val: any, public fn: any) {
+          /**/
+        }
+      }
+
+      const fnWithDefaults = (val = 456, nope = 'nope') => (p: string) =>
+        p + nope + val
+
+      container.register({
+        val: asValue(123),
+        cls: asClass(ClassWithDefaults),
+        fn: asFunction(fnWithDefaults)
+      })
+
+      expect(container.resolve<ClassWithDefaults>('cls').val).toBe(123)
+      expect(container.resolve<ClassWithDefaults>('cls').fn('yep')).toBe(
+        'yepnope123'
+      )
+    })
+
     it('throws an AwilixResolutionError when there are cyclic dependencies', function() {
       const container = createContainer()
       container.registerFunction({
