@@ -167,19 +167,15 @@ describe('registrations', function() {
 
       subjects.forEach(x => {
         let retVal = x.setLifetime(Lifetime.SCOPED)
-        expect(retVal).toBe(x)
         expect(retVal.lifetime).toBe(Lifetime.SCOPED)
 
         retVal = retVal.transient()
-        expect(retVal).toBe(x)
         expect(retVal.lifetime).toBe(Lifetime.TRANSIENT)
 
         retVal = retVal.singleton()
-        expect(retVal).toBe(x)
         expect(retVal.lifetime).toBe(Lifetime.SINGLETON)
 
         retVal = retVal.scoped()
-        expect(retVal).toBe(x)
         expect(retVal.lifetime).toBe(Lifetime.SCOPED)
       })
     })
@@ -194,7 +190,7 @@ describe('registrations', function() {
 
       subjects.forEach(x => {
         const retVal = x.inject(() => ({ value: 42 }))
-        expect(retVal).toBe(x)
+        expect(retVal.injector).toBeDefined()
       })
     })
   })

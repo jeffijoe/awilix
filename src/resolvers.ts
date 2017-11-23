@@ -29,9 +29,11 @@ export interface Resolver<T> {
 }
 
 /**
- * Setter function helpers for build resolvers.
+ * A resolver object created by asClass() or asFunction().
  */
-export interface BuildSetters {
+export interface BuildResolver<T> extends Resolver<T> {
+  injectionMode?: InjectionModeType
+  injector?: InjectorFunction
   setLifetime(lifetime: LifetimeType): this
   setInjectionMode(mode: InjectionModeType): this
   singleton(): this
@@ -43,12 +45,17 @@ export interface BuildSetters {
 }
 
 /**
- * A resolver object created by asClass() or asFunction().
+ * Disposable resolver.
  */
-export interface BuildResolver<T> extends Resolver<T>, BuildSetters {
-  injectionMode?: InjectionModeType
-  injector?: InjectorFunction
+export interface DisposableResolver<T> extends Resolver<T> {
+  dispose?: Disposer<T>
+  disposer(dispose: Disposer<T>): this
 }
+
+/**
+ * Disposer function type.
+ */
+export type Disposer<T> = (value: T) => void | Promise<void>
 
 /**
  * The options when registering a class, function or value.
@@ -91,35 +98,37 @@ export type Constructor<T> = { new (...args: any[]): T }
  * Given an options object, creates a fluid interface
  * to manage it.
  *
- * @param {*} returnValue
+ * @param {*} obj
  * The object to return.
- *
- * @param  {object} opts
- * The options to manage.
  *
  * @return {object}
  * The interface.
  */
-export function makeFluidInterface<T>(obj: Resolver<T>): BuildSetters {
-  // For TS.
-  const buildRegistration = obj as BuildResolver<T>
-
+export function createBuildResolver<T, B extends Resolver<T>>(
+  obj: B
+): BuildResolver<T> & B {
   function setLifetime(value: LifetimeType) {
-    buildRegistration.lifetime = value
-    return buildRegistration
+    return createBuildResolver({
+      ...(obj as any),
+      lifetime: value
+    })
   }
 
   function setInjectionMode(value: InjectionModeType) {
-    buildRegistration.injectionMode = value
-    return buildRegistration
+    return createBuildResolver({
+      ...(obj as any),
+      injectionMode: value
+    })
   }
 
   function inject(injector: InjectorFunction) {
-    buildRegistration.injector = injector
-    return buildRegistration
+    return createBuildResolver({
+      ...(obj as any),
+      injector
+    })
   }
 
-  return {
+  return updateResolver(obj, {
     setLifetime,
     inject,
     transient: () => setLifetime(Lifetime.TRANSIENT),
@@ -128,7 +137,45 @@ export function makeFluidInterface<T>(obj: Resolver<T>): BuildSetters {
     setInjectionMode,
     proxy: () => setInjectionMode(InjectionMode.PROXY),
     classic: () => setInjectionMode(InjectionMode.CLASSIC)
+  })
+}
+
+/**
+ * Given a resolver, returns an object with methods to manage the disposer
+ * function.
+ * @param obj
+ */
+export function createDisposableResolver<T, B extends Resolver<T>>(
+  obj: B
+): DisposableResolver<T> & B {
+  function disposer(dispose: Disposer<T>) {
+    return createDisposableResolver({
+      ...(obj as any),
+      dispose
+    })
   }
+
+  return updateResolver(obj, {
+    dispose: undefined,
+    disposer
+  })
+}
+
+/**
+ * Creates a new resolver with props merged from both.
+ *
+ * @param source
+ * @param target
+ */
+function updateResolver<T, A extends Resolver<T>, B>(
+  source: A,
+  target: B
+): Resolver<T> & A & B {
+  const result = {
+    ...(source as any),
+    ...(target as any)
+  }
+  return result
 }
 
 /**
@@ -185,14 +232,14 @@ export function asFunction<T>(
   opts = makeOptions(defaults, opts, (fn as any)[RESOLVER])
 
   const resolve = generateResolve(fn)
-  const result = {
+  let result = {
     resolve,
     lifetime: opts.lifetime!,
     injector: opts.injector,
     injectionMode: opts.injectionMode
   }
-  result.resolve = resolve.bind(result)
-  return Object.assign(result, makeFluidInterface<T>(result))
+
+  return createBuildResolver(result)
 }
 
 /**
@@ -230,15 +277,12 @@ export function asClass<T = {}>(
   }
 
   const resolve = generateResolve(newClass, Type.prototype.constructor)
-  const result = {
+  return createBuildResolver({
     lifetime: opts.lifetime!,
     injector: opts.injector,
     injectionMode: opts.injectionMode,
-    resolve: resolve
-  }
-
-  result.resolve = resolve.bind(result)
-  return Object.assign(result, makeFluidInterface<T>(result))
+    resolve
+  })
 }
 
 /**
