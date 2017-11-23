@@ -4,6 +4,7 @@ import { createContainer, AwilixContainer } from '../container'
 import { Lifetime } from '../lifetime'
 import { InjectionMode } from '../injection-mode'
 import { AwilixTypeError } from '../errors'
+import { aliasTo } from '../awilix'
 
 const testFn = () => 1337
 const depsFn = (testClass: any) => testClass
@@ -195,6 +196,13 @@ describe('registrations', function() {
         const retVal = x.inject(() => ({ value: 42 }))
         expect(retVal).toBe(x)
       })
+    })
+  })
+
+  describe('aliasTo', () => {
+    it('returns the aliased dependency', () => {
+      container.register({ val: asValue(123), aliasVal: aliasTo('val') })
+      expect(container.resolve('aliasVal')).toBe(123)
     })
   })
 })

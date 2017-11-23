@@ -242,6 +242,20 @@ export function asClass<T = {}>(
 }
 
 /**
+ * Resolves to the specified registration.
+ */
+export function aliasTo<T>(name: string): Resolver<T> {
+  return {
+    // Transient because it all depends on the
+    // dependency being resolved.
+    lifetime: Lifetime.TRANSIENT,
+    resolve(container) {
+      return container.resolve(name)
+    }
+  }
+}
+
+/**
  * Makes an options object based on defaults.
  *
  * @param  {object} defaults
@@ -406,5 +420,3 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
     return fn()
   }
 }
-
-module.exports.asClass = asClass
