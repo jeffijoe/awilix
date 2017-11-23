@@ -27,7 +27,6 @@ export function parseParameterList(source: string): Array<Parameter> {
   const { peek, next: _next, done } = createTokenizer(source)
   const params: Array<Parameter> = []
 
-  const history: Array<Token> = []
   let t: Token = null!
   nextToken()
   while (!done()) {
@@ -116,7 +115,6 @@ export function parseParameterList(source: string): Array<Parameter> {
    * Advances the tokenizer and stores the previous token in history
    */
   function nextToken() {
-    history.unshift(t)
     t = _next()
     return t
   }
@@ -124,60 +122,11 @@ export function parseParameterList(source: string): Array<Parameter> {
   /**
    * Returns an error describing an unexpected token.
    */
+  /* istanbul ignore next */
   function unexpected() {
-    /* istanbul ignore next */
     return new SyntaxError(
       `Parsing parameter list, did not expect ${t.type} token${t.value &&
         ` (${t.value})`}`
     )
   }
 }
-
-/*
-export function parseParameterList(source: string): Array<string> {
-  const tokens = tokenizeFunction(source)
-  const params = []
-  for (let i = 0; i < tokens.length; i++) {
-    let t = tokens[i]
-    if (t.type === ')') {
-      break
-    }
-    if (t.type === 'ident') {
-      if (t.value === 'function') {
-        t = tokens[++i]
-        if (t.type === 'ident') {
-          t = tokens[++i]
-        }
-        // We know its "(", so advance right away.
-        t = tokens[++i]
-        if (t.type === ')') {
-          break
-        }
-      } else if (t.value === 'class') {
-        // Skip until we reach the constructor method.
-        do {
-          t = tokens[++i]
-          if (t.type === 'EOF') {
-            return params
-          }
-          if (t.type !== 'ident') {
-            continue
-          }
-          if (t.value === 'constructor') {
-            t = tokens[++i] // "("
-            while (t.type !== ')') {
-              t = tokens[++i]
-              if (t.type === 'ident') {
-                params.push(t.value!)
-              }
-            }
-            return params
-          }
-        } while (true)
-      }
-      params.push(t.value!)
-    }
-  }
-  return params
-}
-*/

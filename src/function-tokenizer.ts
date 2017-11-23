@@ -29,6 +29,9 @@ export function createTokenizer(source: string) {
   let pos: number = 0
   let type: TokenType = 'EOF'
   let value: string = ''
+
+  // These are used to greedily skip as much as possible.
+  // Whenever we reach a paren, we increment these.
   let parenLeft = 0
   let parenRight = 0
 
@@ -59,6 +62,7 @@ export function createTokenizer(source: string) {
       }
 
       let ch = source.charAt(pos)
+      // Whitespace is irrelevant
       if (isWhiteSpace(ch)) {
         pos++
         continue
@@ -80,9 +84,10 @@ export function createTokenizer(source: string) {
           pos++
           skipExpression()
           // We need to know that there's a default value so we can
-          // exclude it if it does not exist.
+          // skip it if it does not exist when resolving.
           return (type = ch)
         default:
+          // Scans an identifier.
           if (isIdentifierStart(ch)) {
             scanIdentifier()
             return type
@@ -182,7 +187,10 @@ export function createTokenizer(source: string) {
         if (next === '$') {
           const afterDollar = source.charAt(pos + 2)
           if (afterDollar === '{') {
+            // This is the start of an interpolation; skip the ${
             pos = pos + 2
+            // Skip strings and whitespace until we reach the ending }.
+            // This includes skipping nested interpolated strings. :D
             skipUntil(ch => ch === '}')
           }
         }
