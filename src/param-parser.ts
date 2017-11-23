@@ -56,6 +56,7 @@ export function parseParameterList(source: string): Array<Parameter> {
         // which can have no default args.
         params.push({ name: t.value!, optional: false })
         return params
+      /* istanbul ignore next */
       default:
         throw unexpected()
     }
@@ -88,6 +89,7 @@ export function parseParameterList(source: string): Array<Parameter> {
             params.push(param)
           }
           return
+        /* istanbul ignore next */
         default:
           throw unexpected()
       }
@@ -123,6 +125,7 @@ export function parseParameterList(source: string): Array<Parameter> {
    * Returns an error describing an unexpected token.
    */
   function unexpected() {
+    /* istanbul ignore next */
     return new SyntaxError(
       `Parsing parameter list, did not expect ${t.type} token${t.value &&
         ` (${t.value})`}`

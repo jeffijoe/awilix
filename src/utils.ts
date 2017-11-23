@@ -1,4 +1,4 @@
-import { tokenizeFunction } from './function-tokenizer'
+import { createTokenizer } from './function-tokenizer'
 import { Constructor } from './resolvers'
 
 /**
@@ -70,14 +70,14 @@ export function isClass(fn: Function | Constructor<any>) {
   }
 
   // Should only need 2 tokens.
-  const tokens = tokenizeFunction(fn.toString(), 2)
-  const first = tokens[0]
-  if (first.value === 'class') {
+  const tokenizer = createTokenizer(fn.toString())
+  const first = tokenizer.next()
+  if (first.type === 'class') {
     return true
   }
 
-  const second = tokens[1]
-  if (first.value === 'function' && second.value) {
+  const second = tokenizer.next()
+  if (first.type === 'function' && second.value) {
     if (second.value[0] === second.value[0].toUpperCase()) {
       return true
     }

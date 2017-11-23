@@ -141,7 +141,7 @@ export interface AwilixContainer {
    * @return {*}
    * Whatever was resolved.
    */
-  resolve<T>(name: string | symbol): T
+  resolve<T>(name: string | symbol, resolveOptions?: ResolveOptions): T
   /**
    * Given a resolver, class or function, builds it up and returns it.
    * Does not cache it, this means that any lifetime configured in case of passing
@@ -154,6 +154,17 @@ export interface AwilixContainer {
     targetOrResolver: ClassOrFunctionReturning<T> | Resolver<T>,
     opts?: ResolverOptions<T>
   ): T
+}
+
+/**
+ * Optional resolve options.
+ */
+export interface ResolveOptions {
+  /**
+   * If `true` and `resolve` cannot find the requested dependency,
+   * returns `undefined` rather than throwing an error.
+   */
+  allowUnregistered?: boolean
 }
 
 /**
@@ -516,7 +527,8 @@ export function createContainer(
    * @return {*}
    * Whatever was resolved.
    */
-  function resolve(name: string | symbol) {
+  function resolve(name: string | symbol, resolveOpts?: ResolveOptions) {
+    resolveOpts = resolveOpts || {}
     if (!resolutionStack.length) {
       // Root resolve busts the registration cache.
       rollUpRegistrations(true)
@@ -549,6 +561,10 @@ export function createContainer(
         // return the registration names.
         if (name === Symbol.iterator) {
           return registrationNamesIterator
+        }
+
+        if (resolveOpts.allowUnregistered) {
+          return undefined
         }
 
         throw new AwilixResolutionError(name, resolutionStack)
