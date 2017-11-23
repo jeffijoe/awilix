@@ -38,7 +38,7 @@ export interface AwilixContainer {
   /**
    * Resolved modules cache.
    */
-  readonly cache: { [key: string]: any }
+  readonly cache: Map<string | symbol, CacheEntry>
   /**
    * Creates a scoped container with this one as the parent.
    */
@@ -165,6 +165,20 @@ export interface ResolveOptions {
    * returns `undefined` rather than throwing an error.
    */
   allowUnregistered?: boolean
+}
+
+/**
+ * Cache entry.
+ */
+export interface CacheEntry {
+  /**
+   * The resolver that resolved the value.
+   */
+  resolver: Resolver<any>
+  /**
+   * The resolved value.
+   */
+  value: any
 }
 
 /**
@@ -352,7 +366,7 @@ export function createContainer(
     options,
     cradle: cradle as any,
     inspect,
-    cache: {},
+    cache: new Map<string | symbol, CacheEntry>(),
     loadModules,
     createScope,
     register: register as any,
@@ -536,7 +550,7 @@ export function createContainer(
 
     try {
       // Grab the registration by name.
-      const registration = computedRegistrations![name]
+      const resolver = computedRegistrations![name]
       if (resolutionStack.indexOf(name) > -1) {
         throw new AwilixResolutionError(
           name,
@@ -550,7 +564,7 @@ export function createContainer(
         return createContainer
       }
 
-      if (!registration) {
+      if (!resolver) {
         // The following checks ensure that console.log on the cradle does not
         // throw an error (issue #7).
         if (name === util.inspect.custom || name === 'inspect') {
@@ -574,21 +588,21 @@ export function createContainer(
       resolutionStack.push(name)
 
       // Do the thing
-      let cached
+      let cached: CacheEntry | undefined
       let resolved
-      switch (registration.lifetime) {
+      switch (resolver.lifetime) {
         case Lifetime.TRANSIENT:
           // Transient lifetime means resolve every time.
-          resolved = registration.resolve(container)
+          resolved = resolver.resolve(container)
           break
         case Lifetime.SINGLETON:
           // Singleton lifetime means cache at all times, regardless of scope.
-          cached = rootContainer.cache[name]
-          if (cached === undefined) {
-            resolved = registration.resolve(container)
-            rootContainer.cache[name] = resolved
+          cached = rootContainer.cache.get(name)
+          if (!cached) {
+            resolved = resolver.resolve(container)
+            rootContainer.cache.set(name, { resolver, value: resolved })
           } else {
-            resolved = cached
+            resolved = cached.value
           }
           break
         case Lifetime.SCOPED:
@@ -599,25 +613,25 @@ export function createContainer(
 
           // Note: The first element in the family tree is this container.
           for (const c of familyTree) {
-            cached = c.cache[name]
+            cached = c.cache.get(name)
             if (cached !== undefined) {
               // We found one!
-              resolved = cached
+              resolved = cached.value
               break
             }
           }
 
           // If we still have not found one, we need to resolve and cache it.
           if (cached === undefined) {
-            resolved = registration.resolve(container)
-            container.cache[name] = resolved
+            resolved = resolver.resolve(container)
+            container.cache.set(name, { resolver, value: resolved })
           }
           break
         default:
           throw new AwilixResolutionError(
             name,
             resolutionStack,
-            `Unknown lifetime "${registration.lifetime}"`
+            `Unknown lifetime "${resolver.lifetime}"`
           )
       }
       // Pop it from the stack again, ready for the next resolution

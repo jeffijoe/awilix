@@ -712,7 +712,7 @@ Not really useful for public use.
 
 ### `container.cache`
 
-An object used internally for caching resolutions. It's a plain object.
+An object used internally for caching resolutions. It's a `Map<string, CacheEntry>`.
 Not meant for public use but if you find it useful, go ahead but tread carefully.
 
 Each scope has it's own cache, and checks the cache of it's parents.
@@ -730,7 +730,7 @@ container.register({
 container.cradle.count === 1
 container.cradle.count === 1
 
-delete container.cache.count
+container.cache.delete('count')
 container.cradle.count === 2
 ```
 
