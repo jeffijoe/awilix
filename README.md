@@ -712,10 +712,10 @@ Not really useful for public use.
 
 ### `container.cache`
 
-An object used internally for caching resolutions. It's a `Map<string, CacheEntry>`.
+A `Map<string, CacheEntry>` used internally for caching resolutions.
 Not meant for public use but if you find it useful, go ahead but tread carefully.
 
-Each scope has it's own cache, and checks the cache of it's parents.
+Each scope has it's own cache, and checks the cache of it's ancestors.
 
 ### `container.options`
 
