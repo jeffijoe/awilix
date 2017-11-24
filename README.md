@@ -967,7 +967,7 @@ Args:
 * `opts.formatName`: Can be either `'camelCase'`, or a function that takes the
   current name as the first parameter and returns the new name. Default is to
   pass the name through as-is. The 2nd parameter is a full module descriptor.
-* `resolverOptions`: An `object` passed to the resolvers. Used to configure the
+* `opts.resolverOptions`: An `object` passed to the resolvers. Used to configure the
   lifetime, injection mode and more of the loaded modules.
 
 Example:
