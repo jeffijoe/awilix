@@ -175,12 +175,6 @@ const FAMILY_TREE = Symbol('familyTree')
 const ROLL_UP_REGISTRATIONS = Symbol('rollUpRegistrations')
 
 /**
- * Scopes symbol.
- * @type {Symbol}
- */
-const SCOPES = Symbol('scopes')
-
-/**
  * Creates an Awilix container instance.
  *
  * @param {Function} options.require
@@ -288,7 +282,6 @@ export function createContainer(
     dispose,
     [util.inspect.custom]: inspect,
     [ROLL_UP_REGISTRATIONS]: rollUpRegistrations,
-    [SCOPES]: [],
     get registrations() {
       return rollUpRegistrations()
     }
@@ -301,11 +294,6 @@ export function createContainer(
 
   // Save it so we can access it from a scoped container.
   ;(container as any)[FAMILY_TREE] = familyTree
-
-  // Add this container to the parent's scopes.
-  if (parentContainer) {
-    ;(parentContainer as any)[SCOPES].push(container)
-  }
 
   // We need a reference to the root container,
   // so we can retrieve and store singletons.
@@ -571,24 +559,6 @@ export function createContainer(
    * on all disposable registrations and clearing the cache.
    */
   function dispose(): Promise<void> {
-    const scopes = getChildScopes()
-    return Promise.all(scopes.map(s => s.dispose())).then(() => {
-      return callDisposersAndClearCache()
-    })
-  }
-
-  /**
-   * Gets the child scopes for this container.
-   */
-  function getChildScopes(): Array<AwilixContainer> {
-    return (container as any)[SCOPES] as Array<AwilixContainer>
-  }
-
-  /**
-   * Calls the disposers on the cached values, then clears the cache
-   * for this container.
-   */
-  function callDisposersAndClearCache(): Promise<void> {
     const entries = Array.from(container.cache.entries())
     container.cache.clear()
     return Promise.all(

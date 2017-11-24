@@ -63,7 +63,7 @@ describe('disposing container', () => {
     scope.resolve('funcDisposer')
     scope.resolve('classDisposer')
     await container.dispose()
-    expect(order).toEqual([1, 2])
+    expect(order).toEqual([2])
   })
 
   it('when the scope is disposed directly, disposes scoped instances but does not dispose the root singletons', async () => {

@@ -609,9 +609,8 @@ For example, database connection libraries usually have some sort of `destroy`
 or `end` function to close the connection. You can tell Awilix to call these for
 you when calling `container.dispose()`.
 
-**Important:** the container being disposed will first dispose it's child
-containers (the ones created using `createScope()`), before disposing it's own
-cache. This also means you can dispose a scope without disposing the parent.
+**Important:** the container being disposed **will not dispose its' scopes**. It
+only disposes values **in it's own cache**.
 
 ```js
 import { createContainer, asClass } from 'awilix'
@@ -1182,11 +1181,10 @@ const myFunc = container.build(myFuncResolver)
 
 ### `container.dispose()`
 
-Returns a `Promise` that resolves when all disposers on the container and it's
-child-containers (scopes) have resolved. The disposers run **depth-first**,
-meaning sub-scopes get disposed before their parents. **Only cached values will
-be disposed, meaning they must have a `Lifetime` of `SCOPED` or `SINGLETON`**,
-else they are not cached.
+Returns a `Promise` that resolves when all disposers of cached resolutions have
+resolved. **Only cached values will be disposed, meaning they must have a
+`Lifetime` of `SCOPED` or `SINGLETON`**, or else they are not cached by the
+container and therefore can't be disposed by it.
 
 This also clears the container's cache.
 
