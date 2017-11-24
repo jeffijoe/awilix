@@ -5,7 +5,7 @@ const awilix = require('../..')
 const container = awilix.createContainer()
 
 // Register some value.. We depend on this in `Stuffs.js`
-container.registerValue('database', 'stuffs_db')
+container.register('database', awilix.asValue('stuffs_db'))
 
 // Auto-load our services and our repositories.
 const opts = {

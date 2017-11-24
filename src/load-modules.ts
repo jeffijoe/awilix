@@ -1,6 +1,11 @@
 import { ModuleDescriptor, GlobWithOptions, listModules } from './list-modules'
 import { Lifetime } from './lifetime'
-import { ResolverOptions, RESOLVER, asClass, asFunction } from './resolvers'
+import {
+  RESOLVER,
+  asClass,
+  asFunction,
+  BuildResolverOptions
+} from './resolvers'
 import { AwilixContainer } from './container'
 import { isClass, isFunction } from './utils'
 
@@ -13,7 +18,7 @@ const camelCase = require('camel-case')
 export interface LoadModulesOptions {
   cwd?: string
   formatName?: NameFormatter | BuiltInNameFormatters
-  resolverOptions?: ResolverOptions<any>
+  resolverOptions?: BuildResolverOptions<any>
 }
 
 /**
@@ -125,20 +130,14 @@ function optsWithDefaults(
   opts: Partial<LoadModulesOptions> | undefined,
   container: AwilixContainer
 ): LoadModulesOptions {
-  return Object.assign(
-    {},
-    {
-      // Does a somewhat-deep merge on the registration options.
-      registrationOptions: Object.assign(
-        {
-          lifetime: Lifetime.TRANSIENT,
-          injectionMode: container.options.injectionMode
-        },
-        opts && opts.resolverOptions
-      )
+  return {
+    // Does a somewhat-deep merge on the registration options.
+    resolverOptions: {
+      lifetime: Lifetime.TRANSIENT,
+      ...(opts && opts.resolverOptions)
     },
-    opts
-  )
+    ...opts
+  }
 }
 
 /**
@@ -175,7 +174,10 @@ function registerDescriptor(
     moduleDescriptorOpts = { lifetime: moduleDescriptorOpts }
   }
 
-  const regOpts = Object.assign({}, opts.resolverOptions, moduleDescriptorOpts)
+  const regOpts = {
+    ...opts.resolverOptions,
+    ...moduleDescriptorOpts
+  }
 
   const reg = regOpts.register
     ? regOpts.register

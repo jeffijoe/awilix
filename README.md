@@ -27,6 +27,7 @@ dependency resolution support powered by `Proxy`. Make IoC great again!
 * [Auto-loading modules](#auto-loading-modules)
 * [Per-module local injections](#per-module-local-injections)
 * [Inlining resolver options](#inlining-resolver-options)
+* [Disposing](#disposing)
 * [API](#api)
   * [The `awilix` object](#the-awilix-object)
   * [Resolver options](#resolver-options)
@@ -44,12 +45,10 @@ dependency resolution support powered by `Proxy`. Make IoC great again!
     * [`container.options`](#containeroptions)
     * [`container.resolve()`](#containerresolve)
     * [`container.register()`](#containerregister)
-    - [`container.registerValue()` (DEPRECATED)](#containerregistervalue-deprecated)
-    - [`container.registerFunction()` (DEPRECATED)](#containerregisterfunction-deprecated)
-    - [`container.registerClass()` (DEPRECATED)](#containerregisterclass-deprecated)
     * [`container.loadModules()`](#containerloadmodules)
     * [`container.createScope()`](#containercreatescope)
     * [`container.build()`](#containerbuild)
+    * [`container.dispose()`](#containerdispose)
 * [Contributing](#contributing)
 * [What's in a name?](#whats-in-a-name)
 * [Author](#author)
@@ -97,10 +96,10 @@ class UserController {
   }
 }
 
-container.registerClass({
+container.register({
   // Here we are telling Awilix how to resolve a
   // userController: by instantiating a class.
-  userController: UserController
+  userController: asClass(UserController)
 })
 
 // Let's try with a factory function.
@@ -114,10 +113,10 @@ const makeUserService = ({ db }) => {
   }
 }
 
-container.registerFunction({
+container.register({
   // the `userService` is resolved by
   // invoking the function.
-  userService: makeUserService
+  userService: asFunction(makeUserService)
 })
 
 // Alright, now we need a database.
@@ -146,12 +145,12 @@ container.register({
 
 // Lastly we register the connection string and timeout values
 // as we need them in the Database constructor.
-container.registerValue({
+container.register({
   // We can register things as-is - this is not just
   // limited to strings and numbers, it can be anything,
   // really - they will be passed through directly.
-  connectionString: process.env.CONN_STR,
-  timeout: 1000
+  connectionString: asValue(process.env.CONN_STR),
+  timeout: asValue(1000)
 })
 
 // We have now wired everything up!
@@ -196,14 +195,15 @@ const Lifetime = awilix.Lifetime
 To register a module with a specific lifetime:
 
 ```js
+const { asClass, asFunction, asValue } = awilix
+
 class MailService {}
 
-container.registerClass({
-  mailService: [MailService, { lifetime: Lifetime.SINGLETON }]
+container.register({
+  mailService: asClass(MailService, { lifetime: Lifetime.SINGLETON })
 })
 
-// or using the resolver functions directly..
-const { asClass, asFunction, asValue } = awilix
+// or using the chaining configuration API..
 container.register({
   mailService: asClass(MailService).lifetime(Lifetime.SINGLETON)
 })
@@ -213,12 +213,8 @@ container.register({
   mailService: asClass(MailService).singleton()
 })
 
-// all roads lead to rome
-container.register({
-  mailService: asClass(MailService, { lifetime: Lifetime.SINGLETON })
-})
-// seriously..
-container.registerClass('mailService', MailService, { lifetime: SINGLETON })
+// or.......
+container.register('mailService', asClass(MailService, { lifetime: SINGLETON }))
 ```
 
 ## Scoped lifetime
@@ -375,8 +371,8 @@ container.register({
 })
 
 // or..
-container.registerClass({
-  logger: [Logger, { injectionMode: InjectionMode.CLASSIC }]
+container.register({
+  logger: asClass(Logger, { injectionMode: InjectionMode.CLASSIC })
 })
 ```
 
@@ -520,17 +516,19 @@ const container = createContainer()
   })
 
   // Shorthand variants
-  .registerFunction({
-    userRepository: [
-      createUserRepository,
-      { injector: () => ({ timeout: 2000 }) }
-    ]
+  .register({
+    userRepository: asFunction(createUserRepository, {
+      injector: () => ({ timeout: 2000 })
+    })
   })
 
   // Stringly-typed shorthand
-  .registerFunction('userRepository', createUserRepository, {
-    injector: () => ({ timeout: 2000 })
-  })
+  .register(
+    'userRepository',
+    asFunction(createUserRepository, {
+      injector: () => ({ timeout: 2000 })
+    })
+  )
 
   // with `loadModules`
   .loadModules([['repositories/*.js', { injector: () => ({ timeout: 2000 }) }]])
@@ -569,11 +567,11 @@ AwesomeService[RESOLVER] = {
 **index.js**:
 
 ```js
-import { createContainer } from 'awilix'
+import { createContainer, asClass } from 'awilix'
 import AwesomeService from './services/awesome-service.js'
 
-const container = createContainer().registerClass({
-  awesomeService: AwesomeService
+const container = createContainer().register({
+  awesomeService: asClass(AwesomeService)
 })
 
 console.log(container.registrations.awesomeService.lifetime) // 'SCOPED'
@@ -599,6 +597,90 @@ console.log(container.registrations.superService.injectionMode) // 'CLASSIC'
 ```
 
 **Important**: the `name` field is only used by `loadModules`.
+
+# Disposing
+
+As of Awilix v3.0, you can call `container.dispose()` to clear the resolver
+cache and call any registered disposers. This is very useful to properly dispose
+resources like connection pools, and especially when using watch-mode in your
+integration tests.
+
+For example, database connection libraries usually have some sort of `destroy`
+or `end` function to close the connection. You can tell Awilix to call these for
+you when calling `container.dispose()`.
+
+**Important:** the container being disposed will first dispose it's child
+containers (the ones created using `createScope()`), before disposing it's own
+cache. This also means you can dispose a scope without disposing the parent.
+
+```js
+import { createContainer, asClass } from 'awilix'
+import pg from 'pg'
+
+class TodoStore {
+  constructor({ pool }) {
+    this.pool = pool
+  }
+
+  async getTodos() {
+    const result = await this.pool.query('SELECT * FROM todos')
+    return result.rows
+  }
+}
+
+function configureContainer() {
+  return container.register({
+    todoStore: asClass(TodoStore),
+    pool: asFunction(() => new pg.Pool())
+      // Disposables must be either `scoped` or `singleton`.
+      .singleton()
+      // This is called when the pool is going to be disposed.
+      // If it returns a Promise, it will be awaited by `dispose`.
+      .disposer(pool => pool.end())
+  })
+}
+
+const container = configureContainer()
+const todoStore = container.resolve('todoStore')
+
+// Later...
+container.dispose().then(() => {
+  console.log('Container has been disposed!')
+})
+```
+
+A perfect use case for this would be when using Awilix with an HTTP server.
+
+```js
+import express from 'express'
+import http from 'http'
+
+function createServer() {
+  const app = express()
+  const container = configureContainer()
+  app.get('/todos', async (req, res) => {
+    const store = container.resolve('todoStore')
+    const todos = await store.getTodos()
+    res.status(200).json(todos)
+  })
+
+  const server = http.createServer(app)
+  // Dispose container when the server closes.
+  server.on('close', () => container.dispose())
+  return server
+}
+
+test('server does server things', async () => {
+  const server = createServer()
+  server.listen(3000)
+
+  /// .. run your tests..
+
+  // Disposes everything, and your process no
+  // longer hangs on to zombie connections!
+  server.close()
+})
+```
 
 # API
 
@@ -768,10 +850,10 @@ Not really useful for public use.
 
 ### `container.cache`
 
-An object used internally for caching resolutions. It's a plain object. Not
-meant for public use but if you find it useful, go ahead but tread carefully.
+A `Map<string, CacheEntry>` used internally for caching resolutions. Not meant
+for public use but if you find it useful, go ahead but tread carefully.
 
-Each scope has it's own cache, and checks the cache of it's parents.
+Each scope has it's own cache, and checks the cache of it's ancestors.
 
 ### `container.options`
 
@@ -786,7 +868,7 @@ container.register({
 container.cradle.count === 1
 container.cradle.count === 1
 
-delete container.cache.count
+container.cache.delete('count')
 container.cradle.count === 2
 ```
 
@@ -799,8 +881,8 @@ Resolves the registration with the given name. Used by the cradle.
 * `resolve<T>(name: string, [resolveOpts: ResolveOptions]): T`
 
 ```js
-container.registerFunction({
-  leet: () => 1337
+container.register({
+  leet: asFunction(() => 1337)
 })
 
 container.resolve('leet') === 1337
@@ -818,9 +900,6 @@ The optional `resolveOpts` has the following fields:
 
 * `register(name: string, resolver: Resolver): AwilixContainer`
 * `register(nameAndResolverPair: NameAndResolverPair): AwilixContainer`
-
-Registers modules with the container. This function is used by the
-`registerValue`, `registerFunction` and `registerClass` functions.
 
 Awilix needs to know how to resolve the modules, so let's pull out the resolver
 functions:
@@ -854,7 +933,7 @@ container.register({
   context: asClass(SessionContext, { lifetime: Lifetime.SCOPED })
 })
 
-// `registerFunction` and `registerClass` also supports a fluid syntax.
+// `asClass` and `asFunction` also supports a fluid syntax.
 // This...
 container.register(
   'mailService',
@@ -870,144 +949,6 @@ container.register('context', asClass(SessionContext).scoped())
 
 **The object syntax, key-value syntax and chaining are valid for all `register`
 calls!**
-
-### `container.registerValue()` (DEPRECATED)
-
-> This method is deprecated and will be removed in v3. Please use
-> `container.register({ name: asValue(target) })` instead.
-
-**Signatures**
-
-* `registerValue(name: string, value: any): AwilixContainer`
-* `registerValue(nameAndValuePairs: RegisterNameAndValuePair): AwilixContainer`
-
-Registers a constant value in the container. Can be anything.
-
-```js
-container.registerValue({
-  someName: 'some value',
-  db: myDatabaseObject
-})
-
-// Alternative syntax:
-container.registerValue('someName', 'some value')
-container.registerValue('db', myDatabaseObject)
-
-// Chaining
-container
-  .registerValue('someName', 'some value')
-  .registerValue('db', myDatabaseObject)
-```
-
-### `container.registerFunction()` (DEPRECATED)
-
-> This method is deprecated and will be removed in v3. Please use
-> `container.register({ name: asFunction(target) })` instead.
-
-**Signatures**
-
-* `registerFunction(fn: Function, opts?: ResolverOptions): AwilixContainer`
-  (infers the name using `fn.name`)
-* `registerFunction(name: string, fn: Function, opts?: ResolverOptions):
-  AwilixContainer`
-* `registerFunction(name: string, funcAndOptionsPair: [Function,
-  ResolverOptions]): AwilixContainer`
-* `registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair):
-  AwilixContainer`
-
-Registers a standard function to be called whenever being resolved. The factory
-function can return anything it wants, and whatever it returns is what is passed
-to dependents.
-
-By default all registrations are `TRANSIENT`, meaning resolutions will **not**
-be cached. This is configurable on a per-resolver level.
-
-**The array syntax for values means `[value, options]`.** This is also valid for
-`registerClass`.
-
-```js
-const myFactoryFunction = ({ someName }) =>
-  `${new Date().toISOString()}: Hello, this is ${someName}`
-
-container.registerFunction({ fullString: myFactoryFunction })
-console.log(container.cradle.fullString)
-// << 2016-06-24T16:00:00.00Z: Hello, this is some value
-
-// Wait 2 seconds, try again
-setTimeout(() => {
-  console.log(container.cradle.fullString)
-  // << 2016-06-24T16:00:02.00Z: Hello, this is some value
-
-  // The timestamp is different because the
-  // factory function was called again!
-}, 2000)
-
-// Let's try this again, but we want it to be
-// cached!
-const Lifetime = awilix.Lifetime
-container.registerFunction({
-  fullString: [myFactoryFunction, { lifetime: Lifetime.SINGLETON }]
-})
-
-console.log(container.cradle.fullString)
-// << 2016-06-24T16:00:02.00Z: Hello, this is some value
-
-// Wait 2 seconds, try again
-setTimeout(() => {
-  console.log(container.cradle.fullString)
-  // << 2016-06-24T16:00:02.00Z: Hello, this is some value
-
-  // The timestamp is the same, because
-  // the factory function's result was cached.
-}, 2000)
-```
-
-### `container.registerClass()` (DEPRECATED)
-
-> This method is deprecated and will be removed in v3. Please use
-> `container.register({ name: asClass(target) })` instead.
-
-* `registerClass<T>(ctor: Constructor<T>, opts?: ResolverOptions):
-  AwilixContainer` (infers the name using `ctor.name`)
-* `registerClass<T>(name: string, ctor: Constructor<T>, opts?: ResolverOptions):
-  AwilixContainer`
-* `registerClass<T>(name: string, ctorAndOptionsPair: [Constructor<T>,
-  ResolverOptions]): AwilixContainer`
-* `registerClass(nameAndClassPair: RegisterNameAndClassPair): AwilixContainer`
-
-Same as `registerFunction`, except it will use `new`.
-
-By default all registrations are `TRANSIENT`, meaning resolutions will **not**
-be cached. This is configurable on a per-resolver level.
-
-```js
-class Exclaimer {
-  constructor({ fullString }) {
-    this.fullString = fullString
-  }
-
-  exclaim() {
-    return this.fullString + '!!!!!'
-  }
-}
-
-container.registerClass({
-  exclaimer: Exclaimer
-})
-
-// or, to easily set up Lifetime..
-container.registerClass({
-  exclaimer: [Exclaimer, Lifetime.SINGLETON]
-})
-
-// or, to fully customize options..
-container.registerClass({
-  exclaimer: [Exclaimer, { lifetime: Lifetime.SINGLETON }]
-})
-
-container.cradle.exclaimer.exclaim()
-// << 2016-06-24T17:00:00.00Z: Hello, this is some value!!!!!
-```
 
 ### `container.loadModules()`
 
@@ -1218,8 +1159,8 @@ const createMyFunc = ({ ping }) => ({
   pong: () => ping
 })
 
-container.registerValue({
-  ping: 'pong'
+container.register({
+  ping: asValue('pong')
 })
 
 // Shorthand
@@ -1237,6 +1178,35 @@ const myFuncResolver = asFunction(MyFunc)
 
 const myClass = container.build(myClassResolver)
 const myFunc = container.build(myFuncResolver)
+```
+
+### `container.dispose()`
+
+Returns a `Promise` that resolves when all disposers on the container and it's
+child-containers (scopes) have resolved. The disposers run **depth-first**,
+meaning sub-scopes get disposed before their parents. **Only cached values will
+be disposed, meaning they must have a `Lifetime` of `SCOPED` or `SINGLETON`**,
+else they are not cached.
+
+This also clears the container's cache.
+
+```js
+const pg = require('pg')
+
+container.register({
+  pool: asFunction(() => new pg.Pool())
+    .disposer(pool => pool.end())
+    // IMPORTANT! Must be either singleton or scoped!
+    .singleton()
+})
+
+const pool = container.resolve('pool')
+pool.query('...')
+
+// Later..
+container.dispose().then(() => {
+  console.log('All dependencies disposed, you can exit now. :)')
+})
 ```
 
 # Contributing

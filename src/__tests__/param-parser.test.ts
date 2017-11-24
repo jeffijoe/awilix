@@ -146,6 +146,29 @@ describe('parseParameterList', function() {
     ])
   })
 
+  it('supports class constructors with a bunch of other shit before it', () => {
+    const cls = `
+    class Rofl {
+      @dec(1, 3, { obj: value })
+      someMethod(yeah, boi) {
+        const ctor = Rofl.prototype.constructor.call(this, 2)
+        return 'heyo' + \` gimme $\{mayo + 10}\`
+      }
+
+      static prop = '123'
+      @decorated stuff = func(1, 'two')
+
+      constructor(dep1, dep2 = 123) {
+
+      }
+    }
+    `
+    expect(parseParameterList(cls)).toEqual([
+      { name: 'dep1', optional: false },
+      { name: 'dep2', optional: true }
+    ])
+  })
+
   it('supports carriage return in function signature', function() {
     expect(parseParameterList(`function (\r\ndep1,\r\ndep2\r\n) {}`)).toEqual([
       { name: 'dep1', optional: false },

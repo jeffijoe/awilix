@@ -50,7 +50,7 @@ function _listModules(
   globPattern: string | GlobWithOptions,
   opts?: ListModulesOptions
 ): Array<ModuleDescriptor> {
-  opts = Object.assign({ cwd: process.cwd(), glob: glob.sync }, opts)
+  opts = { cwd: process.cwd(), glob: glob.sync, ...opts }
   let patternOpts: ResolverOptions<any> | null = null
   if (globPattern instanceof Array) {
     patternOpts = globPattern[1] as ResolverOptions<any>

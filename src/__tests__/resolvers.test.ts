@@ -12,7 +12,11 @@ const multiDeps = (testClass: any, needsCradle: any) => {
   return { testClass, needsCradle }
 }
 
-class TestClass {}
+class TestClass {
+  dispose() {
+    /**/
+  }
+}
 class WithDeps {
   testClass: any
   constructor(testClass: any) {
@@ -117,8 +121,8 @@ describe('registrations', function() {
     })
 
     it('resolves dependencies manually', function() {
-      container.registerClass({
-        testClass: TestClass
+      container.register({
+        testClass: asClass(TestClass)
       })
       const withDepsReg = asClass(WithDeps).classic()
       const result = withDepsReg.resolve(container)
@@ -127,8 +131,8 @@ describe('registrations', function() {
     })
 
     it('resolves single dependency as cradle', function() {
-      container.registerClass({
-        testClass: TestClass
+      container.register({
+        testClass: asClass(TestClass)
       })
       const reg = asClass(NeedsCradle).proxy()
       const result = reg.resolve(container)
@@ -137,9 +141,9 @@ describe('registrations', function() {
     })
 
     it('resolves multiple dependencies manually', function() {
-      container.registerClass({
-        testClass: TestClass,
-        needsCradle: NeedsCradle
+      container.register({
+        testClass: asClass(TestClass),
+        needsCradle: asClass(NeedsCradle)
       })
       const reg = asClass(MultipleDeps, {
         injectionMode: InjectionMode.CLASSIC
@@ -159,28 +163,30 @@ describe('registrations', function() {
   describe('asClass and asFunction fluid interface', function() {
     it('supports all lifetimes and returns the object itself', function() {
       const subjects = [
-        asClass(TestClass),
+        asClass<TestClass>(TestClass),
         asFunction(() => {
-          /**/
+          return new TestClass()
         })
       ]
 
       subjects.forEach(x => {
         let retVal = x.setLifetime(Lifetime.SCOPED)
-        expect(retVal).toBe(x)
         expect(retVal.lifetime).toBe(Lifetime.SCOPED)
 
         retVal = retVal.transient()
-        expect(retVal).toBe(x)
         expect(retVal.lifetime).toBe(Lifetime.TRANSIENT)
 
         retVal = retVal.singleton()
-        expect(retVal).toBe(x)
         expect(retVal.lifetime).toBe(Lifetime.SINGLETON)
 
         retVal = retVal.scoped()
-        expect(retVal).toBe(x)
         expect(retVal.lifetime).toBe(Lifetime.SCOPED)
+
+        const d = (t: TestClass) => {
+          return t.dispose()
+        }
+        retVal = retVal.disposer(d)
+        expect(retVal.dispose).toBe(d)
       })
     })
 
@@ -194,7 +200,7 @@ describe('registrations', function() {
 
       subjects.forEach(x => {
         const retVal = x.inject(() => ({ value: 42 }))
-        expect(retVal).toBe(x)
+        expect(retVal.injector).toBeDefined()
       })
     })
   })

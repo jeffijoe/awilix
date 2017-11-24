@@ -23,15 +23,16 @@ export type InjectorFunction = (container: AwilixContainer) => object
 /**
  * A resolver object returned by asClass(), asFunction() or asValue().
  */
-export interface Resolver<T> {
-  lifetime: LifetimeType
+export interface Resolver<T> extends ResolverOptions<T> {
   resolve(container: AwilixContainer): T
 }
 
 /**
- * Setter function helpers for build resolvers.
+ * A resolver object created by asClass() or asFunction().
  */
-export interface BuildSetters {
+export interface BuildResolver<T> extends Resolver<T>, BuildResolverOptions<T> {
+  injectionMode?: InjectionModeType
+  injector?: InjectorFunction
   setLifetime(lifetime: LifetimeType): this
   setInjectionMode(mode: InjectionModeType): this
   singleton(): this
@@ -43,12 +44,25 @@ export interface BuildSetters {
 }
 
 /**
- * A resolver object created by asClass() or asFunction().
+ * Options for disposable resolvers.
  */
-export interface BuildResolver<T> extends Resolver<T>, BuildSetters {
-  injectionMode?: InjectionModeType
-  injector?: InjectorFunction
+export interface DisposableResolverOptions<T> extends ResolverOptions<T> {
+  dispose?: Disposer<T>
 }
+
+/**
+ * Disposable resolver.
+ */
+export interface DisposableResolver<T>
+  extends Resolver<T>,
+    DisposableResolverOptions<T> {
+  disposer(dispose: Disposer<T>): this
+}
+
+/**
+ * Disposer function type.
+ */
+export type Disposer<T> = (value: T) => any | Promise<any>
 
 /**
  * The options when registering a class, function or value.
@@ -64,6 +78,18 @@ export interface ResolverOptions<T> {
    */
   lifetime?: LifetimeType
   /**
+   * Registration function to use. Only used for inline configuration with `loadModules`.
+   */
+  register?: (...args: any[]) => Resolver<T>
+}
+
+/**
+ * Builder resolver options.
+ */
+export interface BuildResolverOptions<T>
+  extends ResolverOptions<T>,
+    DisposableResolverOptions<T> {
+  /**
    * Resolution mode.
    */
   injectionMode?: InjectionModeType
@@ -71,10 +97,6 @@ export interface ResolverOptions<T> {
    * Injector function to provide additional parameters.
    */
   injector?: InjectorFunction
-  /**
-   * Registration function to use.
-   */
-  resolver?: (...args: any[]) => Resolver<T>
 }
 
 /**
@@ -86,50 +108,6 @@ export interface ResolverOptions<T> {
  *                                       ^^^^^^^
  */
 export type Constructor<T> = { new (...args: any[]): T }
-
-/**
- * Given an options object, creates a fluid interface
- * to manage it.
- *
- * @param {*} returnValue
- * The object to return.
- *
- * @param  {object} opts
- * The options to manage.
- *
- * @return {object}
- * The interface.
- */
-export function makeFluidInterface<T>(obj: Resolver<T>): BuildSetters {
-  // For TS.
-  const buildRegistration = obj as BuildResolver<T>
-
-  function setLifetime(value: LifetimeType) {
-    buildRegistration.lifetime = value
-    return buildRegistration
-  }
-
-  function setInjectionMode(value: InjectionModeType) {
-    buildRegistration.injectionMode = value
-    return buildRegistration
-  }
-
-  function inject(injector: InjectorFunction) {
-    buildRegistration.injector = injector
-    return buildRegistration
-  }
-
-  return {
-    setLifetime,
-    inject,
-    transient: () => setLifetime(Lifetime.TRANSIENT),
-    scoped: () => setLifetime(Lifetime.SCOPED),
-    singleton: () => setLifetime(Lifetime.SINGLETON),
-    setInjectionMode,
-    proxy: () => setInjectionMode(InjectionMode.PROXY),
-    classic: () => setInjectionMode(InjectionMode.CLASSIC)
-  }
-}
 
 /**
  * Creates a simple value resolver where the given value will always be resolved.
@@ -144,13 +122,8 @@ export function makeFluidInterface<T>(obj: Resolver<T>): BuildSetters {
  * The resolver.
  */
 export function asValue<T>(value: T): Resolver<T> {
-  const resolve = () => {
-    return value
-  }
-
   return {
-    resolve,
-    lifetime: Lifetime.TRANSIENT
+    resolve: () => value
   }
 }
 
@@ -172,8 +145,8 @@ export function asValue<T>(value: T): Resolver<T> {
  */
 export function asFunction<T>(
   fn: FunctionReturning<T>,
-  opts?: ResolverOptions<T>
-): BuildResolver<T> {
+  opts?: BuildResolverOptions<T>
+): BuildResolver<T> & DisposableResolver<T> {
   if (!isFunction(fn)) {
     throw new AwilixTypeError('asFunction', 'fn', 'function', fn)
   }
@@ -185,14 +158,12 @@ export function asFunction<T>(
   opts = makeOptions(defaults, opts, (fn as any)[RESOLVER])
 
   const resolve = generateResolve(fn)
-  const result = {
+  let result = {
     resolve,
-    lifetime: opts.lifetime!,
-    injector: opts.injector,
-    injectionMode: opts.injectionMode
+    ...opts
   }
-  result.resolve = resolve.bind(result)
-  return Object.assign(result, makeFluidInterface<T>(result))
+
+  return createDisposableResolver(createBuildResolver(result))
 }
 
 /**
@@ -212,8 +183,8 @@ export function asFunction<T>(
  */
 export function asClass<T = {}>(
   Type: Constructor<T>,
-  opts?: ResolverOptions<T>
-): BuildResolver<T> {
+  opts?: BuildResolverOptions<T>
+): BuildResolver<T> & DisposableResolver<T> {
   if (!isFunction(Type)) {
     throw new AwilixTypeError('asClass', 'Type', 'class', Type)
   }
@@ -230,15 +201,12 @@ export function asClass<T = {}>(
   }
 
   const resolve = generateResolve(newClass, Type.prototype.constructor)
-  const result = {
-    lifetime: opts.lifetime!,
-    injector: opts.injector,
-    injectionMode: opts.injectionMode,
-    resolve: resolve
-  }
-
-  result.resolve = resolve.bind(result)
-  return Object.assign(result, makeFluidInterface<T>(result))
+  return createDisposableResolver(
+    createBuildResolver({
+      ...opts,
+      resolve
+    })
+  )
 }
 
 /**
@@ -246,12 +214,84 @@ export function asClass<T = {}>(
  */
 export function aliasTo<T>(name: string): Resolver<T> {
   return {
-    // Transient because it all depends on the
-    // dependency being resolved.
-    lifetime: Lifetime.TRANSIENT,
     resolve(container) {
       return container.resolve(name)
     }
+  }
+}
+
+/**
+ * Given an options object, creates a fluid interface
+ * to manage it.
+ *
+ * @param {*} obj
+ * The object to return.
+ *
+ * @return {object}
+ * The interface.
+ */
+export function createBuildResolver<T, B extends Resolver<T>>(
+  obj: B
+): BuildResolver<T> & B {
+  function setLifetime(this: any, value: LifetimeType) {
+    return createBuildResolver({
+      ...this,
+      lifetime: value
+    })
+  }
+
+  function setInjectionMode(this: any, value: InjectionModeType) {
+    return createBuildResolver({
+      ...this,
+      injectionMode: value
+    })
+  }
+
+  function inject(this: any, injector: InjectorFunction) {
+    return createBuildResolver({
+      ...this,
+      injector
+    })
+  }
+
+  return updateResolver(obj, {
+    setLifetime,
+    inject,
+    transient: partial(setLifetime, Lifetime.TRANSIENT),
+    scoped: partial(setLifetime, Lifetime.SCOPED),
+    singleton: partial(setLifetime, Lifetime.SINGLETON),
+    setInjectionMode,
+    proxy: partial(setInjectionMode, InjectionMode.PROXY),
+    classic: partial(setInjectionMode, InjectionMode.CLASSIC)
+  })
+}
+
+/**
+ * Given a resolver, returns an object with methods to manage the disposer
+ * function.
+ * @param obj
+ */
+export function createDisposableResolver<T, B extends Resolver<T>>(
+  obj: B
+): DisposableResolver<T> & B {
+  function disposer(this: any, dispose: Disposer<T>) {
+    return createDisposableResolver({
+      ...this,
+      dispose
+    })
+  }
+
+  return updateResolver(obj, {
+    disposer
+  })
+}
+
+/**
+ * Partially apply arguments to the given function.
+ */
+function partial<T1, R>(fn: (arg1: T1) => R, arg1: T1): () => R {
+  return function partiallyApplied(this: any): R {
+    return fn.call(this, arg1)
   }
 }
 
@@ -268,6 +308,23 @@ export function aliasTo<T>(name: string): Resolver<T> {
  */
 function makeOptions<T, O>(defaults: T, ...rest: Array<O | undefined>): T & O {
   return Object.assign({}, defaults, ...rest) as T & O
+}
+
+/**
+ * Creates a new resolver with props merged from both.
+ *
+ * @param source
+ * @param target
+ */
+function updateResolver<T, A extends Resolver<T>, B>(
+  source: A,
+  target: B
+): Resolver<T> & A & B {
+  const result = {
+    ...(source as any),
+    ...(target as any)
+  }
+  return result
 }
 
 /**

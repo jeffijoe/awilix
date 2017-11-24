@@ -37,8 +37,6 @@ export function createTokenizer(source: string) {
 
   return {
     next,
-    speculate,
-    peek,
     done
   }
 
@@ -123,7 +121,8 @@ export function createTokenizer(source: string) {
    */
   function skipExpression() {
     skipUntil(ch => {
-      if (ch === ',' && parenLeft === parenRight + 1) {
+      const isAtRoot = parenLeft === parenRight + 1
+      if (ch === ',' && isAtRoot) {
         return true
       }
 
@@ -133,10 +132,10 @@ export function createTokenizer(source: string) {
       }
 
       if (ch === ')') {
-        if (parenLeft === parenRight + 1) {
+        parenRight++
+        if (isAtRoot) {
           return true
         }
-        parenRight++
       }
 
       return false
@@ -201,13 +200,6 @@ export function createTokenizer(source: string) {
   }
 
   /**
-   * Peeks at the next token.
-   */
-  function peek(): Token {
-    return speculate(createToken, true)
-  }
-
-  /**
    * Creates a token from the current state.
    */
   function createToken(): Token {
@@ -215,30 +207,6 @@ export function createTokenizer(source: string) {
       return { value, type }
     }
     return { type }
-  }
-
-  /**
-   * Invokes the `callback` which can advance the tokenizer.
-   * If the callback returns a falsy value, or if `lookAhead` is `true`,
-   * rewinds the state to what it was before calling `peek`.
-   *
-   * @param callback
-   * @param lookAhead
-   */
-  function speculate<T = boolean>(
-    callback: () => T,
-    lookAhead: boolean = false
-  ): T {
-    const oldPos = pos
-    const oldType = type
-    const oldValue = value
-    const result = callback()
-    if (!result || lookAhead) {
-      pos = oldPos
-      type = oldType
-      value = oldValue
-    }
-    return result
   }
 
   /**
