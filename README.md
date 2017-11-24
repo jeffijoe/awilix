@@ -12,9 +12,11 @@
 [![node](https://img.shields.io/node/v/awilix.svg?maxAge=1000)](https://www.npmjs.com/package/awilix)
 [![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 
-Extremely powerful **Inversion of Control** (IoC) container for Node with dependency resolution support powered by `Proxy`. Make IoC great again!
+Extremely powerful **Inversion of Control** (IoC) container for Node with
+dependency resolution support powered by `Proxy`. Make IoC great again!
 
-> Check out this [intro to Dependency Injection with Awilix](https://medium.com/@Jeffijoe/dependency-injection-in-node-js-2016-edition-f2a88efdd427)
+> Check out this
+> [intro to Dependency Injection with Awilix](https://medium.com/@Jeffijoe/dependency-injection-in-node-js-2016-edition-f2a88efdd427)
 
 # Table of Contents
 
@@ -26,27 +28,27 @@ Extremely powerful **Inversion of Control** (IoC) container for Node with depend
 * [Per-module local injections](#per-module-local-injections)
 * [Inlining registration options](#inlining-registration-options)
 * [API](#api)
-  - [The `awilix` object](#the-awilix-object)
-  - [Registration options](#registration-options)
-  - [`createContainer()`](#createcontainer)
-  - [`asFunction()`](#asfunction)
-  - [`asClass()`](#asclass)
-  - [`asValue()`](#asvalue)
-  - [`listModules()`](#listmodules)
-  - [`AwilixResolutionError`](#awilixresolutionerror)
-  - [The `AwilixContainer` object](#the-awilixcontainer-object)
-    + [`container.cradle`](#containercradle)
-    + [`container.registrations`](#containerregistrations)
-    + [`container.cache`](#containercache)
-    + [`container.options`](#containeroptions)
-    + [`container.resolve()`](#containerresolve)
-    + [`container.register()`](#containerregister)
-    + [`container.registerValue()`](#containerregistervalue)
-    + [`container.registerFunction()`](#containerregisterfunction)
-    + [`container.registerClass()`](#containerregisterclass)
-    + [`container.loadModules()`](#containerloadmodules)
-    + [`container.createScope()`](#containercreatescope)
-    + [`container.build()`](#containerbuild)
+  * [The `awilix` object](#the-awilix-object)
+  * [Registration options](#registration-options)
+  * [`createContainer()`](#createcontainer)
+  * [`asFunction()`](#asfunction)
+  * [`asClass()`](#asclass)
+  * [`asValue()`](#asvalue)
+  * [`listModules()`](#listmodules)
+  * [`AwilixResolutionError`](#awilixresolutionerror)
+  * [The `AwilixContainer` object](#the-awilixcontainer-object)
+    * [`container.cradle`](#containercradle)
+    * [`container.registrations`](#containerregistrations)
+    * [`container.cache`](#containercache)
+    * [`container.options`](#containeroptions)
+    * [`container.resolve()`](#containerresolve)
+    * [`container.register()`](#containerregister)
+    * [`container.registerValue()` (DEPRECATED)](#containerregistervalue-deprecated)
+    * [`container.registerFunction()` (DEPRECATED)](#containerregisterfunction-deprecated)
+    * [`container.registerClass()` (DEPRECATED)](#containerregisterclass-deprecated)
+    * [`container.loadModules()`](#containerloadmodules)
+    * [`container.createScope()`](#containercreatescope)
+    * [`container.build()`](#containerbuild)
 * [Contributing](#contributing)
 * [What's in a name?](#whats-in-a-name)
 * [Author](#author)
@@ -57,11 +59,12 @@ Extremely powerful **Inversion of Control** (IoC) container for Node with depend
 npm install awilix --save
 ```
 
-*Requires Node v6 or above*
+_Requires Node v6 or above_
 
 # Usage
 
-Awilix has a pretty simple API (but with many possible ways to invoke it). At minimum, you need to do 3 things:
+Awilix has a pretty simple API (but with many possible ways to invoke it). At
+minimum, you need to do 3 things:
 
 * Create a container
 * Register some modules in it
@@ -104,7 +107,7 @@ const makeUserService = ({ db }) => {
   // Notice how we can use destructuring
   // to access dependencies
   return {
-    getUser: (id) => {
+    getUser: id => {
       return db.query(`select * from users where id=${id}`)
     }
   }
@@ -118,9 +121,9 @@ container.registerFunction({
 
 // Alright, now we need a database.
 // Let's make that a constructor function.
-// Notice how the dependency is referenced by name 
+// Notice how the dependency is referenced by name
 // directly instead of destructuring an object.
-// This is because we register it in "CLASSIC" 
+// This is because we register it in "CLASSIC"
 // resolution mode below.
 function Database(connectionString, timeout) {
   // We can inject plain values as well!
@@ -132,10 +135,9 @@ Database.prototype.query = function(sql) {
   return this.conn.rawSql(sql)
 }
 
-
-// We use register coupled with asClass to tell Awilix to 
+// We use register coupled with asClass to tell Awilix to
 // use `new Database(...)` instead of just `Database(...)`.
-// We also want to use `CLASSIC` resolution mode for this 
+// We also want to use `CLASSIC` resolution mode for this
 // registration. Read more about resolution modes below.
 container.register({
   db: awilix.asClass(Database).classic()
@@ -162,18 +164,24 @@ router.get('/api/users/:id', container.cradle.userController.getUser)
 // `container.resolve('userController')` - the cradle is our proxy!
 ```
 
-That example is rather lengthy, but if you extract things to their proper files it becomes more manageable.
+That example is rather lengthy, but if you extract things to their proper files
+it becomes more manageable.
 
 [Check out a working Koa example!](/examples/koa)
 
 # Lifetime management
 
-Awilix supports managing the lifetime of instances. This means that you can control whether objects are resolved and used once, cached within a certain scope, or cached for the lifetime of the process.
+Awilix supports managing the lifetime of instances. This means that you can
+control whether objects are resolved and used once, cached within a certain
+scope, or cached for the lifetime of the process.
 
 There are 3 lifetime types available.
 
-* `Lifetime.TRANSIENT`: This is the default. The registration is resolved every time it is needed. This means if you resolve a class more than once, you will get back a new instance every time.
-* `Lifetime.SCOPED`: The registration is scoped to the container - that means that the resolved value will be reused when resolved from the same scope.
+* `Lifetime.TRANSIENT`: This is the default. The registration is resolved every
+  time it is needed. This means if you resolve a class more than once, you will
+  get back a new instance every time.
+* `Lifetime.SCOPED`: The registration is scoped to the container - that means
+  that the resolved value will be reused when resolved from the same scope.
 * `Lifetime.SINGLETON`: The registration is always reused no matter what.
 
 They are exposed on the `awilix.Lifetime` object.
@@ -212,7 +220,9 @@ container.registerClass('mailService', MailService, { lifetime: SINGLETON })
 
 ## Scoped lifetime
 
-In web applications, managing state without depending too much on the web framework can get difficult. Having to pass tons of information into every function just to make the right choices based on the authenticated user.
+In web applications, managing state without depending too much on the web
+framework can get difficult. Having to pass tons of information into every
+function just to make the right choices based on the authenticated user.
 
 Scoped lifetime in Awilix makes this simple - and fun!
 
@@ -248,7 +258,7 @@ app.use((req, res, next) => {
   next()
 })
 
-app.get('/messages', (req,res) => {
+app.get('/messages', (req, res) => {
   // for each request we get a new message service!
   const messageService = req.scope.resolve('messageService')
   messageService.getMessages().then(messages => {
@@ -260,7 +270,8 @@ app.get('/messages', (req,res) => {
 // without depending on any request data!
 ```
 
-**IMPORTANT!** If a singleton is resolved, and it depends on a scoped or transient registration, those will remain in the singleton for it's lifetime!
+**IMPORTANT!** If a singleton is resolved, and it depends on a scoped or
+transient registration, those will remain in the singleton for it's lifetime!
 
 ```js
 const makePrintTime = ({ time }) => () => {
@@ -286,52 +297,57 @@ container.resolve('printTime')()
 container.resolve('printTime')()
 ```
 
-Read the documentation for [`container.createScope()`](#containercreatescope) for more examples.
+Read the documentation for [`container.createScope()`](#containercreatescope)
+for more examples.
 
 # Resolution modes
 
-The resolution mode determines how a function/constructor receives its dependencies. Pre-2.3.0, only one mode was
-supported - `PROXY` - which remains the default mode.
+The resolution mode determines how a function/constructor receives its
+dependencies. Pre-2.3.0, only one mode was supported - `PROXY` - which remains
+the default mode.
 
-Awilix v2.3.0 introduced an alternative resolution mode: `CLASSIC`. The resolution modes are available on `awilix.ResolutionMode`
+Awilix v2.3.0 introduced an alternative resolution mode: `CLASSIC`. The
+resolution modes are available on `awilix.ResolutionMode`
 
-* `ResolutionMode.PROXY` (default): Injects a proxy to functions/constructors which looks like a regular object.
-    
-    ```js
-    class UserService {
-      constructor (opts) {
-        this.emailService = opts.emailService
-        this.logger = opts.logger
-      }
+* `ResolutionMode.PROXY` (default): Injects a proxy to functions/constructors
+  which looks like a regular object.
+
+  ```js
+  class UserService {
+    constructor(opts) {
+      this.emailService = opts.emailService
+      this.logger = opts.logger
     }
-    ```
-    
-    or with destructuring:
-    
-    ```js
-    class UserService {
-      constructor ({ emailService, logger }) {
-        this.emailService = emailService
-        this.logger = logger
-      }
+  }
+  ```
+
+  or with destructuring:
+
+  ```js
+  class UserService {
+    constructor({ emailService, logger }) {
+      this.emailService = emailService
+      this.logger = logger
     }
-    ```
+  }
+  ```
 
-* `ResolutionMode.CLASSIC`: Parses the function/constructor parameters, and matches them with registrations in the container.
-    
-    ```js
-    class UserService {
-      constructor (emailService, logger) {
-        this.emailService = emailService
-        this.logger = logger
-      }
+* `ResolutionMode.CLASSIC`: Parses the function/constructor parameters, and
+  matches them with registrations in the container.
+  ```js
+  class UserService {
+    constructor(emailService, logger) {
+      this.emailService = emailService
+      this.logger = logger
     }
-    ```
+  }
+  ```
 
-Resolution modes can be set per-container and per-registration. The most specific one wins.
+Resolution modes can be set per-container and per-registration. The most
+specific one wins.
 
-> Note: I personally don't see why you would want to have different resolution modes in a project, but
-> if the need arises, Awilix supports it.
+> Note: I personally don't see why you would want to have different resolution
+> modes in a project, but if the need arises, Awilix supports it.
 
 **Container-wide**:
 
@@ -364,27 +380,27 @@ container.registerClass({
 
 ```js
 const container = createContainer()
-container.loadModules([
-  'services/**/*.js',
-  'repositories/**/*.js'
-], {
+container.loadModules(['services/**/*.js', 'repositories/**/*.js'], {
   registrationOptions: {
     resolutionMode: ResolutionMode.CLASSIC
   }
 })
 ```
 
-Choose whichever fits your style. 
+Choose whichever fits your style.
 
-* `PROXY` _technically_ allows you to defer pulling dependencies (for circular dependency support), but **this isn't recommended**.
+* `PROXY` _technically_ allows you to defer pulling dependencies (for circular
+  dependency support), but **this isn't recommended**.
 * `CLASSIC` feels more like the DI you're used to in other languages.
-* `PROXY` is more descriptive, and makes for more readable tests; when unit testing your classes/functions without using Awilix, you don't have to worry about parameter ordering like you would with `CLASSIC`.
+* `PROXY` is more descriptive, and makes for more readable tests; when unit
+  testing your classes/functions without using Awilix, you don't have to worry
+  about parameter ordering like you would with `CLASSIC`.
 
 Here's an example outlining the testability points raised.
 
 ```js
 // CLASSIC
-function database (connectionString, timeout, logger) {
+function database(connectionString, timeout, logger) {
   // ...
 }
 
@@ -392,7 +408,7 @@ function database (connectionString, timeout, logger) {
 const db = database('localhost:1337;user=123...', 4000, new LoggerMock())
 
 // PROXY
-function database ({ connectionString, timeout, logger }) {
+function database({ connectionString, timeout, logger }) {
   // ...
 }
 
@@ -406,17 +422,19 @@ const db = database({
 
 # Auto-loading modules
 
-When you have created your container, registering 100's of classes can get boring. You can automate this by using `loadModules`.
+When you have created your container, registering 100's of classes can get
+boring. You can automate this by using `loadModules`.
 
 Imagine this app structure:
 
 * `app`
-  - `services`
-    + `UserService.js` - exports an ES6 `class UserService {}`
-    + `emailService.js`  - exports a factory function `function makeEmailService() {}`
-  - `repositories`
-    + `UserRepository.js` - exports an ES6 `class UserRepository {}`
-  - `index.js` - our main script
+  * `services`
+    * `UserService.js` - exports an ES6 `class UserService {}`
+    * `emailService.js` - exports a factory function `function
+      makeEmailService() {}`
+  * `repositories`
+    * `UserRepository.js` - exports an ES6 `class UserRepository {}`
+  * `index.js` - our main script
 
 In our main script we would do the following
 
@@ -426,54 +444,65 @@ const awilix = require('awilix')
 const container = awilix.createContainer()
 
 // Load our modules!
-container.loadModules([
-  // Globs!
-  'services/**/*.js',
-  'repositories/**/*.js'
-], {
-  // We want to register `UserService` as `userService` -
-  // by default loaded modules are registered with the
-  // name of the file (minus the extension)
-  formatName: 'camelCase',
-  // Apply registration options to all modules.
-  registrationOptions: {
-    // We can give these auto-loaded modules
-    // the deal of a lifetime! (see what I did there?)
-    // By default it's `TRANSIENT`.
-    lifetime: Lifetime.SINGLETON,
-    // We can tell Awilix what to register everything as,
-    // instead of guessing. If omitted, will inspect the
-    // module to determinw what to register as.
-    register: awilix.asClass
+container.loadModules(
+  [
+    // Globs!
+    'services/**/*.js',
+    'repositories/**/*.js'
+  ],
+  {
+    // We want to register `UserService` as `userService` -
+    // by default loaded modules are registered with the
+    // name of the file (minus the extension)
+    formatName: 'camelCase',
+    // Apply registration options to all modules.
+    registrationOptions: {
+      // We can give these auto-loaded modules
+      // the deal of a lifetime! (see what I did there?)
+      // By default it's `TRANSIENT`.
+      lifetime: Lifetime.SINGLETON,
+      // We can tell Awilix what to register everything as,
+      // instead of guessing. If omitted, will inspect the
+      // module to determinw what to register as.
+      register: awilix.asClass
+    }
   }
-})
+)
 
 // We are now ready! We now have a userService, userRepository and emailService!
 container.resolve('userService').getUser(1)
 ```
 
-**Important**: Auto-loading relies on `glob` and therefore does not with bundlers like Webpack, Rollup and Browserify.
+**Important**: Auto-loading relies on `glob` and therefore does not with
+bundlers like Webpack, Rollup and Browserify.
 
 # Per-module local injections
 
-Some modules might need some additional configuration values than just dependencies.
+Some modules might need some additional configuration values than just
+dependencies.
 
-For example, our `userRepository` wants a `db` module which is registered with the container, but it also wants a `timeout` value. `timeout` is a very generic name and we don't want to register that as a value that can be accessed by all modules in the container (maybe other modules have a different timeout?)
+For example, our `userRepository` wants a `db` module which is registered with
+the container, but it also wants a `timeout` value. `timeout` is a very generic
+name and we don't want to register that as a value that can be accessed by all
+modules in the container (maybe other modules have a different timeout?)
 
 ```js
-export default function userRepository ({ db, timeout }) {
+export default function userRepository({ db, timeout }) {
   return {
-    find () {
+    find() {
       return Promise.race([
         db.query('select * from users'),
-        Promise.delay(timeout).then(() => Promise.reject(new Error('Timed out')))
+        Promise.delay(timeout).then(() =>
+          Promise.reject(new Error('Timed out'))
+        )
       ])
     }
   }
 }
 ```
 
-Awilix 2.5 added per-module local injections. The following snippet contains _all_ the possible ways to set this up.
+Awilix 2.5 added per-module local injections. The following snippet contains
+_all_ the possible ways to set this up.
 
 ```js
 import { createContainer, Lifetime, asFunction } from 'awilix'
@@ -488,32 +517,35 @@ const container = createContainer()
       // it is attached to.
       .inject(() => ({ timeout: 2000 }))
   })
-  
+
   // Shorthand variants
   .registerFunction({
-    userRepository: [createUserRepository, { injector: () => ({ timeout: 2000 }) }]
+    userRepository: [
+      createUserRepository,
+      { injector: () => ({ timeout: 2000 }) }
+    ]
   })
-  
+
   // Stringly-typed shorthand
-  .registerFunction(
-    'userRepository', 
-    createUserRepository, 
-    { injector: () => ({ timeout: 2000 }) }
-  )
-  
+  .registerFunction('userRepository', createUserRepository, {
+    injector: () => ({ timeout: 2000 })
+  })
+
   // with `loadModules`
-  .loadModules([
-    ['repositories/*.js', { injector: () => ({ timeout: 2000 }) }]
-  ])
+  .loadModules([['repositories/*.js', { injector: () => ({ timeout: 2000 }) }]])
 ```
 
 Now `timeout` is only available to the modules it was configured for.
 
-**IMPORTANT**: the way this works is by wrapping the `cradle` in another proxy that provides the returned values from the `inject` function. This means if you pass along the injected cradle object, anything with access to it can access the local injections.
+**IMPORTANT**: the way this works is by wrapping the `cradle` in another proxy
+that provides the returned values from the `inject` function. This means if you
+pass along the injected cradle object, anything with access to it can access the
+local injections.
 
 # Inlining registration options
 
-Awilix 2.8 added support for inline registration options. This is best explained with an example.
+Awilix 2.8 added support for inline registration options. This is best explained
+with an example.
 
 **services/awesome-service.js**:
 
@@ -521,7 +553,7 @@ Awilix 2.8 added support for inline registration options. This is best explained
 import { REGISTRATION, Lifetime, ResolutionMode } from 'awilix'
 
 export default class AwesomeService {
-  constructor (awesomeRepository) {
+  constructor(awesomeRepository) {
     this.awesomeRepository = awesomeRepository
   }
 }
@@ -539,16 +571,16 @@ AwesomeService[REGISTRATION] = {
 import { createContainer } from 'awilix'
 import AwesomeService from './services/awesome-service.js'
 
-const container = createContainer()
-  .registerClass({
-    awesomeService: AwesomeService
-  })
+const container = createContainer().registerClass({
+  awesomeService: AwesomeService
+})
 
 console.log(container.registrations.awesomeService.lifetime) // 'SCOPED'
 console.log(container.registrations.awesomeService.resolutionMode) // 'CLASSIC'
 ```
 
-Additionally, if we add a `name` field and use `loadModules`, the `name` is used for registration.
+Additionally, if we add a `name` field and use `loadModules`, the `name` is used
+for registration.
 
 ```diff
 // `REGISTRATION` is a Symbol.
@@ -560,8 +592,7 @@ AwesomeService[REGISTRATION] = {
 ```
 
 ```js
-const container = createContainer()
-  .loadModules(['services/*.js'])
+const container = createContainer().loadModules(['services/*.js'])
 console.log(container.registrations.superService.lifetime) // 'SCOPED'
 console.log(container.registrations.superService.resolutionMode) // 'CLASSIC'
 ```
@@ -587,12 +618,16 @@ These are documented below.
 
 ## Registration options
 
-Whenever you see a place where you can pass in **registration options**, you can pass in an object with the following props:
+Whenever you see a place where you can pass in **registration options**, you can
+pass in an object with the following props:
 
 * `lifetime`: An `awilix.Lifetime.*` string, such as `awilix.Lifetime.SCOPED`
-* `resolutionMode`: An `awilix.ResolutionMode.*` string, such as `awilix.ResolutionMode.CLASSIC`
-* `injector`: An injector function - see [Per-module local injections](#per-module-local-injections)
-* `register`: Only used in `loadModules`, determines how to register a loaded module explicitly
+* `resolutionMode`: An `awilix.ResolutionMode.*` string, such as
+  `awilix.ResolutionMode.CLASSIC`
+* `injector`: An injector function - see
+  [Per-module local injections](#per-module-local-injections)
+* `register`: Only used in `loadModules`, determines how to register a loaded
+  module explicitly
 
 **Examples of usage:**
 
@@ -601,9 +636,7 @@ container.register({
   stuff: asClass(MyClass, { resolutionMode: ResolutionMode.CLASSIC })
 })
 
-container.loadModules([
-  ['some/path/to/*.js', { register: asClass }]
-], {
+container.loadModules([['some/path/to/*.js', { register: asClass }]], {
   registrationOptions: {
     lifetime: Lifetime.SCOPED
   }
@@ -617,38 +650,55 @@ Creates a new Awilix container. The container stuff is documented further down.
 Args:
 
 * `options`: Options object. Optional.
-  - `options.require`: The function to use when requiring modules. Defaults to `require`. Useful when using something like [`require-stack`](https://npmjs.org/package/require-stack). Optional.
-  - `options.resolutionMode`: Determines the method for resolving dependencies. Valid modes are:
-    - `PROXY`: Uses the `awilix` default dependency resolution mechanism (I.E. injects the cradle into the function or class). This is the default resolution mode.
-    - `CLASSIC`: Uses the named dependency resolution mechanism. Dependencies ___must___ be named exactly like they are in the registration. For example, a dependency registered as `repository` cannot be referenced in a class constructor as `repo`.
+  * `options.require`: The function to use when requiring modules. Defaults to
+    `require`. Useful when using something like
+    [`require-stack`](https://npmjs.org/package/require-stack). Optional.
+  * `options.resolutionMode`: Determines the method for resolving dependencies.
+    Valid modes are:
+    * `PROXY`: Uses the `awilix` default dependency resolution mechanism (I.E.
+      injects the cradle into the function or class). This is the default
+      resolution mode.
+    * `CLASSIC`: Uses the named dependency resolution mechanism. Dependencies
+      **_must_** be named exactly like they are in the registration. For
+      example, a dependency registered as `repository` cannot be referenced in a
+      class constructor as `repo`.
 
 ## `asFunction()`
 
-Used with `container.register({ userService: asFunction(makeUserService) })`. Tells Awilix to invoke the function without any context.
+Used with `container.register({ userService: asFunction(makeUserService) })`.
+Tells Awilix to invoke the function without any context.
 
 The returned registration has the following chainable (fluid) API:
 
-* `asFunction(fn).setLifetime(lifetime: string)`: sets the lifetime of the registration to the given value.
-* `asFunction(fn).transient()`: same as `asFunction(fn).setLifetime(Lifetime.TRANSIENT)`.
-* `asFunction(fn).scoped()`: same as `asFunction(fn).setLifetime(Lifetime.SCOPED)`.
-* `asFunction(fn).singleton()`: same as `asFunction(fn).setLifetime(Lifetime.SINGLETON)`.
-* `asFunction(fn).inject(injector: Function)`: Let's you provide local dependencies only available to this module. The `injector` gets the container passed as the first and only argument and should return an object.
+* `asFunction(fn).setLifetime(lifetime: string)`: sets the lifetime of the
+  registration to the given value.
+* `asFunction(fn).transient()`: same as
+  `asFunction(fn).setLifetime(Lifetime.TRANSIENT)`.
+* `asFunction(fn).scoped()`: same as
+  `asFunction(fn).setLifetime(Lifetime.SCOPED)`.
+* `asFunction(fn).singleton()`: same as
+  `asFunction(fn).setLifetime(Lifetime.SINGLETON)`.
+* `asFunction(fn).inject(injector: Function)`: Let's you provide local
+  dependencies only available to this module. The `injector` gets the container
+  passed as the first and only argument and should return an object.
 
 ## `asClass()`
 
-Used with `container.register({ userService: asClass(UserService) })`. Tells Awilix to instantiate the given function as a class using `new`.
+Used with `container.register({ userService: asClass(UserService) })`. Tells
+Awilix to instantiate the given function as a class using `new`.
 
-The returned registration has the same chainable API as [`asFunction`](#asfunction).
+The returned registration has the same chainable API as
+[`asFunction`](#asfunction).
 
 ## `asValue()`
 
-Used with `container.register({ dbHost: asValue('localhost') })`. Tells Awilix to provide the given value as-is.
+Used with `container.register({ dbHost: asValue('localhost') })`. Tells Awilix
+to provide the given value as-is.
 
 ## `listModules()`
 
-Returns an array of `{name, path}` pairs,
-where the name is the module name, and path is the actual
-full path to the module.
+Returns an array of `{name, path}` pairs, where the name is the module name, and
+path is the actual full path to the module.
 
 This is used internally, but is useful for other things as well, e.g.
 dynamically loading an `api` folder.
@@ -656,29 +706,32 @@ dynamically loading an `api` folder.
 Args:
 
 * `globPatterns`: a glob pattern string, or an array of them.
-* `opts.cwd`: The current working directory passed to `glob`. Defaults to `process.cwd()`.
+* `opts.cwd`: The current working directory passed to `glob`. Defaults to
+  `process.cwd()`.
 * **returns**: an array of objects with:
-  - `name`: The module name - e.g. `db`
-  - `path`: The path to the module relative to `options.cwd` - e.g. `lib/db.js`
+  * `name`: The module name - e.g. `db`
+  * `path`: The path to the module relative to `options.cwd` - e.g. `lib/db.js`
 
 Example:
 
 ```js
 const listModules = require('awilix').listModules
 
-const result = listModules([
-  'services/*.js'
-])
+const result = listModules(['services/*.js'])
 
 console.log(result)
-  // << [{ name: 'someService', path: 'path/to/services/someService.js' }]
+// << [{ name: 'someService', path: 'path/to/services/someService.js' }]
 ```
 
-**Important**: `listModules` relies on `glob` and therefore does not with bundlers like Webpack, Rollup and Browserify.
+**Important**: `listModules` relies on `glob` and therefore does not with
+bundlers like Webpack, Rollup and Browserify.
 
 ## `AwilixResolutionError`
 
-This is a special error thrown when Awilix is unable to resolve all dependencies (due to missing or cyclic dependencies). You can catch this error and use `err instanceof AwilixResolutionError` if you wish. It will tell you what dependencies it could not find or which ones caused a cycle.
+This is a special error thrown when Awilix is unable to resolve all dependencies
+(due to missing or cyclic dependencies). You can catch this error and use `err
+instanceof AwilixResolutionError` if you wish. It will tell you what
+dependencies it could not find or which ones caused a cycle.
 
 ## The `AwilixContainer` object
 
@@ -686,19 +739,23 @@ The container returned from `createContainer` has some methods and properties.
 
 ### `container.cradle`
 
-**Behold! This is where the magic happens!** The `cradle` is a proxy, and all getters will trigger a `container.resolve`. The `cradle` is actually being
-passed to the constructor/factory function, which is how everything gets wired up.
+**Behold! This is where the magic happens!** The `cradle` is a proxy, and all
+getters will trigger a `container.resolve`. The `cradle` is actually being
+passed to the constructor/factory function, which is how everything gets wired
+up.
 
 ### `container.registrations`
 
-A read-only getter that returns the internal registrations. When invoked on a *scope*, will show registrations for it's parent, and it's parent's parent, and so on.
+A read-only getter that returns the internal registrations. When invoked on a
+_scope_, will show registrations for it's parent, and it's parent's parent, and
+so on.
 
 Not really useful for public use.
 
 ### `container.cache`
 
-An object used internally for caching resolutions. It's a plain object.
-Not meant for public use but if you find it useful, go ahead but tread carefully.
+An object used internally for caching resolutions. It's a plain object. Not
+meant for public use but if you find it useful, go ahead but tread carefully.
 
 Each scope has it's own cache, and checks the cache of it's parents.
 
@@ -739,7 +796,8 @@ container.cradle.leet === 1337
 * `register(name: string, registration: Registration): AwilixContainer`
 * `register(nameAndRegistrationPair: NameAndRegistrationPair): AwilixContainer`
 
-Registers modules with the container. This function is used by the `registerValue`, `registerFunction` and `registerClass` functions.
+Registers modules with the container. This function is used by the
+`registerValue`, `registerFunction` and `registerClass` functions.
 
 Awilix needs to know how to resolve the modules, so let's pull out the
 registration functions:
@@ -750,10 +808,13 @@ const { asValue, asFunction, asClass } = awilix
 ```
 
 * `asValue`: Resolves the given value as-is.
-* `asFunction`: Resolve by invoking the function with the container cradle as the first and only argument.
+* `asFunction`: Resolve by invoking the function with the container cradle as
+  the first and only argument.
 * `asClass`: Like `asFunction` but uses `new`.
 
-Now we need to use them. There are multiple syntaxes for the `register` function, pick the one you like the most - or use all of them, I don't really care! :sunglasses:
+Now we need to use them. There are multiple syntaxes for the `register`
+function, pick the one you like the most - or use all of them, I don't really
+care! :sunglasses:
 
 **Both styles supports chaining! `register` returns the container!**
 
@@ -772,7 +833,10 @@ container.register({
 
 // `registerFunction` and `registerClass` also supports a fluid syntax.
 // This...
-container.register('mailService', asFunction(makeMailService).setLifetime(Lifetime.SINGLETON))
+container.register(
+  'mailService',
+  asFunction(makeMailService).setLifetime(Lifetime.SINGLETON)
+)
 // .. is the same as this:
 container.register('context', asClass(SessionContext).singleton())
 
@@ -781,14 +845,18 @@ container.register('context', asClass(SessionContext).transient())
 container.register('context', asClass(SessionContext).scoped())
 ```
 
-**The object syntax, key-value syntax and chaining are valid for all `register` calls!**
+**The object syntax, key-value syntax and chaining are valid for all `register`
+calls!**
 
-### `container.registerValue()`
+### `container.registerValue()` (DEPRECATED)
+
+> This method is deprecated and will be removed in v3. Please use
+> `container.register({ name: asValue(target) })` instead.
 
 **Signatures**
 
 * `registerValue(name: string, value: any): AwilixContainer`
-* `registerValue(nameAndValuePairs: RegisterNameAndValuePair): AwilixContainer `
+* `registerValue(nameAndValuePairs: RegisterNameAndValuePair): AwilixContainer`
 
 Registers a constant value in the container. Can be anything.
 
@@ -808,25 +876,35 @@ container
   .registerValue('db', myDatabaseObject)
 ```
 
-### `container.registerFunction()`
+### `container.registerFunction()` (DEPRECATED)
+
+> This method is deprecated and will be removed in v3. Please use
+> `container.register({ name: asFunction(target) })` instead.
 
 **Signatures**
 
-* `registerFunction(fn: Function, opts?: RegistrationOptions): AwilixContainer` (infers the name using `fn.name`)
-* `registerFunction(name: string, fn: Function, opts?: RegistrationOptions): AwilixContainer`
-* `registerFunction(name: string, funcAndOptionsPair: [Function, RegistrationOptions]): AwilixContainer`
-* `registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair): AwilixContainer`
+* `registerFunction(fn: Function, opts?: RegistrationOptions): AwilixContainer`
+  (infers the name using `fn.name`)
+* `registerFunction(name: string, fn: Function, opts?: RegistrationOptions):
+  AwilixContainer`
+* `registerFunction(name: string, funcAndOptionsPair: [Function,
+  RegistrationOptions]): AwilixContainer`
+* `registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair):
+  AwilixContainer`
 
-Registers a standard function to be called whenever being resolved. The factory function can return anything it wants, and whatever it returns is what is passed to dependents.
+Registers a standard function to be called whenever being resolved. The factory
+function can return anything it wants, and whatever it returns is what is passed
+to dependents.
 
-By default all registrations are `TRANSIENT`, meaning resolutions will **not** be cached. This is configurable on a per-registration level.
+By default all registrations are `TRANSIENT`, meaning resolutions will **not**
+be cached. This is configurable on a per-registration level.
 
-**The array syntax for values means `[value, options]`.** This is also valid for `registerClass`.
+**The array syntax for values means `[value, options]`.** This is also valid for
+`registerClass`.
 
 ```js
-const myFactoryFunction = ({ someName }) => (
+const myFactoryFunction = ({ someName }) =>
   `${new Date().toISOString()}: Hello, this is ${someName}`
-)
 
 container.registerFunction({ fullString: myFactoryFunction })
 console.log(container.cradle.fullString)
@@ -861,19 +939,25 @@ setTimeout(() => {
 }, 2000)
 ```
 
-### `container.registerClass()`
+### `container.registerClass()` (DEPRECATED)
+
+> This method is deprecated and will be removed in v3. Please use
+> `container.register({ name: asClass(target) })` instead.
 
 **Signatures**
 
-* `registerClass(ctor: Constructor<T>, opts?: RegistrationOptions): AwilixContainer` (infers the name using `ctor.name`)
-
-* `registerClass<T>(name: string, ctor: Constructor<T>, opts?: RegistrationOptions): AwilixContainer`
-* `registerClass<T>(name: string, ctorAndOptionsPair: [Constructor<T>, RegistrationOptions]): AwilixContainer`
+* `registerClass(ctor: Constructor<T>, opts?: RegistrationOptions):
+  AwilixContainer` (infers the name using `ctor.name`)
+* `registerClass<T>(name: string, ctor: Constructor<T>, opts?:
+  RegistrationOptions): AwilixContainer`
+* `registerClass<T>(name: string, ctorAndOptionsPair: [Constructor<T>,
+  RegistrationOptions]): AwilixContainer`
 * `registerClass(nameAndClassPair: RegisterNameAndClassPair): AwilixContainer`
 
 Same as `registerFunction`, except it will use `new`.
 
-By default all registrations are `TRANSIENT`, meaning resolutions will **not** be cached. This is configurable on a per-registration level.
+By default all registrations are `TRANSIENT`, meaning resolutions will **not**
+be cached. This is configurable on a per-registration level.
 
 ```js
 class Exclaimer {
@@ -908,35 +992,33 @@ container.cradle.exclaimer.exclaim()
 
 Given an array of globs, registers the modules and returns the container.
 
-Awilix will use `require` on the loaded modules, and register the default-exported function or class as the name of the file.
+Awilix will use `require` on the loaded modules, and register the
+default-exported function or class as the name of the file.
 
-**This will not work for constructor functions (`function Database{} ...`), because there is no way to determine when to use `new`. Internally, Awilix uses `is-class` which only works for ES6 classes.**
+**This will not work for constructor functions (`function Database{} ...`),
+because there is no way to determine when to use `new`. Internally, Awilix uses
+`is-class` which only works for ES6 classes.**
 
 Args:
 
 * `globPatterns`: Array of glob patterns that match JS files to load.
 * `opts.cwd`: The `cwd` being passed to `glob`. Defaults to `process.cwd()`.
-* `opts.formatName`: Can be either `'camelCase'`, or a function that takes the current name as the first parameter and returns the new name. Default is to pass the name through as-is. The 2nd parameter is a full module descriptor.
-* `registrationOptions`: An `object` passed to the registrations. Used to configure the lifetime, resolution mode and more of the loaded modules.
+* `opts.formatName`: Can be either `'camelCase'`, or a function that takes the
+  current name as the first parameter and returns the new name. Default is to
+  pass the name through as-is. The 2nd parameter is a full module descriptor.
+* `registrationOptions`: An `object` passed to the registrations. Used to
+  configure the lifetime, resolution mode and more of the loaded modules.
 
 Example:
 
 ```js
 // index.js
-container.loadModules([
-  'services/*.js',
-  'repositories/*.js',
-  'db/db.js'
-])
+container.loadModules(['services/*.js', 'repositories/*.js', 'db/db.js'])
 
 container.cradle.userService.getUser(123)
 
 // to configure lifetime for all modules loaded..
-container.loadModules([
-  'services/*.js',
-  'repositories/*.js',
-  'db/db.js'
-], {
+container.loadModules(['services/*.js', 'repositories/*.js', 'db/db.js'], {
   registrationOptions: {
     lifetime: Lifetime.SINGLETON
   }
@@ -945,38 +1027,36 @@ container.loadModules([
 container.cradle.userService.getUser(123)
 
 // to configure lifetime for specific globs..
-container.loadModules([
-  ['services/*.js', Lifetime.SCOPED], // all services will have scoped lifetime
-  'repositories/*.js',
-  'db/db.js'
-], {
-  registrationOptions: {
-    lifetime: Lifetime.SINGLETON // db and repositories will be singleton
+container.loadModules(
+  [
+    ['services/*.js', Lifetime.SCOPED], // all services will have scoped lifetime
+    'repositories/*.js',
+    'db/db.js'
+  ],
+  {
+    registrationOptions: {
+      lifetime: Lifetime.SINGLETON // db and repositories will be singleton
+    }
   }
-})
+)
 
 container.cradle.userService.getUser(123)
 
 // to use camelCase for modules where filenames are not camelCase
-container.loadModules([
-  'repositories/account-repository.js',
-  'db/db.js'
-], {
+container.loadModules(['repositories/account-repository.js', 'db/db.js'], {
   formatName: 'camelCase'
 })
 
 container.cradle.accountRepository.getUser(123)
 
 // to customize how modules are named in the container (and for injection)
-container.loadModules([
-  'repository/account.js',
-  'service/email.js'
-], {
+container.loadModules(['repository/account.js', 'service/email.js'], {
   // This formats the module name so `repository/account.js` becomes `accountRepository`
   formatName: (name, descriptor) => {
     const splat = descriptor.path.split('/')
     const namespace = splat[splat.length - 2] // `repository` or `service`
-    const upperNamespace = namespace.charAt(0).toUpperCase() + namespace.substring(1)
+    const upperNamespace =
+      namespace.charAt(0).toUpperCase() + namespace.substring(1)
     return name + upperNamespace
   }
 })
@@ -985,11 +1065,13 @@ container.cradle.accountRepository.getUser(123)
 container.cradle.emailService.sendEmail('test@test.com', 'waddup')
 ```
 
-The `['glob', Lifetime.SCOPED]` syntax is a shorthand for passing in registration options like so: `['glob', { lifetime: Lifetime.SCOPED }]`
+The `['glob', Lifetime.SCOPED]` syntax is a shorthand for passing in
+registration options like so: `['glob', { lifetime: Lifetime.SCOPED }]`
 
 ### `container.createScope()`
 
-Creates a new scope. All registrations with a `Lifetime.SCOPED` will be cached inside a scope. A scope is basically a "child" container.
+Creates a new scope. All registrations with a `Lifetime.SCOPED` will be cached
+inside a scope. A scope is basically a "child" container.
 
 * returns `AwilixContainer`
 
@@ -1012,7 +1094,8 @@ scope2.cradle.counterValue === 2
 scope1Child.cradle.counterValue === 1
 ```
 
-**Be careful!** If a scope's *parent* has already resolved a scoped value, that value will be returned.
+**Be careful!** If a scope's _parent_ has already resolved a scoped value, that
+value will be returned.
 
 ```js
 let counter = 1
@@ -1031,14 +1114,15 @@ scope2.cradle.counterValue === 1
 scope2.cradle.counterValue === 1
 ```
 
-A scope may also register additional stuff - they will only be available within that scope and it's children.
+A scope may also register additional stuff - they will only be available within
+that scope and it's children.
 
 ```js
 // Register a transient function
 // that returns the value of the scope-provided dependency.
 // For this example we could also use scoped lifetime.
 container.register({
-  scopedValue: asFunction((cradle) => 'Hello ' + cradle.someValue)
+  scopedValue: asFunction(cradle => 'Hello ' + cradle.someValue)
 })
 
 // Create a scope and register a value.
@@ -1064,7 +1148,7 @@ const scope = container.createScope()
 
 container.register({
   value: asValue('root'),
-  usedValue: asFunction((cradle) => cradle.value)
+  usedValue: asFunction(cradle => cradle.value)
 })
 
 scope.register({
@@ -1077,22 +1161,29 @@ scope.cradle.usedValue === 'scope'
 
 ### `container.build()`
 
-Builds an instance of a class (or a function) by injecting dependencies, but without registering it in the container.
+Builds an instance of a class (or a function) by injecting dependencies, but
+without registering it in the container.
 
 It's basically a shortcut for `asClass(MyClass).resolve(container)`.
 
 Args:
-  - `targetOrResolver`: A class, function or resolver (example: `asClass(..)`, `asFunction(..)`)
-  - `opts`: Resolver options.
 
-Returns an instance of whatever is passed in, or the result of calling the resolver. 
+* `targetOrResolver`: A class, function or resolver (example: `asClass(..)`,
+  `asFunction(..)`)
+* `opts`: Resolver options.
 
-**Important**: if you are doing this often for the same class/function, consider using the explicit approach and save the resolver, **especially** if you are using classic resolution because it scans the class constructor/function when calling `asClass(Class)` / `asFunction(func)`.
+Returns an instance of whatever is passed in, or the result of calling the
+resolver.
+
+**Important**: if you are doing this often for the same class/function, consider
+using the explicit approach and save the resolver, **especially** if you are
+using classic resolution because it scans the class constructor/function when
+calling `asClass(Class)` / `asFunction(func)`.
 
 ```js
 // The following are equivelant..
 class MyClass {
-  constructor ({ ping }) {
+  constructor({ ping }) {
     this.ping = ping
   }
 
@@ -1110,8 +1201,8 @@ container.registerValue({
 })
 
 // Shorthand
-// This uses `utils.isClass()` to determine whether to 
-// use `asClass` or `asFunction`. This is fine for 
+// This uses `utils.isClass()` to determine whether to
+// use `asClass` or `asFunction`. This is fine for
 // one-time resolutions.
 const myClass = container.build(MyClass)
 const myFunc = container.build(createMyFunc)
@@ -1124,21 +1215,23 @@ const myFuncResolver = asFunction(MyFunc)
 
 const myClass = container.build(myClassResolver)
 const myFunc = container.build(myFuncResolver)
-
 ```
 
 # Contributing
 
-Clone repo, run `npm i` to install all dependencies, and then `npm run test-watch` + `npm run lint-watch` to start writing code.
+Clone repo, run `npm i` to install all dependencies, and then `npm run
+test-watch` + `npm run lint-watch` to start writing code.
 
 For code coverage, run `npm run cover`.
 
 If you submit a PR, please aim for 100% code coverage and no linting errors.
-Travis will fail if there are linting errors. Thank you for considering contributing. :)
+Travis will fail if there are linting errors. Thank you for considering
+contributing. :)
 
 # What's in a name?
 
-Awilix is the mayan goddess of the moon, and also my favorite character in the game [SMITE](http://www.smitegame.com/play-for-free?ref=Jeffijoe).
+Awilix is the mayan goddess of the moon, and also my favorite character in the
+game [SMITE](http://www.smitegame.com/play-for-free?ref=Jeffijoe).
 
 # Author
 
