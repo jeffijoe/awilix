@@ -1,6 +1,6 @@
 {
   "name": "awilix",
-  "version": "3.0.0-rc.2",
+  "version": "3.0.0-rc.3",
   "description": "Simple dependency injection container + helper utilities to facilitate wiring of modules",
   "main": "lib/awilix.js",
   "typings": "lib/awilix.d.ts",
