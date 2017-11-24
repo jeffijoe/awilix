@@ -8,6 +8,7 @@ import {
 } from './resolvers'
 import { AwilixContainer } from './container'
 import { isClass, isFunction } from './utils'
+import { BuildResolver } from './awilix'
 
 const camelCase = require('camel-case')
 
@@ -174,7 +175,7 @@ function registerDescriptor(
     moduleDescriptorOpts = { lifetime: moduleDescriptorOpts }
   }
 
-  const regOpts = {
+  const regOpts: BuildResolver<any> = {
     ...opts.resolverOptions,
     ...moduleDescriptorOpts
   }
