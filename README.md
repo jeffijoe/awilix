@@ -12,8 +12,8 @@
 [![node](https://img.shields.io/node/v/awilix.svg?maxAge=1000)](https://www.npmjs.com/package/awilix)
 [![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 
-Extremely powerful **Inversion of Control** (IoC) container for Node with
-dependency resolution support powered by `Proxy`. Make IoC great again!
+Extremely powerful **Dependency Injection** (DI) container for JavaScript/Node,
+written in [TypeScript](http://typescriptlang.org). **Make IoC great again!**
 
 > Check out this
 > [intro to Dependency Injection with Awilix](https://medium.com/@Jeffijoe/dependency-injection-in-node-js-2016-edition-f2a88efdd427)
@@ -1209,8 +1209,8 @@ container.dispose().then(() => {
 
 # Contributing
 
-Clone repo, run `npm i` to install all dependencies, and then `npm run
-test-watch` + `npm run lint-watch` to start writing code.
+Clone repo, run `npm i` to install all dependencies, and then `npm run test --
+--watchAll` to start writing code.
 
 For code coverage, run `npm run cover`.
 
