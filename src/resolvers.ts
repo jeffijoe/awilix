@@ -23,15 +23,14 @@ export type InjectorFunction = (container: AwilixContainer) => object
 /**
  * A resolver object returned by asClass(), asFunction() or asValue().
  */
-export interface Resolver<T> {
-  lifetime: LifetimeType
+export interface Resolver<T> extends ResolverOptions<T> {
   resolve(container: AwilixContainer): T
 }
 
 /**
  * A resolver object created by asClass() or asFunction().
  */
-export interface BuildResolver<T> extends Resolver<T> {
+export interface BuildResolver<T> extends Resolver<T>, BuildResolverOptions<T> {
   injectionMode?: InjectionModeType
   injector?: InjectorFunction
   setLifetime(lifetime: LifetimeType): this
@@ -45,17 +44,25 @@ export interface BuildResolver<T> extends Resolver<T> {
 }
 
 /**
+ * Options for disposable resolvers.
+ */
+export interface DisposableResolverOptions<T> extends ResolverOptions<T> {
+  dispose?: Disposer<T>
+}
+
+/**
  * Disposable resolver.
  */
-export interface DisposableResolver<T> extends Resolver<T> {
-  dispose?: Disposer<T>
+export interface DisposableResolver<T>
+  extends Resolver<T>,
+    DisposableResolverOptions<T> {
   disposer(dispose: Disposer<T>): this
 }
 
 /**
  * Disposer function type.
  */
-export type Disposer<T> = (value: T) => void | Promise<void>
+export type Disposer<T> = (value: T) => any | Promise<any>
 
 /**
  * The options when registering a class, function or value.
@@ -71,6 +78,18 @@ export interface ResolverOptions<T> {
    */
   lifetime?: LifetimeType
   /**
+   * Registration function to use. Only used for inline configuration with `loadModules`.
+   */
+  register?: (...args: any[]) => Resolver<T>
+}
+
+/**
+ * Builder resolver options.
+ */
+export interface BuildResolverOptions<T>
+  extends ResolverOptions<T>,
+    DisposableResolverOptions<T> {
+  /**
    * Resolution mode.
    */
   injectionMode?: InjectionModeType
@@ -78,10 +97,6 @@ export interface ResolverOptions<T> {
    * Injector function to provide additional parameters.
    */
   injector?: InjectorFunction
-  /**
-   * Registration function to use.
-   */
-  resolver?: (...args: any[]) => Resolver<T>
 }
 
 /**
@@ -106,15 +121,10 @@ export type Constructor<T> = { new (...args: any[]): T }
  * @return {object}
  * The resolver.
  */
-export function asValue<T>(value: T): Resolver<T> & DisposableResolver<T> {
-  const resolve = () => {
-    return value
+export function asValue<T>(value: T): Resolver<T> {
+  return {
+    resolve: () => value
   }
-
-  return createDisposableResolver({
-    resolve,
-    lifetime: Lifetime.TRANSIENT
-  })
 }
 
 /**
@@ -135,7 +145,7 @@ export function asValue<T>(value: T): Resolver<T> & DisposableResolver<T> {
  */
 export function asFunction<T>(
   fn: FunctionReturning<T>,
-  opts?: ResolverOptions<T>
+  opts?: BuildResolverOptions<T>
 ): BuildResolver<T> & DisposableResolver<T> {
   if (!isFunction(fn)) {
     throw new AwilixTypeError('asFunction', 'fn', 'function', fn)
@@ -150,9 +160,7 @@ export function asFunction<T>(
   const resolve = generateResolve(fn)
   let result = {
     resolve,
-    lifetime: opts.lifetime!,
-    injector: opts.injector,
-    injectionMode: opts.injectionMode
+    ...opts
   }
 
   return createDisposableResolver(createBuildResolver(result))
@@ -175,7 +183,7 @@ export function asFunction<T>(
  */
 export function asClass<T = {}>(
   Type: Constructor<T>,
-  opts?: ResolverOptions<T>
+  opts?: BuildResolverOptions<T>
 ): BuildResolver<T> & DisposableResolver<T> {
   if (!isFunction(Type)) {
     throw new AwilixTypeError('asClass', 'Type', 'class', Type)
@@ -195,9 +203,7 @@ export function asClass<T = {}>(
   const resolve = generateResolve(newClass, Type.prototype.constructor)
   return createDisposableResolver(
     createBuildResolver({
-      lifetime: opts.lifetime!,
-      injector: opts.injector,
-      injectionMode: opts.injectionMode,
+      ...opts,
       resolve
     })
   )
@@ -208,9 +214,6 @@ export function asClass<T = {}>(
  */
 export function aliasTo<T>(name: string): Resolver<T> {
   return {
-    // Transient because it all depends on the
-    // dependency being resolved.
-    lifetime: Lifetime.TRANSIENT,
     resolve(container) {
       return container.resolve(name)
     }

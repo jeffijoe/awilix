@@ -7,13 +7,14 @@ import {
 import {
   Resolver,
   Constructor,
-  ResolverOptions,
   asClass,
-  asFunction
+  asFunction,
+  DisposableResolver,
+  BuildResolverOptions
 } from './resolvers'
 import { last, nameValueToObject, isClass } from './utils'
 import { InjectionMode, InjectionModeType } from './injection-mode'
-import { Lifetime, LifetimeType } from './lifetime'
+import { Lifetime } from './lifetime'
 import { AwilixResolutionError, AwilixTypeError } from './errors'
 
 /**
@@ -87,8 +88,14 @@ export interface AwilixContainer {
    */
   build<T>(
     targetOrResolver: ClassOrFunctionReturning<T> | Resolver<T>,
-    opts?: ResolverOptions<T>
+    opts?: BuildResolverOptions<T>
   ): T
+  /**
+   * Disposes this container and it's children, calling the disposer
+   * on all disposable registrations and clearing the cache.
+   * Only applies to registrations with `SCOPED` or `SINGLETON` lifetime.
+   */
+  dispose(): Promise<void>
 }
 
 /**
@@ -117,44 +124,11 @@ export interface CacheEntry {
 }
 
 /**
- * Registration options or a lifetime type.
- */
-export type RegistrationOptionsOrLifetime<T> = ResolverOptions<T> | LifetimeType
-
-/**
  * Register a Registration
  * @interface NameAndRegistrationPair
  */
 export interface NameAndRegistrationPair {
   [key: string]: Resolver<any>
-}
-
-/**
- * Register a class.
- * @interface RegisterNameAndClassPair
- */
-export interface RegisterNameAndClassPair {
-  [key: string]:
-    | [Constructor<any>, RegistrationOptionsOrLifetime<any>]
-    | Constructor<any>
-}
-
-/**
- * Register a function.
- * @interface RegisterNameAndFunctionPair
- */
-export interface RegisterNameAndFunctionPair {
-  [key: string]:
-    | [FunctionReturning<any>, RegistrationOptionsOrLifetime<any>]
-    | FunctionReturning<any>
-}
-
-/**
- * Register a value.
- * @interface RegisterNameAndValuePair
- */
-export interface RegisterNameAndValuePair {
-  [key: string]: any
 }
 
 /**
@@ -201,6 +175,12 @@ const FAMILY_TREE = Symbol('familyTree')
 const ROLL_UP_REGISTRATIONS = Symbol('rollUpRegistrations')
 
 /**
+ * Scopes symbol.
+ * @type {Symbol}
+ */
+const SCOPES = Symbol('scopes')
+
+/**
  * Creates an Awilix container instance.
  *
  * @param {Function} options.require
@@ -216,12 +196,10 @@ export function createContainer(
   options?: ContainerOptions,
   parentContainer?: AwilixContainer
 ): AwilixContainer {
-  options = Object.assign(
-    {
-      injectionMode: InjectionMode.PROXY
-    },
-    options
-  )
+  options = {
+    injectionMode: InjectionMode.PROXY,
+    ...options
+  }
 
   // The resolution stack is used to keep track
   // of what modules are being resolved, so when
@@ -307,8 +285,10 @@ export function createContainer(
     register: register as any,
     build,
     resolve,
+    dispose,
     [util.inspect.custom]: inspect,
     [ROLL_UP_REGISTRATIONS]: rollUpRegistrations,
+    [SCOPES]: [],
     get registrations() {
       return rollUpRegistrations()
     }
@@ -321,6 +301,11 @@ export function createContainer(
 
   // Save it so we can access it from a scoped container.
   ;(container as any)[FAMILY_TREE] = familyTree
+
+  // Add this container to the parent's scopes.
+  if (parentContainer) {
+    ;(parentContainer as any)[SCOPES].push(container)
+  }
 
   // We need a reference to the root container,
   // so we can retrieve and store singletons.
@@ -352,12 +337,11 @@ export function createContainer(
       return computedRegistrations
     }
 
-    computedRegistrations = Object.assign(
-      {},
-      parentContainer &&
-        (parentContainer as any)[ROLL_UP_REGISTRATIONS](bustCache),
-      registrations
-    )
+    computedRegistrations = {
+      ...(parentContainer &&
+        (parentContainer as any)[ROLL_UP_REGISTRATIONS](bustCache)),
+      ...registrations
+    }
 
     return computedRegistrations!
   }
@@ -463,7 +447,7 @@ export function createContainer(
       // Do the thing
       let cached: CacheEntry | undefined
       let resolved
-      switch (resolver.lifetime) {
+      switch (resolver.lifetime || Lifetime.TRANSIENT) {
         case Lifetime.TRANSIENT:
           // Transient lifetime means resolve every time.
           resolved = resolver.resolve(container)
@@ -527,7 +511,7 @@ export function createContainer(
    */
   function build<T>(
     targetOrResolver: Resolver<T> | ClassOrFunctionReturning<T>,
-    opts?: ResolverOptions<T>
+    opts?: BuildResolverOptions<T>
   ): T {
     if (targetOrResolver && (targetOrResolver as Resolver<T>).resolve) {
       return (targetOrResolver as Resolver<T>).resolve(container)
@@ -580,5 +564,42 @@ export function createContainer(
     }
     realLoadModules(_loadModulesDeps, globPatterns, opts)
     return container
+  }
+
+  /**
+   * Disposes this container and it's children, calling the disposer
+   * on all disposable registrations and clearing the cache.
+   */
+  function dispose(): Promise<void> {
+    const scopes = getChildScopes()
+    return Promise.all(scopes.map(s => s.dispose())).then(() => {
+      return callDisposersAndClearCache()
+    })
+  }
+
+  /**
+   * Gets the child scopes for this container.
+   */
+  function getChildScopes(): Array<AwilixContainer> {
+    return (container as any)[SCOPES] as Array<AwilixContainer>
+  }
+
+  /**
+   * Calls the disposers on the cached values, then clears the cache
+   * for this container.
+   */
+  function callDisposersAndClearCache(): Promise<void> {
+    const entries = Array.from(container.cache.entries())
+    container.cache.clear()
+    return Promise.all(
+      entries.map(([name, entry]) => {
+        const { resolver, value } = entry
+        const disposable = resolver as DisposableResolver<any>
+        if (disposable.dispose) {
+          return Promise.resolve().then(() => disposable.dispose!(value))
+        }
+        return Promise.resolve()
+      })
+    ).then(() => undefined)
   }
 }
