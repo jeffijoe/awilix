@@ -95,45 +95,6 @@ describe('tokenizer', () => {
   it('does not require function name', () => {
     expect(getTokens(`function (first, second)`)).toMatchSnapshot()
   })
-
-  describe('speculate', () => {
-    it('restores state if callback returns false', () => {
-      const tokenizer = createTokenizer('function lol')
-      tokenizer.speculate(() => {
-        tokenizer.next()
-        tokenizer.next()
-        return false
-      })
-
-      expect(tokenizer.next()).toEqual({ type: 'function' })
-    })
-
-    it('keeps state if callback returns truthy', () => {
-      const tokenizer = createTokenizer('function lol')
-      const speculateed = tokenizer.speculate(() => {
-        return [tokenizer.next(), tokenizer.next()]
-      })
-      expect(speculateed).toEqual([
-        { type: 'function' },
-        { type: 'ident', value: 'lol' }
-      ])
-      expect(tokenizer.next()).toEqual({ type: 'EOF' })
-      expect(tokenizer.done()).toBe(true)
-    })
-
-    it('restores state if lookAhead is true', () => {
-      const tokenizer = createTokenizer('function lol')
-      const speculateed = tokenizer.speculate(() => {
-        return [tokenizer.next(), tokenizer.next()]
-      }, true)
-      expect(speculateed).toEqual([
-        { type: 'function' },
-        { type: 'ident', value: 'lol' }
-      ])
-      expect(tokenizer.next()).toEqual({ type: 'function' })
-      expect(tokenizer.done()).toBe(false)
-    })
-  })
 })
 
 function getTokens(source: string) {

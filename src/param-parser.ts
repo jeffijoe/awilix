@@ -24,7 +24,7 @@ export interface Parameter {
  * Returns an array of parameters.
  */
 export function parseParameterList(source: string): Array<Parameter> {
-  const { peek, next: _next, done } = createTokenizer(source)
+  const { next: _next, done } = createTokenizer(source)
   const params: Array<Parameter> = []
 
   let t: Token = null!
@@ -37,8 +37,7 @@ export function parseParameterList(source: string): Array<Parameter> {
         nextToken()
         break
       case 'function':
-        nextToken()
-        if (peek().type === 'ident') {
+        if (nextToken().type === 'ident') {
           // This is the function name. Skip it.
           nextToken()
         }
@@ -105,7 +104,7 @@ export function parseParameterList(source: string): Array<Parameter> {
   }
 
   /**
-   * Determines if the current token represents a constructor,
+   * Determines if the current token represents a constructor, and the next token after it is a paren
    */
   function isConstructorToken() {
     return t.type === 'ident' && t.value === 'constructor'
