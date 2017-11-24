@@ -9,13 +9,12 @@ import {
   Constructor,
   ResolverOptions,
   asClass,
-  asFunction,
-  asValue
+  asFunction
 } from './resolvers'
 import { last, nameValueToObject, isClass } from './utils'
 import { InjectionMode, InjectionModeType } from './injection-mode'
 import { Lifetime, LifetimeType } from './lifetime'
-import { AwilixResolutionError, AwilixTypeError, AwilixError } from './errors'
+import { AwilixResolutionError, AwilixTypeError } from './errors'
 
 /**
  * The container returned from createContainer has some methods and properties.
@@ -68,70 +67,6 @@ export interface AwilixContainer {
    * Pairs resolvers to registration names and registers them.
    */
   register(nameAndRegistrationPair: NameAndRegistrationPair): this
-  /**
-   * Registers a class that will be instantiated when resolved,
-   * using it's `name` property as the registration name.
-   */
-  registerClass<T>(
-    ctor: Constructor<T>,
-    opts?: RegistrationOptionsOrLifetime<T>
-  ): this
-  /**
-   * Registers a class that will be instantiated when resolved.
-   */
-  registerClass<T>(
-    name: string | symbol,
-    ctor: Constructor<T>,
-    opts?: RegistrationOptionsOrLifetime<T>
-  ): this
-  /**
-   * Registers a class with options.
-   */
-  registerClass<T>(
-    name: string | symbol,
-    ctorAndOptionsPair: [Constructor<T>, RegistrationOptionsOrLifetime<T>]
-  ): this
-  /**
-   * Pairs classes to registration names and registers them.
-   */
-  registerClass(nameAndClassPair: RegisterNameAndClassPair): this
-  /**
-   * Registers the given value as a function that will be invoked
-   * with dependencies when resolved, using it's `name` property as the
-   * registration name.
-   */
-  registerFunction(
-    fn: Function,
-    opts?: RegistrationOptionsOrLifetime<any>
-  ): this
-  /**
-   * Registers the given value as a function that will be invoked
-   * with dependencies when resolved.
-   */
-  registerFunction(
-    name: string | symbol,
-    fn: Function,
-    opts?: RegistrationOptionsOrLifetime<any>
-  ): this
-  /**
-   * Registers a function with options.
-   */
-  registerFunction(
-    name: string | symbol,
-    funcAndOptionsPair: [Function, RegistrationOptionsOrLifetime<any>]
-  ): this
-  /**
-   * Pairs functions to registration names and registers them.
-   */
-  registerFunction(nameAndFunctionPair: RegisterNameAndFunctionPair): this
-  /**
-   * Registers the given value as-is.
-   */
-  registerValue(name: string | symbol, value: any): this
-  /**
-   * Pairs values to registration names and registers them.
-   */
-  registerValue(nameAndValuePairs: RegisterNameAndValuePair): this
   /**
    * Resolves the registration with the given name.
    *
@@ -370,9 +305,6 @@ export function createContainer(
     loadModules,
     createScope,
     register: register as any,
-    registerValue: makeRegister(asValue, true) as any,
-    registerClass: makeRegister(asClass) as any,
-    registerFunction: makeRegister(asFunction) as any,
     build,
     resolve,
     [util.inspect.custom]: inspect,
@@ -463,65 +395,6 @@ export function createContainer(
     // Invalidates the computed registrations.
     computedRegistrations = null
     return container
-  }
-
-  /**
-   * Makes a register function.
-   *
-   * @param {Function} fn
-   * The `as*` resolver function to make a register function for.
-   *
-   * @param {Boolean} verbatimValue
-   * The `('name', [value, opts])` is not valid for all register functions.
-   * When set to true, treat the value as-is, don't check if its an value-opts-array.
-   */
-  function makeRegister(
-    fn: ((value: any, opts?: ResolverOptions<any>) => Resolver<any>),
-    verbatimValue?: boolean
-  ) {
-    return function registerShortcut(
-      name: any,
-      value: any,
-      opts?: ResolverOptions<any>
-    ) {
-      // Supports infering the class/function name.
-      if (typeof name === 'function' && !verbatimValue) {
-        if (!name.name) {
-          throw new AwilixError(
-            `Attempted to use shorthand register function, but the specified function has no name.`
-          )
-        }
-        opts = value
-        value = name
-        name = name.name
-      }
-      // This ensures that we can support name+value style and object style.
-      const obj = nameValueToObject(name, value)
-      const keys = [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)]
-      for (const key of keys) {
-        let valueToRegister = obj[key]
-
-        // If we have options, copy them over.
-        let regOpts = Object.assign({}, opts)
-
-        if (!verbatimValue && Array.isArray(valueToRegister)) {
-          let arrayOpts = valueToRegister[1]
-          // // The ('name', [value, opts]) style
-          if (typeof arrayOpts === 'string') {
-            // opts is a Lifetime.
-            arrayOpts = { lifetime: arrayOpts }
-          }
-
-          regOpts = Object.assign({}, regOpts, arrayOpts)
-          valueToRegister = valueToRegister[0]
-        }
-
-        register(key, fn(valueToRegister, regOpts))
-      }
-
-      // Chaining
-      return container
-    }
   }
 
   /**

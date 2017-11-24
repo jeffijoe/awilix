@@ -1,5 +1,5 @@
 import { createContainer } from '../container'
-import { asClass } from '../resolvers'
+import { asClass, asFunction } from '../resolvers'
 import { InjectionMode } from '../injection-mode'
 
 class Test {
@@ -44,13 +44,13 @@ describe('local injections', function() {
   })
 
   it('supported by registerClass', function() {
-    const container = createContainer().registerClass({
-      test: [Test, { injector }],
-      testClassic: [
-        TestClassic,
-        { injector, injectionMode: InjectionMode.CLASSIC }
-      ],
-      test2: Test
+    const container = createContainer().register({
+      test: asClass(Test, { injector }),
+      testClassic: asClass(TestClassic, {
+        injector,
+        injectionMode: InjectionMode.CLASSIC
+      }),
+      test2: asClass(Test)
     })
 
     expect(container.cradle.test.value).toBe(42)
@@ -63,13 +63,13 @@ describe('local injections', function() {
   })
 
   it('supported by registerFunction', function() {
-    const container = createContainer().registerFunction({
-      test: [makeTest, { injector }],
-      testClassic: [
-        makeCLassicTest,
-        { injector, injectionMode: InjectionMode.CLASSIC }
-      ],
-      test2: makeTest
+    const container = createContainer().register({
+      test: asFunction(makeTest, { injector }),
+      testClassic: asFunction(makeCLassicTest, {
+        injector,
+        injectionMode: InjectionMode.CLASSIC
+      }),
+      test2: asFunction(makeTest)
     })
 
     expect(container.cradle.test.value).toBe(42)

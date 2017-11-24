@@ -4,8 +4,8 @@ module.exports = function() {
   const opts = { cwd: __dirname }
   return awilix
     .createContainer()
-    .registerValue({
-      conn: {}
+    .register({
+      conn: awilix.asValue({})
     })
     .loadModules(
       [

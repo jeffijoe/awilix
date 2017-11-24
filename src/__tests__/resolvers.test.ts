@@ -121,8 +121,8 @@ describe('registrations', function() {
     })
 
     it('resolves dependencies manually', function() {
-      container.registerClass({
-        testClass: TestClass
+      container.register({
+        testClass: asClass(TestClass)
       })
       const withDepsReg = asClass(WithDeps).classic()
       const result = withDepsReg.resolve(container)
@@ -131,8 +131,8 @@ describe('registrations', function() {
     })
 
     it('resolves single dependency as cradle', function() {
-      container.registerClass({
-        testClass: TestClass
+      container.register({
+        testClass: asClass(TestClass)
       })
       const reg = asClass(NeedsCradle).proxy()
       const result = reg.resolve(container)
@@ -141,9 +141,9 @@ describe('registrations', function() {
     })
 
     it('resolves multiple dependencies manually', function() {
-      container.registerClass({
-        testClass: TestClass,
-        needsCradle: NeedsCradle
+      container.register({
+        testClass: asClass(TestClass),
+        needsCradle: asClass(NeedsCradle)
       })
       const reg = asClass(MultipleDeps, {
         injectionMode: InjectionMode.CLASSIC
