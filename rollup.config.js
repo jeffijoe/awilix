@@ -1,4 +1,4 @@
-import typescript from 'rollup-plugin-typescript'
+import typescript from 'rollup-plugin-typescript2'
 import replace from 'rollup-plugin-replace'
 
 const comment = '/* removed in browser build */'
@@ -25,13 +25,14 @@ export default {
     // which also means node-only stuff like `path`, `util` and `glob`
     // will be shaken off.
     replace({
-      'loadModules,': comment,
+      'loadModules,':
+        'loadModules: () => { throw new Error("loadModules is not supported in the browser.") },',
       '[util.inspect.custom]: inspect,': comment,
       'name === util.inspect.custom || ': '',
       "export * from './list-modules'": comment,
       delimiters: ['', '']
     }),
-    typescript({ typescript: require('typescript') })
+    typescript({ check: false, cacheRoot: './node_modules/.rpt2' })
   ]
 }
 
