@@ -1,5 +1,9 @@
-import { EOL } from 'os'
 import { ResolutionStack } from './container'
+
+/**
+ * Newline.
+ */
+const EOL = '\n'
 
 /**
  * An extendable error class.
@@ -63,9 +67,7 @@ export class AwilixTypeError extends AwilixError {
     givenType: any
   ) {
     super(
-      `${funcDescription}: expected ${paramName} to be ${
-        expectedType
-      }, but got ${givenType}.`
+      `${funcDescription}: expected ${paramName} to be ${expectedType}, but got ${givenType}.`
     )
   }
 
