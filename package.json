@@ -1,29 +1,34 @@
 {
   "name": "awilix",
   "version": "3.0.0-rc.3",
-  "description": "Simple dependency injection container + helper utilities to facilitate wiring of modules",
+  "description":
+    "Simple dependency injection container + helper utilities to facilitate wiring of modules",
   "main": "lib/awilix.js",
+  "module": "lib/awilix.module.js",
+  "jsnext:main": "lib/awilix.module.js",
+  "browser": "lib/awilix.browser.js",
+  "umd:main": "lib/awilix.umd.js",
+  "react-native": "lib/awilix.module.js",
   "typings": "lib/awilix.d.ts",
   "engines": {
     "node": ">=6.0.0"
   },
   "scripts": {
-    "build": "rimraf lib && tsc -p tsconfig.build.json",
+    "build": "rimraf lib && tsc -p tsconfig.build.json && rollup -c",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "npm run check && jest",
     "test-watch": "npm run test -- --watch --reporter nyan",
-    "lint": "npm run check && tslint --project tsconfig.json --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",
+    "lint":
+      "npm run check && tslint --project tsconfig.json --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",
     "precommit": "lint-staged && npm test",
     "rollup": "rollup -c",
     "cover": "npm run test -- --coverage",
-    "coveralls": "npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "do-publish": "npm run build && npm run lint && npm run cover && npm publish"
+    "coveralls":
+      "npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "do-publish":
+      "npm run build && npm run lint && npm run cover && npm publish"
   },
-  "files": [
-    "lib",
-    "LICENSE.md",
-    "README.md"
-  ],
+  "files": ["lib", "LICENSE.md", "README.md"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jeffijoe/awilix.git"
@@ -82,15 +87,8 @@
     "mapCoverage": true,
     "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
     "testEnvironment": "node",
-    "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "__tests__"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
+    "coveragePathIgnorePatterns": ["/node_modules/", "__tests__"],
+    "moduleFileExtensions": ["ts", "tsx", "js"],
     "transform": {
       "^.+\\.(j|t)sx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     }
