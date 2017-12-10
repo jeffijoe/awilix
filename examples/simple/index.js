@@ -26,8 +26,8 @@ const classicalServiceFromCradle = container.cradle.classicalService
 const classicalService = container.resolve('classicalService')
 
 console.log(
-  'Resolved to the same instance:',
-  classicalService === classicalServiceFromCradle
+  'Resolved to the same type:',
+  classicalService.constructor === classicalServiceFromCradle.constructor
 )
 
 // This will return false because the default is to return a new instance
