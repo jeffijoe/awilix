@@ -71,7 +71,7 @@ yarn add awilix
 You can also use the [UMD](https://github.com/umdjs/umd) build from `unpkg`
 
 ```html
-<script src="https://unpkg.com/awilix/lib/awilix.umd.js">
+<script src="https://unpkg.com/awilix/lib/awilix.umd.js"/>
 <script>
 const container = Awilix.createContainer()
 </script>
