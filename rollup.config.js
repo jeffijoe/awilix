@@ -1,5 +1,7 @@
 import typescript from 'rollup-plugin-typescript2'
 import replace from 'rollup-plugin-replace'
+import commonjs from 'rollup-plugin-commonjs'
+import resolve from 'rollup-plugin-node-resolve'
 
 const comment = '/* removed in browser build */'
 const ignoredWarnings = ['UNUSED_EXTERNAL_IMPORT']
@@ -14,7 +16,7 @@ export default [
   // Build 1: ES6 modules for Node.
   {
     input: 'src/awilix.ts',
-    external: ['glob', 'path', 'util'],
+    external: ['glob', 'path', 'util', 'camel-case'],
     treeshake: { pureExternalModules: true },
     onwarn,
     output: [
@@ -51,10 +53,14 @@ export default [
           'loadModules: () => { throw new Error("loadModules is not supported in the browser.") },',
         '[util.inspect.custom]: inspect,': comment,
         'name === util.inspect.custom || ': '',
+        "const camelCase = require('camel-case')":
+          'const camelCase = null as any',
         "export * from './list-modules'": comment,
         delimiters: ['', '']
       }),
-      ts
+      ts,
+      resolve(),
+      commonjs()
     ]
   }
 ]
