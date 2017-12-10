@@ -1226,7 +1226,9 @@ container.dispose().then(() => {
 })
 ```
 
-# Using Awilix in the browser
+# Awilix is a Universal Module
+
+**As of v3**, Awilix ships with official support for browser environments!
 
 The package includes 4 flavors.
 
@@ -1237,11 +1239,11 @@ The package includes 4 flavors.
 * UMD, for dropping it into a script tag - `lib/awilix.umd.js`
 
 The `package.json` includes the proper fields for bundlers like Webpack, Rollup
-and Browserify to pick the correct version, so you should not have to do
-anything.
+and Browserify to pick the correct version, so you should not have to configure
+anything. 😎
 
-**Important**: the browser build does not support `loadModules` or
-`listModules`, because it depends on Node-specific packages.
+**Important**: the browser builds do not support `loadModules` or `listModules`,
+because they depend on Node-specific packages.
 
 # Contributing
 
