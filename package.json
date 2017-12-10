@@ -1,8 +1,7 @@
 {
   "name": "awilix",
   "version": "3.0.0-rc.3",
-  "description":
-    "Simple dependency injection container + helper utilities to facilitate wiring of modules",
+  "description": "Extremely powerful dependency injection container.",
   "main": "lib/awilix.js",
   "module": "lib/awilix.module.js",
   "jsnext:main": "lib/awilix.module.js",
@@ -21,7 +20,6 @@
     "lint":
       "npm run check && tslint --project tsconfig.json --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",
     "precommit": "lint-staged && npm test",
-    "rollup": "rollup -c",
     "cover": "npm run test -- --coverage",
     "coveralls":
       "npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
@@ -51,6 +49,9 @@
     "@types/jest": "^21.1.8",
     "@types/node": "^8.0.57",
     "@types/prettier": "^1.8.1",
+    "babel-jest": "^21.2.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
     "coveralls": "^3.0.0",
     "husky": "^0.14.3",
     "istanbul": "^0.4.5",
@@ -83,14 +84,29 @@
     "semi": false,
     "singleQuote": true
   },
+  "babel": {
+    "plugins": ["transform-runtime"],
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "browsers": "last 2 versions",
+            "node": "6.0.0"
+          }
+        }
+      ]
+    ]
+  },
   "jest": {
     "mapCoverage": true,
     "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
     "testEnvironment": "node",
-    "coveragePathIgnorePatterns": ["/node_modules/", "__tests__"],
+    "coveragePathIgnorePatterns": ["/node_modules/", "__tests__", "lib"],
     "moduleFileExtensions": ["ts", "tsx", "js"],
     "transform": {
-      "^.+\\.(j|t)sx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js",
+      "^.+\\.jsx?$": "<rootDir>/node_modules/babel-jest"
     }
   }
 }

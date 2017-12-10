@@ -6,7 +6,8 @@ const ignoredWarnings = ['UNUSED_EXTERNAL_IMPORT']
 
 const ts = typescript({
   cacheRoot: './node_modules/.rpt2',
-  typescript: require('typescript')
+  typescript: require('typescript'),
+  tsconfig: 'tsconfig.build.json'
 })
 
 export default [
