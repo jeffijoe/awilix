@@ -49,8 +49,8 @@ written in [TypeScript](http://typescriptlang.org). **Make IoC great again!**
     * [`container.createScope()`](#containercreatescope)
     * [`container.build()`](#containerbuild)
     * [`container.dispose()`](#containerdispose)
+* [Universal Module (Browser Support)](#universal-module-browser-support)
 * [Contributing](#contributing)
-* [Using Awilix in the browser](#using-awilix-in-the-browser)
 * [What's in a name?](#whats-in-a-name)
 * [Author](#author)
 
@@ -329,11 +329,10 @@ modes are available on `awilix.InjectionMode`
 
   ```js
   class UserService {
-    constructor (opts) {
+    constructor(opts) {
       this.emailService = opts.emailService
       this.logger = opts.logger
     }
-  }
   }
   ```
 
@@ -345,17 +344,18 @@ modes are available on `awilix.InjectionMode`
       this.emailService = emailService
       this.logger = logger
     }
+  }
   ```
 
 * `InjectionMode.CLASSIC`: Parses the function/constructor parameters, and
-  matches them with registrations in the container.
+  matches them with registrations in the container. _Don't use this if you
+  minify your code!_
   ```js
   class UserService {
-    constructor (emailService, logger) {
+    constructor(emailService, logger) {
       this.emailService = emailService
       this.logger = logger
     }
-  }
   }
   ```
 
@@ -411,6 +411,13 @@ Choose whichever fits your style.
 * `PROXY` is more descriptive, and makes for more readable tests; when unit
   testing your classes/functions without using Awilix, you don't have to worry
   about parameter ordering like you would with `CLASSIC`.
+* Performance-wise, `CLASSIC` is _slightly_ faster because it only reads the
+  dependencies from the constructor/function _once_ (when `asClass`/`asFunction`
+  is called), whereas accessing dependencies on the Proxy _may_ incur slight
+  overhead for each resolve.
+* **`CLASSIC` will not work when your code is minified!** It reads the function
+  signature to determine what dependencies to inject. Minifiers will usually
+  mangle these names.
 
 Here's an example outlining the testability points raised.
 
@@ -983,8 +990,8 @@ Args:
 * `opts.formatName`: Can be either `'camelCase'`, or a function that takes the
   current name as the first parameter and returns the new name. Default is to
   pass the name through as-is. The 2nd parameter is a full module descriptor.
-* `opts.resolverOptions`: An `object` passed to the resolvers. Used to configure the
-  lifetime, injection mode and more of the loaded modules.
+* `opts.resolverOptions`: An `object` passed to the resolvers. Used to configure
+  the lifetime, injection mode and more of the loaded modules.
 
 Example:
 
@@ -1226,7 +1233,7 @@ container.dispose().then(() => {
 })
 ```
 
-# Awilix is a Universal Module
+# Universal Module (Browser Support)
 
 **As of v3**, Awilix ships with official support for browser environments!
 
