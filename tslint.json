@@ -1,0 +1,14 @@
+{
+  "extends": ["tslint-config-standard", "tslint-config-prettier"],
+  "rules": {
+    "no-var-requires": false,
+    "trailing-comma": [false],
+    "ordered-imports": [false],
+    "member-access": false,
+    "only-arrow-functions": [false],
+    "object-literal-sort-keys": [false],
+    "max-classes-per-file": [false],
+    "no-string-literal": false,
+    "no-use-before-declare": false
+  }
+}

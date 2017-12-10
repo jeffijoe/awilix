@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": ["__tests__", "**/__tests__/*", "node_modules/*", "examples"],
+  "compilerOptions": {
+    "forceConsistentCasingInFileNames": false,
+    "baseUrl": "src"
+  }
+}

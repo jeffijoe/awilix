@@ -1,23 +1,20 @@
 {
+  "exclude": ["node_modules", "lib"],
+  "compileOnSave": false,
   "compilerOptions": {
-    "allowJs": true,
+    "outDir": "./lib",
+    "strict": true,
+    "strictNullChecks": true,
     "experimentalDecorators": true,
-    "module": "commonjs",
-    "outDir": "dist",
-    "sourceMap": false,
-    "target": "es6",
     "noImplicitAny": true,
-    "noImplicitThis": true,
-    "noImplicitReturns": true,
-    "strictNullChecks": true
-  },
-  "include": [
-    "test/**/*.ts"
-  ],
-  "exclude": [
-    "examples",
-    "lib",
-    "node_modules",
-    "**/.baseDir.ts"
-  ]
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "importHelpers": false,
+    "sourceMap": true,
+    "declaration": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["es6", "es7"]
+  }
 }

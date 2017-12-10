@@ -1,9 +1,9 @@
-import { asClass, createContainer, ResolutionMode } from '../../../'
+import { asClass, createContainer, InjectionMode } from '../../../'
 import { TestService } from './services/testService'
 import { DependentService } from './services/dependentService'
 
 const container = createContainer({
-  resolutionMode: ResolutionMode.CLASSIC
+  injectionMode: InjectionMode.CLASSIC
 })
 
 container.register({

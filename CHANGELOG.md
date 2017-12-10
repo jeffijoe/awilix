@@ -1,5 +1,181 @@
 # Awilix Changelog
 
+# v3.0.0
+
+A lot of cool stuff has made it into version 3, and a few things were broken in
+the process. I have done my best to list everything here.
+
+## ✨ New Features
+
+With v3 comes a few new cool features.
+
+### Disposer support ([#48](https://github.com/jeffijoe/awilix/issues/48))
+
+This has been a very requested feature. The idea is you can tell Awilix how to
+dispose of a dependency—for example, to close a database connection—when calling
+`container.dispose()`.
+
+```js
+const pg = require('pg')
+const { createContainer, asFunction } = require('awilix')
+const container = createContainer()
+  .register({
+    pool: (
+      asFunction(() => new pg.Pool({ ... }))
+        .singleton()
+        .disposer((pool) => pool.end())
+    )
+  })
+
+// .. later, but only if a `pool` was ever created
+container.dispose().then(() => {
+  console.log('One disposable connection.. disposed! Huehehehe')
+})
+```
+
+### `alias` resolver ([#55](https://github.com/jeffijoe/awilix/issues/55))
+
+This new resolver lets you alias a registration. This is best illustrated with
+an example:
+
+```js
+const { alias, asValue, createContainer } = require('awilix')
+
+const container = createContainer()
+
+container.register({
+  laughingOutLoud: asValue('hahahahaha'),
+  lol: alias('laughingOutLoud')
+})
+
+container.resolve('lol') // 'hahahahaha'
+```
+
+It's essentially the exact same as calling
+`container.resolve('laughingOutLoad')`, but `lol` might be easier to type out in
+your constructors. 😎
+
+### Default values in constructors/functions ([#46](https://github.com/jeffijoe/awilix/issues/46))
+
+This is a pretty _small_ feature but was the most difficult to land, mainly
+because I had to write a smarter
+[parser](https://github.com/jeffijoe/awilix/tree/master/src/param-parser.ts) and
+[tokenizer](https://github.com/jeffijoe/awilix/tree/master/src/function-tokenizer.ts),
+not to mention they are now way better at skipping over code. Check out
+[the tests](https://github.com/jeffijoe/awilix/tree/master/src/__tests__/param-parser.test.ts#L149),
+it's pretty wild.
+
+```js
+class MyClass {
+  constructor(db, timeout = 1000) { /*...*/ }
+}
+
+container.register({
+  db: asFunction(..)
+})
+
+// Look! No errors!! :D
+container.build(MyClass) instanceof MyClass // true
+```
+
+### Official support for running in the browser ([#69](https://github.com/jeffijoe/awilix/issues/69))
+
+Awilix now ships with 4 module flavors: CommonJS (same old), ES Modules for
+Node, ES Modules for the Browser and UMD.
+
+Please see the
+[Universal Module](https://github.com/jeffijoe/awilix#universal-module-browser-support)
+section in the readme for details.
+
+## 🚨 Known breaking changes
+
+The following is a list of known breaking changes. If there's any I've missed
+feel free to let me know.
+
+### The entire library is now written in TypeScript! ([#49](https://github.com/jeffijoe/awilix/issues/49))
+
+This means a bunch of interfaces have been renamed and made more correct. If
+you're a TypeScript user, this is great news for you. 😄
+
+### `ResolutionMode` is now `InjectionMode` ([#57](https://github.com/jeffijoe/awilix/issues/57))
+
+* `ResolutionMode.js` renamed to `injection-mode.ts`
+* `ResolutionMode` renamed to `InjectionMode`
+
+### "Registrations" are now "Resolvers" ([#51](https://github.com/jeffijoe/awilix/issues/51))
+
+The terminology is now "you _register_ a **resolver** to a **name**".
+
+* TypeScript interfaces renamed
+* `REGISTRATION` symbol renamed to `RESOLVER`
+* `registrations.js` renamed to `resolvers.ts`
+* `registrationOptions` in `loadModules` renamed to `resolverOptions`
+
+### `registerClass`, `registerFunction` and `registerValue` removed ([#60](https://github.com/jeffijoe/awilix/issues/60))
+
+This was done to simplify the API surface, and also simplifies the
+implementation greatly (less overloads). You should be using
+`container.register` with `asClass`, `asFunction` and `asValue` instead.
+
+### Resolver configuration chaining API is now immutable ([#62](https://github.com/jeffijoe/awilix/issues/62))
+
+This simplifies the TypeScript types and is also considered a good practice. All
+configuration functions rely on `this`, meaning you **should not do**:
+
+```js
+// I don't know why you would, but DONT DO THIS!
+const singleton = asClass(MyClass).singleton
+singleton()
+```
+
+However, this also means you can now "split" a resolver to configure it
+differently. For example:
+
+```js
+class GenericSender {
+  constructor(transport) {
+    this.transport = transport
+  }
+
+  send() {
+    if (this.transport === 'email') {
+      // ... etc
+    }
+  }
+
+  dispose() { /*...*/ }
+}
+
+const base = asClass(GenericSender).scoped().disposer((g) => g.dispose())
+const emailSender = base.inject(() => ({ transport: 'email' })
+const pushSender = base.inject(() => ({ transport: 'push' })
+
+container.register({
+  emailSender,
+  pushSender
+})
+```
+
+### Removed `AwilixNotAFunctionError` in favor of a generic `AwilixTypeError` ([#52](https://github.com/jeffijoe/awilix/issues/52))
+
+This _should_ not have an impact on userland code but I thought I'd mention it.
+
+There are a bunch of internal uses of this error, so I thought it made sense to
+consolidate them into one error type.
+
+## 👀 Other cool changes
+
+* Code is now formatted with Prettier
+* Awilix is now using `husky` + `lint-staged` to lint, format and test every
+  commit to ensure top code quality.
+* Switched to Jest from Mocha
+* Switched from eslint to tslint
+* Rewrote the function parameter parser, it is now much better at correctly
+  skipping over default value expressions to reach the next parameter.
+* Most (if not all) of the code is now documented and should be readable.
+
+---
+
 ## 2.12.0
 
 * Deprecated the `registerFunction`, `registerValue` and `registerClass`
@@ -65,10 +241,10 @@
 
 ## 2.7.0
 
-* **[BREAKING]**: Custom `isClass` function that will treat `function Capital ()
-  {}` as a class due to the capital first letter of the function name. This is
-  to improve compatibility with Babel's ES5 code generator, and is also a pretty
-  commonly accepted standard naming convention.
+* **[BREAKING]**: Custom `isClass` function that will treat
+  `function Capital () {}` as a class due to the capital first letter of the
+  function name. This is to improve compatibility with Babel's ES5 code
+  generator, and is also a pretty commonly accepted standard naming convention.
   ([#28](https://github.com/jeffijoe/awilix/issues/28))
 * **[NEW]**: Added support for passing in a `register` function to
   `loadModules`. ([#28](https://github.com/jeffijoe/awilix/issues/28))
@@ -94,11 +270,11 @@
 
 * **[NEW]**: Implemented per-module locals injection
   ([#24](https://github.com/jeffijoe/awilix/issues/24)).
-* Fixed issue where passing a `Lifetime` like `.registerFunction('name', func,
-  Lifetime.SCOPED)` didn't work.
+* Fixed issue where passing a `Lifetime` like
+  `.registerFunction('name', func, Lifetime.SCOPED)` didn't work.
 * Documented `asClass`, `asValue` and `asFunction`.
-* **[FIXED]**: nasty options leaking when using `registerClass/Function({ test1:
-  [Test1, { }], test2: [Test2, { }] })`.
+* **[FIXED]**: nasty options leaking when using
+  `registerClass/Function({ test1: [Test1, { }], test2: [Test2, { }] })`.
 
 ## 2.4.0
 
@@ -119,8 +295,9 @@
   a value, because the `register` function would think it was the
   value-options-array pattern when it shouldn't be. **This change is breaking in
   the sense that it solves the unexpected behavior, but it breaks existing
-  registrations that would register arrays by using `registerValue({ name: [[1,
-  2]] })` (multi-dimensional array to work around the pre-2.3.0 behavior)**
+  registrations that would register arrays by using
+  `registerValue({ name: [[1, 2]] })` (multi-dimensional array to work around
+  the pre-2.3.0 behavior)**
 * [chore]: Updated packages.
 
 ## 2.2.6
