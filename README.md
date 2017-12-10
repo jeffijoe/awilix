@@ -50,16 +50,32 @@ written in [TypeScript](http://typescriptlang.org). **Make IoC great again!**
     * [`container.build()`](#containerbuild)
     * [`container.dispose()`](#containerdispose)
 * [Contributing](#contributing)
+* [Using Awilix in the browser](#using-awilix-in-the-browser)
 * [What's in a name?](#whats-in-a-name)
 * [Author](#author)
 
 # Installation
 
+Install with `npm`
+
 ```
 npm install awilix --save
 ```
 
-_Requires Node v6 or above_
+Or `yarn`
+
+```
+yarn add awilix
+```
+
+You can also use the [UMD](https://github.com/umdjs/umd) build from `unpkg`
+
+```html
+<script src="https://unpkg.com/awilix/lib/awilix.umd.js">
+<script>
+const container = Awilix.createContainer()
+</script>
+```
 
 # Usage
 
@@ -430,8 +446,8 @@ Imagine this app structure:
 * `app`
   * `services`
     * `UserService.js` - exports an ES6 `class UserService {}`
-    * `emailService.js` - exports a factory function `function
-      makeEmailService() {}`
+    * `emailService.js` - exports a factory function
+      `function makeEmailService() {}`
   * `repositories`
     * `UserRepository.js` - exports an ES6 `class UserRepository {}`
   * `index.js` - our main script
@@ -818,14 +834,14 @@ console.log(result)
 // << [{ name: 'someService', path: 'path/to/services/someService.js' }]
 ```
 
-**Important**: `listModules` relies on `glob` and therefore does not with
-bundlers like Webpack, Rollup and Browserify.
+**Important**: `listModules` relies on `glob` and therefore is not supported
+with bundlers like Webpack, Rollup and Browserify.
 
 ## `AwilixResolutionError`
 
 This is a special error thrown when Awilix is unable to resolve all dependencies
-(due to missing or cyclic dependencies). You can catch this error and use `err
-instanceof AwilixResolutionError` if you wish. It will tell you what
+(due to missing or cyclic dependencies). You can catch this error and use
+`err instanceof AwilixResolutionError` if you wish. It will tell you what
 dependencies it could not find or which ones caused a cycle.
 
 ## The `AwilixContainer` object
@@ -956,9 +972,9 @@ Given an array of globs, registers the modules and returns the container.
 Awilix will use `require` on the loaded modules, and register the
 default-exported function or class as the name of the file.
 
-**This uses a heuristic to determine if it's a constructor function (`function
-Database() {...}`); if the function name starts with a capital letter, it will
-be `new`ed!**
+**This uses a heuristic to determine if it's a constructor function
+(`function Database() {...}`); if the function name starts with a capital
+letter, it will be `new`ed!**
 
 Args:
 
@@ -1029,6 +1045,9 @@ container.cradle.emailService.sendEmail('test@test.com', 'waddup')
 
 The `['glob', Lifetime.SCOPED]` syntax is a shorthand for passing in resolver
 options like so: `['glob', { lifetime: Lifetime.SCOPED }]`
+
+**Important**: `loadModules` depends on `glob` and is therefore not supported in
+module bundlers like Webpack, Rollup and Browserify.
 
 ### `container.createScope()`
 
@@ -1207,10 +1226,29 @@ container.dispose().then(() => {
 })
 ```
 
+# Awilix is a Universal Module
+
+**As of v3**, Awilix ships with official support for browser environments!
+
+The package includes 4 flavors.
+
+* CommonJS, the good ol' Node format - `lib/awilix.js`
+* ES Modules, for use with module bundlers **in Node** - `lib/awilix.module.js`
+* ES Modules, for use with module bundlers **in the browser** -
+  `lib/awilix.browser.js`
+* UMD, for dropping it into a script tag - `lib/awilix.umd.js`
+
+The `package.json` includes the proper fields for bundlers like Webpack, Rollup
+and Browserify to pick the correct version, so you should not have to configure
+anything. 😎
+
+**Important**: the browser builds do not support `loadModules` or `listModules`,
+because they depend on Node-specific packages.
+
 # Contributing
 
-Clone repo, run `npm i` to install all dependencies, and then `npm run test --
---watchAll` to start writing code.
+Clone repo, run `npm i` to install all dependencies, and then
+`npm run test -- --watchAll` to start writing code.
 
 For code coverage, run `npm run cover`.
 

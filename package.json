@@ -1,28 +1,32 @@
 {
   "name": "awilix",
   "version": "3.0.0-rc.3",
-  "description": "Simple dependency injection container + helper utilities to facilitate wiring of modules",
+  "description": "Extremely powerful dependency injection container.",
   "main": "lib/awilix.js",
+  "module": "lib/awilix.module.js",
+  "jsnext:main": "lib/awilix.module.js",
+  "browser": "lib/awilix.browser.js",
+  "umd:main": "lib/awilix.umd.js",
+  "react-native": "lib/awilix.module.js",
   "typings": "lib/awilix.d.ts",
   "engines": {
     "node": ">=6.0.0"
   },
   "scripts": {
-    "build": "rimraf lib && tsc -p tsconfig.build.json",
+    "build": "rimraf lib && tsc -p tsconfig.build.json && rollup -c",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "npm run check && jest",
     "test-watch": "npm run test -- --watch --reporter nyan",
-    "lint": "npm run check && tslint --project tsconfig.json --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",
+    "lint":
+      "npm run check && tslint --project tsconfig.json --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",
     "precommit": "lint-staged && npm test",
     "cover": "npm run test -- --coverage",
-    "coveralls": "npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "do-publish": "npm run build && npm run lint && npm run cover && npm publish"
+    "coveralls":
+      "npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "do-publish":
+      "npm run build && npm run lint && npm run cover && npm publish"
   },
-  "files": [
-    "lib",
-    "LICENSE.md",
-    "README.md"
-  ],
+  "files": ["lib", "LICENSE.md", "README.md"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jeffijoe/awilix.git"
@@ -43,25 +47,31 @@
   "devDependencies": {
     "@types/glob": "^5.0.33",
     "@types/jest": "^21.1.8",
-    "@types/node": "^8.0.53",
-    "@types/prettier": "^1.8.0",
+    "@types/node": "^8.0.57",
+    "@types/prettier": "^1.8.1",
+    "babel-jest": "^21.2.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
     "coveralls": "^3.0.0",
     "husky": "^0.14.3",
     "istanbul": "^0.4.5",
     "jest": "^21.2.1",
-    "lint-staged": "^5.0.0",
-    "prettier": "^1.8.2",
+    "lint-staged": "^6.0.0",
+    "prettier": "^1.9.1",
+    "rollup": "^0.52.1",
+    "rollup-plugin-replace": "^2.0.0",
+    "rollup-plugin-typescript2": "^0.8.4",
     "smid": "^0.1.1",
-    "ts-jest": "^21.2.3",
+    "ts-jest": "^21.2.4",
     "tslint": "^5.8.0",
     "tslint-config-prettier": "^1.6.0",
     "tslint-config-standard": "^7.0.0",
-    "typescript": "^2.6.1"
+    "typescript": "^2.6.2"
   },
   "dependencies": {
     "camel-case": "^3.0.0",
     "glob": "^7.1.2",
-    "tslib": "^1.8.0"
+    "tslib": "^1.8.1"
   },
   "lint-staged": {
     "*.ts": [
@@ -74,21 +84,29 @@
     "semi": false,
     "singleQuote": true
   },
+  "babel": {
+    "plugins": ["transform-runtime"],
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "browsers": "last 2 versions",
+            "node": "6.0.0"
+          }
+        }
+      ]
+    ]
+  },
   "jest": {
     "mapCoverage": true,
     "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
     "testEnvironment": "node",
-    "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "__tests__"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
+    "coveragePathIgnorePatterns": ["/node_modules/", "__tests__", "lib"],
+    "moduleFileExtensions": ["ts", "tsx", "js"],
     "transform": {
-      "^.+\\.(j|t)sx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js",
+      "^.+\\.jsx?$": "<rootDir>/node_modules/babel-jest"
     }
   }
 }

@@ -238,9 +238,7 @@ export function createContainer(
        */
       set: (target, name, value) => {
         throw new Error(
-          `Attempted setting property "${
-            name
-          }" on container cradle - this is not allowed.`
+          `Attempted setting property "${name}" on container cradle - this is not allowed.`
         )
       },
 
