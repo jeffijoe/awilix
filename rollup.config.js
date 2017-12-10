@@ -6,11 +6,11 @@ import resolve from 'rollup-plugin-node-resolve'
 const comment = '/* removed in browser build */'
 const ignoredWarnings = ['UNUSED_EXTERNAL_IMPORT']
 
-const ts = typescript({
+const tsOpts = {
   cacheRoot: './node_modules/.rpt2',
   typescript: require('typescript'),
   tsconfig: 'tsconfig.build.json'
-})
+}
 
 export default [
   // Build 1: ES6 modules for Node.
@@ -25,7 +25,7 @@ export default [
         format: 'es'
       }
     ],
-    plugins: [ts]
+    plugins: [typescript(tsOpts)]
   },
   // Build 2: ES modules for browser builds.
   {
@@ -58,7 +58,14 @@ export default [
         "export * from './list-modules'": comment,
         delimiters: ['', '']
       }),
-      ts,
+      typescript({
+        ...tsOpts,
+        tsconfigOverride: {
+          compilerOptions: {
+            target: 'es5'
+          }
+        }
+      }),
       resolve(),
       commonjs()
     ]

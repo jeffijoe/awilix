@@ -16,16 +16,17 @@
     "build": "rimraf lib && tsc -p tsconfig.build.json && rollup -c",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "npm run check && jest",
-    "lint":
-      "npm run check && tslint --project tsconfig.json --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",
+    "lint": "npm run check && tslint --project tsconfig.json --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",
     "precommit": "lint-staged && npm test",
     "cover": "npm run test -- --coverage",
-    "coveralls":
-      "npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "do-publish":
-      "npm run build && npm run lint && npm run cover && npm publish"
+    "coveralls": "npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "do-publish": "npm run build && npm run lint && npm run cover && npm publish"
   },
-  "files": ["lib", "LICENSE.md", "README.md"],
+  "files": [
+    "lib",
+    "LICENSE.md",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jeffijoe/awilix.git"
@@ -71,8 +72,7 @@
   },
   "dependencies": {
     "camel-case": "^3.0.0",
-    "glob": "^7.1.2",
-    "tslib": "^1.8.1"
+    "glob": "^7.1.2"
   },
   "lint-staged": {
     "*.ts": [
@@ -86,7 +86,9 @@
     "singleQuote": true
   },
   "babel": {
-    "plugins": ["transform-runtime"],
+    "plugins": [
+      "transform-runtime"
+    ],
     "presets": [
       [
         "env",
@@ -103,8 +105,16 @@
     "mapCoverage": true,
     "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
     "testEnvironment": "node",
-    "coveragePathIgnorePatterns": ["/node_modules/", "__tests__", "lib"],
-    "moduleFileExtensions": ["ts", "tsx", "js"],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "__tests__",
+      "lib"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
     "transform": {
       "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js",
       "^.+\\.jsx?$": "<rootDir>/node_modules/babel-jest"
