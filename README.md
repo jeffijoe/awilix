@@ -115,7 +115,7 @@ class UserController {
 container.register({
   // Here we are telling Awilix how to resolve a
   // userController: by instantiating a class.
-  userController: asClass(UserController)
+  userController: awilix.asClass(UserController)
 })
 
 // Let's try with a factory function.
@@ -132,7 +132,7 @@ const makeUserService = ({ db }) => {
 container.register({
   // the `userService` is resolved by
   // invoking the function.
-  userService: asFunction(makeUserService)
+  userService: awilix.asFunction(makeUserService)
 })
 
 // Alright, now we need a database.
@@ -165,8 +165,8 @@ container.register({
   // We can register things as-is - this is not just
   // limited to strings and numbers, it can be anything,
   // really - they will be passed through directly.
-  connectionString: asValue(process.env.CONN_STR),
-  timeout: asValue(1000)
+  connectionString: awilix.asValue(process.env.CONN_STR),
+  timeout: awilix.asValue(1000)
 })
 
 // We have now wired everything up!
