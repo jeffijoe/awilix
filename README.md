@@ -807,7 +807,7 @@ Resolves the dependency specified.
 ```js
 container.register({
   val: asValue(123),
-  aliasVal: aliasTo('val)
+  aliasVal: aliasTo('val')
 })
 
 container.resolve('aliasVal') === container.resolve('val')
