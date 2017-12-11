@@ -877,10 +877,6 @@ for public use but if you find it useful, go ahead but tread carefully.
 
 Each scope has it's own cache, and checks the cache of it's ancestors.
 
-### `container.options`
-
-Options passed to `createContainer` are stored here.
-
 ```js
 let counter = 1
 container.register({
@@ -892,6 +888,18 @@ container.cradle.count === 1
 
 container.cache.delete('count')
 container.cradle.count === 2
+```
+
+### `container.options`
+
+Options passed to `createContainer` are stored here.
+
+```js
+const container = createContainer({
+  injectionMode: InjectionMode.CLASSIC
+})
+
+console.log(container.options.injectionMode) // 'CLASSIC'
 ```
 
 ### `container.resolve()`
