@@ -197,7 +197,7 @@ export function asClass<T = {}>(
 
   // A function to handle object construction for us, as to make the generateResolve more reusable
   const newClass = function newClass() {
-    return new Type(...(arguments as any))
+    return Reflect.construct(Type, arguments)
   }
 
   const resolve = generateResolve(newClass, Type.prototype.constructor)
