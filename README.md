@@ -1260,6 +1260,15 @@ anything. 😎
 **Important**: the browser builds do not support `loadModules` or `listModules`,
 because they depend on Node-specific packages.
 
+**Also important**: due to using `Proxy` + various `Reflect` methods, Awilix is only _supposed_ to work in:
+
+* Chrome >= 49
+* Firefox >= 18
+* Edge >= 12
+* Opera >= 36
+* Safari >= 10
+* Internet Explorer is not supported
+
 # Contributing
 
 Clone repo, run `npm i` to install all dependencies, and then
