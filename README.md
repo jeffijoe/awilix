@@ -6,7 +6,6 @@
 [![devDependency Status](https://img.shields.io/david/dev/jeffijoe/awilix.svg?maxAge=1000)](https://david-dm.org/jeffijoe/awilix)
 [![Build Status](https://img.shields.io/travis/jeffijoe/awilix.svg?maxAge=1000)](https://travis-ci.org/jeffijoe/awilix)
 [![Coveralls](https://img.shields.io/coveralls/jeffijoe/awilix.svg?maxAge=1000)](https://coveralls.io/github/jeffijoe/awilix)
-[![Code Climate](https://img.shields.io/codeclimate/github/jeffijoe/awilix.svg?maxAge=1000)](https://codeclimate.com/github/jeffijoe/awilix)
 [![npm](https://img.shields.io/npm/dt/awilix.svg?maxAge=1000)](https://www.npmjs.com/package/awilix)
 [![npm](https://img.shields.io/npm/l/awilix.svg?maxAge=1000)](https://github.com/jeffijoe/awilix/blob/master/LICENSE.md)
 [![node](https://img.shields.io/node/v/awilix.svg?maxAge=1000)](https://www.npmjs.com/package/awilix)
