@@ -1,3 +1,7 @@
+# v3.0.3
+
+* Adjust Rollup config to use latest [config format](https://gist.github.com/Rich-Harris/d472c50732dab03efeb37472b08a3f32)
+
 # v3.0.2
 
 * Updated packages, fix an internal typing issue as a result of updated typings.

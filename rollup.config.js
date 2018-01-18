@@ -29,17 +29,18 @@ export default [
   },
   // Build 2: ES modules for browser builds.
   {
-    name: 'Awilix',
     input: 'src/awilix.ts',
     external: ['glob', 'path', 'util'],
     treeshake: { pureExternalModules: true },
     onwarn,
     output: [
       {
+        name: 'Awilix',
         file: 'lib/awilix.browser.js',
         format: 'es'
       },
       {
+        name: 'Awilix',
         file: 'lib/awilix.umd.js',
         format: 'umd'
       }
