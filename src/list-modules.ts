@@ -60,7 +60,7 @@ function _listModules(
   const result = opts.glob!(globPattern, { cwd: opts.cwd })
   const mapped = result.map(p => ({
     name: nameExpr.exec(path.basename(p))![1],
-    path: path.resolve(opts!.cwd, p),
+    path: path.resolve(opts!.cwd!, p),
     opts: patternOpts
   }))
   return mapped

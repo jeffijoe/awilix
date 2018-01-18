@@ -1,3 +1,7 @@
+# v3.0.2
+
+* Updated packages, fix an internal typing issue as a result of updated typings.
+
 # v3.0.1
 
 * Use `Reflect.construct()` instead of `new` internally; fixes TS transpilation issue.
