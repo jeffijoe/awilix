@@ -9,7 +9,13 @@ const ignoredWarnings = ['UNUSED_EXTERNAL_IMPORT']
 const tsOpts = {
   cacheRoot: './node_modules/.rpt2',
   typescript: require('typescript'),
-  tsconfig: 'tsconfig.build.json'
+  tsconfig: 'tsconfig.build.json',
+  tsconfigOverride: {
+    compilerOptions: {
+      // Don't emit declarations, that's done by the regular build.
+      declaration: false
+    }
+  }
 }
 
 export default [
@@ -59,14 +65,16 @@ export default [
         "export * from './list-modules'": comment,
         delimiters: ['', '']
       }),
-      typescript({
-        ...tsOpts,
-        tsconfigOverride: {
-          compilerOptions: {
-            target: 'es5'
+      typescript(
+        Object.assign({}, tsOpts, {
+          tsconfigOverride: {
+            compilerOptions: {
+              target: 'es5',
+              declaration: false
+            }
           }
-        }
-      }),
+        })
+      ),
       resolve(),
       commonjs()
     ]

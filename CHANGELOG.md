@@ -1,3 +1,7 @@
+# v3.0.4
+
+* Fix [#76](https://github.com/jeffijoe/awilix/issues/76): don't overwrite declarations when building with Rollup.
+
 # v3.0.3
 
 * Adjust Rollup config to use latest [config format](https://gist.github.com/Rich-Harris/d472c50732dab03efeb37472b08a3f32)
