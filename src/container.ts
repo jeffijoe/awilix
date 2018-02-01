@@ -279,7 +279,8 @@ export function createContainer(
     resolve,
     dispose,
     [util.inspect.custom]: inspect,
-    [ROLL_UP_REGISTRATIONS]: rollUpRegistrations,
+    // tslint:disable-next-line
+    [ROLL_UP_REGISTRATIONS!]: rollUpRegistrations,
     get registrations() {
       return rollUpRegistrations()
     }

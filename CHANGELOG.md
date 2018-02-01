@@ -1,3 +1,9 @@
+# v3.0.5
+
+* Updated dependencies
+* Fix TS 2.7 compilation issue
+* Fix the `GlobWithOptions` type to include `LifetimeType`
+
 # v3.0.4
 
 * Fix [#76](https://github.com/jeffijoe/awilix/issues/76): don't overwrite declarations when building with Rollup.

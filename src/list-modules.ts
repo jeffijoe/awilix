@@ -2,6 +2,7 @@ import * as glob from 'glob'
 import * as path from 'path'
 import { flatten } from './utils'
 import { ResolverOptions } from './resolvers'
+import { LifetimeType } from './awilix'
 
 /**
  * The options when invoking listModules().
@@ -26,7 +27,9 @@ export interface ModuleDescriptor {
 /**
  * A glob pattern with associated registration options.
  */
-export type GlobWithOptions = [string] | [string, ResolverOptions<any>]
+export type GlobWithOptions =
+  | [string]
+  | [string, ResolverOptions<any> | LifetimeType]
 
 // Regex to extract the module name.
 const nameExpr = /(.*)\..*/i

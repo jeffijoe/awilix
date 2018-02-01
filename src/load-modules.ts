@@ -180,7 +180,7 @@ function registerDescriptor(
     ...moduleDescriptorOpts
   }
 
-  const reg = regOpts.register
+  const reg: Function = regOpts.register
     ? regOpts.register
     : isClass(moduleDescriptor.value) ? asClass : asFunction
 
