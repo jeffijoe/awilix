@@ -32,6 +32,10 @@ console.log(
 
 // This will return false because the default is to return a new instance
 // when resolving.
+console.log(
+  'Resolved to the same instance:',
+  classicalService === classicalServiceFromCradle
+)
 
 // Let's do something!
 classicalService.actAllCool().then(r => {
