@@ -1,3 +1,7 @@
+# v3.0.6
+
+* Update `container.cradle` typing to be `any` ([#83](https://github.com/jeffijoe/awilix/issues/83), [Ackos95](https://github.com/Ackos95))
+
 # v3.0.5
 
 * Updated dependencies
