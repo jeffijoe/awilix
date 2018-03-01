@@ -30,7 +30,7 @@ export interface AwilixContainer {
    * The proxy injected when using `PROXY` injection mode.
    * Can be used as-is.
    */
-  readonly cradle: { [key: string]: any } & Iterable<string>
+  readonly cradle: any
   /**
    * Getter for the rolled up registrations that merges the container family tree.
    */
