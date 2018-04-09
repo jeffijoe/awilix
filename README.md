@@ -447,6 +447,11 @@ const db = database({
 When you have created your container, registering 100's of classes can get
 boring. You can automate this by using `loadModules`.
 
+> **Important**: auto-loading looks at a file's **default export**, which can be:
+> * `module.exports = ...`
+> * `module.exports.default = ...`
+> * `export default ...`
+
 Imagine this app structure:
 
 * `app`
@@ -458,7 +463,7 @@ Imagine this app structure:
     * `UserRepository.js` - exports an ES6 `class UserRepository {}`
   * `index.js` - our main script
 
-In our main script we would do the following
+In our main script we would do the following:
 
 ```js
 const awilix = require('awilix')
