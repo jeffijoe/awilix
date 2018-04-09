@@ -1,6 +1,6 @@
 {
   "name": "awilix",
-  "version": "3.0.6",
+  "version": "3.0.7",
   "description": "Extremely powerful dependency injection container.",
   "main": "lib/awilix.js",
   "module": "lib/awilix.module.js",
@@ -16,24 +16,22 @@
     "build": "rimraf lib && tsc -p tsconfig.build.json && rollup -c",
     "check": "tsc -p tsconfig.json --noEmit --pretty",
     "test": "npm run check && jest",
-    "lint":
-      "npm run check && tslint --project tsconfig.json --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",
+    "lint": "npm run check && tslint --project tsconfig.json --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",
     "precommit": "lint-staged && npm test",
     "cover": "npm run test -- --coverage",
-    "coveralls":
-      "npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "coveralls": "npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "publish:pre": "npm run lint && npm run build && npm run cover",
     "publish:post": "npm publish && git push --follow-tags",
-    "release:prerelease":
-      "npm run publish:pre && npm version prerelease && npm run publish:post",
-    "release:patch":
-      "npm run publish:pre && npm version patch && npm run publish:post",
-    "release:minor":
-      "npm run publish:pre && npm version minor && npm run publish:post",
-    "release:major":
-      "npm run publish:pre && npm version major && npm run publish:post"
+    "release:prerelease": "npm run publish:pre && npm version prerelease && npm run publish:post",
+    "release:patch": "npm run publish:pre && npm version patch && npm run publish:post",
+    "release:minor": "npm run publish:pre && npm version minor && npm run publish:post",
+    "release:major": "npm run publish:pre && npm version major && npm run publish:post"
   },
-  "files": ["lib", "LICENSE.md", "README.md"],
+  "files": [
+    "lib",
+    "LICENSE.md",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jeffijoe/awilix.git"
@@ -93,7 +91,9 @@
     "singleQuote": true
   },
   "babel": {
-    "plugins": ["transform-runtime"],
+    "plugins": [
+      "transform-runtime"
+    ],
     "presets": [
       [
         "env",
@@ -109,8 +109,16 @@
   "jest": {
     "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
     "testEnvironment": "node",
-    "coveragePathIgnorePatterns": ["/node_modules/", "__tests__", "lib"],
-    "moduleFileExtensions": ["ts", "tsx", "js"],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "__tests__",
+      "lib"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
     "transform": {
       "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js",
       "^.+\\.jsx?$": "<rootDir>/node_modules/babel-jest"
