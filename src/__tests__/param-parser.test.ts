@@ -201,4 +201,74 @@ describe('parseParameterList', function() {
       { name: 'a', optional: false }
     ])
   })
+
+  it('skips line comments', () => {
+    const cls = `
+class UserController {
+  // We are using constructor injection.
+  constructor(userService) {
+      // Save a reference to our dependency.
+      this.userService = userService;
+  }
+
+  // imagine ctx is our HTTP request context...
+  getUser(ctx) {
+      return this.userService.getUser(ctx.params.id)
+  }
+}
+    `
+
+    expect(parseParameterList(cls)).toEqual([
+      { name: 'userService', optional: false }
+    ])
+  })
+
+  it('skips block comments', () => {
+    const cls = `
+class UserController {
+  /*
+    We are using constructor injection.
+  */
+  constructor(userService) {
+      // Save a reference to our dependency.
+      this.userService = userService;
+  }
+
+  // imagine ctx is our HTTP request context...
+  getUser(ctx) {
+      return this.userService.getUser(ctx.params.id)
+  }
+}
+    `
+
+    expect(parseParameterList(cls)).toEqual([
+      { name: 'userService', optional: false }
+    ])
+  })
+
+  it('does not get confused when referencing constructor elsewhere', () => {
+    const cls = `
+    class UserController {
+      @decorator(MyThing.prototype.constructor)
+      someField
+
+      /*
+        We are using constructor injection.
+      */
+      constructor(userService) {
+          // Save a reference to our dependency.
+          this.userService = userService;
+      }
+
+      // imagine ctx is our HTTP request context...
+      getUser(ctx) {
+          return this.userService.getUser(ctx.params.id)
+      }
+    }
+        `
+
+    expect(parseParameterList(cls)).toEqual([
+      { name: 'userService', optional: false }
+    ])
+  })
 })

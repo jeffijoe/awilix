@@ -84,6 +84,21 @@ export function createTokenizer(source: string) {
           // We need to know that there's a default value so we can
           // skip it if it does not exist when resolving.
           return (type = ch)
+        case '/':
+          pos++
+          const nextCh = source.charAt(pos)
+          if (nextCh === '/') {
+            skipUntil(c => c === '\n')
+            pos++
+          }
+          if (nextCh === '*') {
+            skipUntil(c => {
+              const closing = source.charAt(pos + 1)
+              return c === '*' && closing === '/'
+            })
+            pos++
+          }
+          continue
         default:
           // Scans an identifier.
           if (isIdentifierStart(ch)) {
@@ -223,7 +238,7 @@ export function createTokenizer(source: string) {
  * @param  {string}  ch
  * @return {Boolean}
  */
-function isWhiteSpace(ch: string) {
+function isWhiteSpace(ch: string): boolean {
   switch (ch) {
     case '\r':
     case '\n':
@@ -238,7 +253,7 @@ function isWhiteSpace(ch: string) {
  * @param  {string}  ch
  * @return {Boolean}
  */
-function isStringQuote(ch: string) {
+function isStringQuote(ch: string): boolean {
   switch (ch) {
     case "'":
     case '"':
@@ -248,8 +263,11 @@ function isStringQuote(ch: string) {
   return false
 }
 
+// NOTE: I've added the `.` character so that member expression paths
+// are seen as identifiers. This is so we don't get a constructor token for
+// stuff like `MyClass.prototype.constructor()`
 const IDENT_START_EXPR = /^[_$a-zA-Z\xA0-\uFFFF]$/
-const IDENT_PART_EXPR = /^[_$a-zA-Z0-9\xA0-\uFFFF]$/
+const IDENT_PART_EXPR = /^[._$a-zA-Z0-9\xA0-\uFFFF]$/
 
 /**
  * Determines if the character is a valid JS identifier start character.

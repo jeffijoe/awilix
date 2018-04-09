@@ -124,8 +124,9 @@ export function parseParameterList(source: string): Array<Parameter> {
   /* istanbul ignore next */
   function unexpected() {
     return new SyntaxError(
-      `Parsing parameter list, did not expect ${t.type} token${t.value &&
-        ` (${t.value})`}`
+      `Parsing parameter list, did not expect ${t.type} token${
+        t.value ? ` (${t.value})` : ''
+      }`
     )
   }
 }

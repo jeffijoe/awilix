@@ -449,7 +449,7 @@ describe('container', function() {
         c1: asClass(Repo)
       })
 
-      expect(Array.from(container.cradle as any)).toEqual([
+      expect(Array.from(container.cradle)).toEqual([
         'val1',
         'val2',
         'fn1',

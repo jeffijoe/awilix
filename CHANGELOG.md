@@ -1,3 +1,9 @@
+# v3.0.7
+
+* Skip code comments in parser ([#87](https://github.com/jeffijoe/awilix/issues/87))
+* Make the parser smarter by including full member expression paths so we get less false positives
+  when scanning for the constructor token.
+
 # v3.0.6
 
 * Update `container.cradle` typing to be `any` ([#83](https://github.com/jeffijoe/awilix/issues/83), [Ackos95](https://github.com/Ackos95))
