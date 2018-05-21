@@ -1,3 +1,8 @@
+# v3.0.8
+
+* Add support for parsing async and generator functions; these no longer break the parser. ([#90](https://github.com/jeffijoe/awilix/issues/90))
+* Update dependencies.
+
 # v3.0.7
 
 * Skip code comments in parser ([#87](https://github.com/jeffijoe/awilix/issues/87))

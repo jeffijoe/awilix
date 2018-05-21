@@ -7,6 +7,7 @@ export type TokenType =
   | ')'
   | ','
   | '='
+  | '*'
   | 'function'
   | 'class'
   | 'EOF'
@@ -74,6 +75,9 @@ export function createTokenizer(source: string) {
         case ')':
           pos++
           parenRight++
+          return (type = ch)
+        case '*':
+          pos++
           return (type = ch)
         case ',':
           pos++

@@ -271,4 +271,57 @@ class UserController {
       { name: 'userService', optional: false }
     ])
   })
+
+  it('skips async keyword', () => {
+    expect(parseParameterList(`async function (first, second) {}`)).toEqual([
+      {
+        name: 'first',
+        optional: false
+      },
+      {
+        name: 'second',
+        optional: false
+      }
+    ])
+    expect(parseParameterList(`async (first, second) => {}`)).toEqual([
+      {
+        name: 'first',
+        optional: false
+      },
+      {
+        name: 'second',
+        optional: false
+      }
+    ])
+    expect(parseParameterList(`async () => {}`)).toEqual([])
+    expect(parseParameterList(`async => {}`)).toEqual([
+      {
+        name: 'async',
+        optional: false
+      }
+    ])
+  })
+
+  it('skips generator star', () => {
+    expect(parseParameterList(`async function* (first, second) {}`)).toEqual([
+      {
+        name: 'first',
+        optional: false
+      },
+      {
+        name: 'second',
+        optional: false
+      }
+    ])
+    expect(parseParameterList(`async function *(first, second) {}`)).toEqual([
+      {
+        name: 'first',
+        optional: false
+      },
+      {
+        name: 'second',
+        optional: false
+      }
+    ])
+  })
 })

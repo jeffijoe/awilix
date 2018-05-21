@@ -37,8 +37,9 @@ export function parseParameterList(source: string): Array<Parameter> {
         nextToken()
         break
       case 'function':
-        if (nextToken().type === 'ident') {
-          // This is the function name. Skip it.
+        const next = nextToken()
+        if (next.type === 'ident' || next.type === '*') {
+          // This is the function name or a generator star. Skip it.
           nextToken()
         }
         break
@@ -52,7 +53,17 @@ export function parseParameterList(source: string): Array<Parameter> {
       case 'ident':
         // Likely a paren-less arrow function
         // which can have no default args.
-        params.push({ name: t.value!, optional: false })
+        const param = { name: t.value!, optional: false }
+        if (t.value === 'async') {
+          // Given it's the very first token, we can assume it's an async function,
+          // so skip the async keyword if the next token is not an equals sign, in which
+          // case it is a single-arg arrow func.
+          const next = nextToken()
+          if (next && next.type !== '=') {
+            break
+          }
+        }
+        params.push(param)
         return params
       /* istanbul ignore next */
       default:
