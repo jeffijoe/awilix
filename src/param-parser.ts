@@ -56,7 +56,8 @@ export function parseParameterList(source: string): Array<Parameter> {
         const param = { name: t.value!, optional: false }
         if (t.value === 'async') {
           // Given it's the very first token, we can assume it's an async function,
-          // so skip the async keyword.
+          // so skip the async keyword if the next token is not an equals sign, in which
+          // case it is a single-arg arrow func.
           const next = nextToken()
           if (next && next.type !== '=') {
             break
