@@ -63,6 +63,7 @@ export default [
         "const camelCase = require('camel-case')":
           'const camelCase = null as any',
         "export * from './list-modules'": comment,
+        "import * as util from 'util'": '',
         delimiters: ['', '']
       }),
       typescript(
@@ -70,7 +71,8 @@ export default [
           tsconfigOverride: {
             compilerOptions: {
               target: 'es5',
-              declaration: false
+              declaration: false,
+              noUnusedLocals: false
             }
           }
         })
