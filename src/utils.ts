@@ -35,10 +35,10 @@ export function flatten<T>(array: Array<Array<T>>): Array<T> {
 export function nameValueToObject(
   name: string | symbol | object,
   value?: any
-): { [key: string]: any } {
+): Record<string | symbol, any> {
   let obj = name
   if (typeof obj === 'string' || typeof obj === 'symbol') {
-    obj = { [name as string]: value }
+    return { [name as any]: value }
   }
 
   return obj

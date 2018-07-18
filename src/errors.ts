@@ -133,7 +133,7 @@ export class AwilixResolutionError extends AwilixError {
     resolutionStack = resolutionStack.slice()
     resolutionStack.push(name)
     const resolutionPathString = resolutionStack.join(' -> ')
-    let msg = `Could not resolve '${name}'.`
+    let msg = `Could not resolve '${name as any}'.`
     if (message) {
       msg += ` ${message}`
     }

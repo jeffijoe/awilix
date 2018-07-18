@@ -7,8 +7,8 @@
     "member-access": false,
     "only-arrow-functions": [false],
     "object-literal-sort-keys": [false],
-    "max-classes-per-file": [false],
     "no-string-literal": false,
-    "no-use-before-declare": false
+    "no-use-before-declare": false,
+    "no-unused-variable": false
   }
 }
