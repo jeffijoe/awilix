@@ -1,10 +1,5 @@
 // This is largely for testing, but import what we need
-import {
-  AwilixContainer,
-  createContainer,
-  asClass,
-  InjectionMode
-} from '../../../src/awilix'
+import { createContainer, asClass, InjectionMode } from '../../../src/awilix'
 import TestService from './services/TestService'
 import DependentService from './services/DependentService'
 

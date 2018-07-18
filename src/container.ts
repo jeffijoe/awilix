@@ -153,9 +153,7 @@ export interface ContainerOptions {
 /**
  * Contains a hash of registrations where the name is the key.
  */
-export interface RegistrationHash {
-  [key: string]: Resolver<any>
-}
+export type RegistrationHash = Record<string | symbol | number, Resolver<any>>
 
 /**
  * Resolution stack.
@@ -236,9 +234,9 @@ export function createContainer(
        * @param  {object} target
        * @param  {string} name
        */
-      set: (target, name, value) => {
+      set: (_target, name, value) => {
         throw new Error(
-          `Attempted setting property "${name}" on container cradle - this is not allowed.`
+          `Attempted setting property "${name as any}" on container cradle - this is not allowed.`
         )
       },
 
@@ -267,7 +265,7 @@ export function createContainer(
   )
 
   // The container being exposed.
-  const container: AwilixContainer = {
+  const container: AwilixContainer & { [ROLL_UP_REGISTRATIONS]: Function } = {
     options,
     cradle: cradle as any,
     inspect,
@@ -360,8 +358,8 @@ export function createContainer(
     const obj = nameValueToObject(arg1, arg2)
     const keys = [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)]
     for (const key of keys) {
-      const value = obj[key] as Resolver<any>
-      registrations[key] = value
+      const value = obj[key as any] as Resolver<any>
+      registrations[key as any] = value
     }
     // Invalidates the computed registrations.
     computedRegistrations = null
@@ -379,13 +377,16 @@ export function createContainer(
   /**
    * Resolves the registration with the given name.
    *
-   * @param  {string} name
+   * @param {string | symbol} name
    * The name of the registration to resolve.
    *
-   * @return {*}
+   * @param {ResolveOptions} resolveOpts
+   * The resolve options.
+   *
+   * @return {any}
    * Whatever was resolved.
    */
-  function resolve(name: string | symbol, resolveOpts?: ResolveOptions) {
+  function resolve(name: string | symbol, resolveOpts?: ResolveOptions): any {
     resolveOpts = resolveOpts || {}
     if (!resolutionStack.length) {
       // Root resolve busts the registration cache.
@@ -394,7 +395,7 @@ export function createContainer(
 
     try {
       // Grab the registration by name.
-      const resolver = computedRegistrations![name]
+      const resolver = computedRegistrations![name as any]
       if (resolutionStack.indexOf(name) > -1) {
         throw new AwilixResolutionError(
           name,
