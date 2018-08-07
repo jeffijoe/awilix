@@ -473,6 +473,14 @@ const container = awilix.createContainer()
 // Load our modules!
 container.loadModules([
   // Globs!
+  [
+    // To have different resolverOptions for specific modules.
+    'models/**/*.js',
+    {
+      register: awilix.asValue,
+      lifetime: Lifetime.SINGLETON
+    }
+  ],
   'services/**/*.js',
   'repositories/**/*.js'
 ], {
