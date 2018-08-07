@@ -474,7 +474,7 @@ const container = awilix.createContainer()
 container.loadModules([
   // Globs!
   [
-    // to have different resolverOptions against single module.
+    // To have different resolverOptions for specific modules.
     'models/**/*.js',
     {
       register: awilix.asValue,
