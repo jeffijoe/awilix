@@ -1,6 +1,6 @@
 {
   "name": "awilix",
-  "version": "3.0.9",
+  "version": "4.0.0",
   "description": "Extremely powerful dependency injection container.",
   "main": "lib/awilix.js",
   "module": "lib/awilix.module.js",
