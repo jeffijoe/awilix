@@ -1099,11 +1099,10 @@ scope1.cradle.counterValue === 1
 scope2.cradle.counterValue === 2
 scope2.cradle.counterValue === 2
 
-scope1Child.cradle.counterValue === 1
+scope1Child.cradle.counterValue === 3
 ```
 
-**Be careful!** If a scope's _parent_ has already resolved a scoped value, that
-value will be returned.
+A *Scope* maintains it's own cache of `Lifetime.SCOPED` registrations, meaning it **does not use the parent's cache** for scoped registrations.
 
 ```js
 let counter = 1

@@ -265,7 +265,9 @@ export function createContainer(
   )
 
   // The container being exposed.
-  const container: AwilixContainer & { [ROLL_UP_REGISTRATIONS]: Function } = {
+  const container: AwilixContainer & {
+    [ROLL_UP_REGISTRATIONS]: typeof rollUpRegistrations
+  } = {
     options,
     cradle: cradle as any,
     inspect,
@@ -456,21 +458,16 @@ export function createContainer(
           // When a registration is not found, we travel up
           // the family tree until we find one that is cached.
 
-          // Note: The first element in the family tree is this container.
-          for (const c of familyTree) {
-            cached = c.cache.get(name)
-            if (cached !== undefined) {
-              // We found one!
-              resolved = cached.value
-              break
-            }
+          cached = container.cache.get(name)
+          if (cached !== undefined) {
+            // We found one!
+            resolved = cached.value
+            break
           }
 
           // If we still have not found one, we need to resolve and cache it.
-          if (cached === undefined) {
-            resolved = resolver.resolve(container)
-            container.cache.set(name, { resolver, value: resolved })
-          }
+          resolved = resolver.resolve(container)
+          container.cache.set(name, { resolver, value: resolved })
           break
         default:
           throw new AwilixResolutionError(

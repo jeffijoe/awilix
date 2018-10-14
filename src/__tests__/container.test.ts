@@ -236,7 +236,7 @@ describe('container', function() {
       expect(scope2.cradle.transient).toBe(4)
     })
 
-    it('uses parents cache when scoped', function() {
+    it('does not use parents cache when scoped', function() {
       const container = createContainer()
       let scopedCounter = 1
       container.register({
@@ -248,12 +248,33 @@ describe('container', function() {
       expect(scope1.cradle.scoped).toBe(1)
 
       const scope2 = scope1.createScope()
-      expect(scope2.cradle.scoped).toBe(1)
-      expect(scope2.cradle.scoped).toBe(1)
+      expect(scope2.cradle.scoped).toBe(2)
+      expect(scope2.cradle.scoped).toBe(2)
 
-      expect(container.cradle.scoped).toBe(2)
-      expect(container.cradle.scoped).toBe(2)
-      expect(scope2.cradle.scoped).toBe(1)
+      expect(container.cradle.scoped).toBe(3)
+      expect(container.cradle.scoped).toBe(3)
+      expect(scope2.cradle.scoped).toBe(2)
+      expect(scope1.cradle.scoped).toBe(1)
+    })
+
+    it('supports the readme example of scopes', () => {
+      // Increments the counter every time it is resolved.
+      const container = createContainer()
+      let counter = 1
+      container.register({
+        counterValue: asFunction(() => counter++).scoped()
+      })
+      const scope1 = container.createScope()
+      const scope2 = container.createScope()
+
+      const scope1Child = scope1.createScope()
+
+      expect(scope1.cradle.counterValue === 1).toBe(true)
+      expect(scope1.cradle.counterValue === 1).toBe(true)
+      expect(scope2.cradle.counterValue === 2).toBe(true)
+      expect(scope2.cradle.counterValue === 2).toBe(true)
+
+      expect(scope1Child.cradle.counterValue === 3).toBe(true)
     })
 
     it('supports nested scopes', function() {
@@ -273,7 +294,7 @@ describe('container', function() {
       expect(scope1.cradle.counterValue).toBe(1)
       expect(scope2.cradle.counterValue).toBe(2)
       expect(scope2.cradle.counterValue).toBe(2)
-      expect(scope1Child.cradle.counterValue).toBe(1)
+      expect(scope1Child.cradle.counterValue).toBe(3)
     })
 
     it('resolves dependencies in scope', function() {

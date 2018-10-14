@@ -1,3 +1,54 @@
+# v4.0.0
+
+- **[BREAKING CHANGE]**: Scoped containers no longer use the parent's cache for `Lifetime.SCOPED` registrations [(#92)](https://github.com/jeffijoe/awilix/issues/92)
+- Change the `"react-native"` module path to use `awilix.browser.js` [(#104)](https://github.com/jeffijoe/awilix/issues/104)
+- Update packages
+
+Awilix v4 corrects a misunderstanding in how the scoped caching should work. For full context, please see [issue #92](https://github.com/jeffijoe/awilix/issues/92), but the TL:DR version is that prior `v4`, scoped registrations (`Lifetime.SCOPED` / `.scoped()`) would travel up the family tree and use a parent's cached resolution if there is any. If there is not, the resolving scope would cache it locally.
+
+While this was by design, it was not very useful, and it was designed based on a misunderstanding of how [Unity's `HierarchicalLifetimeManager` works](https://github.com/unitycontainer/unity/wiki/Unity-Lifetime-Managers#hierarchicallifetimemanager). In `v4`, `Lifetime.SCOPED` now works the same way: _the container performing the resolution also caches it, not looking outside itself for cached resolutions of `Lifetime.SCOPED` registrations_.
+
+A prime use case for this is having a scoped logger, as well as a root logger. This is actually what prompted this change.
+
+```js
+// logger.js
+export class Logger {
+  constructor(loggerPrefix = 'root') {
+    this.prefix = loggerPrefix
+  }
+
+  log(message) {
+    console.log(`[${this.prefix}]: ${message}`)
+  }
+}
+```
+
+```js
+// app.js
+import { Logger } from './logger'
+import { createContainer, asClass, InjectionMode } from 'awilix'
+
+const container = createContainer({
+  injectionMode: InjectionMode.CLASSIC
+}).register({
+  logger: asClass(Logger).scoped()
+})
+
+const scope = container.createScope()
+scope.register({
+  loggerPrefix: asValue('dope scope')
+})
+
+const rootLogger = container.resolve('logger')
+const scopeLogger = scope.resolve('logger')
+
+rootLogger.log('yo!') // [root]: yo!
+scopeLogger.log('wassup!') // [dope scope]: wassup!
+```
+
+Prior to `v4`, the `scopeLogger` would have resolved to the same as `rootLogger` because it would ask it's ancestors if they had a `logger` cached.
+Now it works as you would probably expect it to: it keeps it's own cache.
+
 # v3.0.9
 
 - Updated packages.
