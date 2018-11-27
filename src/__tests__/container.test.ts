@@ -409,6 +409,19 @@ describe('container', function() {
       expect(err.message).toContain('first -> second')
       expect(err.message).toContain('lol')
     })
+
+    it('behaves properly when the cradle is returned from an async function', async function() {
+      const container = createContainer()
+      container.register({ value: asValue(42) })
+
+      async function example() {
+        return container.cradle
+      }
+
+      const { value } = await example()
+
+      expect(value).toBe(42)
+    })
   })
 
   describe('loadModules', function() {
