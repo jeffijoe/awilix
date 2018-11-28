@@ -359,10 +359,12 @@ export function createContainer(
   function register(arg1: any, arg2: any): AwilixContainer {
     const obj = nameValueToObject(arg1, arg2)
     const keys = [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)]
+
     for (const key of keys) {
       const value = obj[key as any] as Resolver<any>
       registrations[key as any] = value
     }
+
     // Invalidates the computed registrations.
     computedRegistrations = null
     return container
@@ -416,6 +418,12 @@ export function createContainer(
         // throw an error (issue #7).
         if (name === util.inspect.custom || name === 'inspect') {
           return inspectCradle
+        }
+
+        // Edge case: Promise unwrapping will look for a "then" property and attempt to call it.
+        // Return undefined so that we won't cause a resolution error. (issue #109)
+        if (name === 'then') {
+          return undefined
         }
 
         // When using `Array.from` or spreading the cradle, this will
