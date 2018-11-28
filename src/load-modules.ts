@@ -183,8 +183,8 @@ function registerDescriptor(
   const reg: Function = regOpts.register
     ? regOpts.register
     : isClass(moduleDescriptor.value)
-      ? asClass
-      : asFunction
+    ? asClass
+    : asFunction
 
   container.register(name, reg(moduleDescriptor.value, regOpts))
 }

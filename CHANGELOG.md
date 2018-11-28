@@ -1,3 +1,8 @@
+# v4.0.1
+
+- Support returning the `cradle` in `async` functions ([#109](https://github.com/jeffijoe/awilix/issues/109), [andyfleming](https://github.com/andyfleming)))
+- Update packages
+
 # v4.0.0
 
 - **[BREAKING CHANGE]**: Scoped containers no longer use the parent's cache for `Lifetime.SCOPED` registrations [(#92)](https://github.com/jeffijoe/awilix/issues/92)

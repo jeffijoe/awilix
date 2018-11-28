@@ -288,10 +288,10 @@ export function createContainer(
 
   // Track the family tree.
   const familyTree: Array<AwilixContainer> = parentContainer
-    ? [container].concat((parentContainer as any)[FAMILY_TREE])
-    : [container]
+      ? [container].concat((parentContainer as any)[FAMILY_TREE])
+      : [container]
 
-  // Save it so we can access it from a scoped container.
+    // Save it so we can access it from a scoped container.
   ;(container as any)[FAMILY_TREE] = familyTree
 
   // We need a reference to the root container,
