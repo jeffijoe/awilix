@@ -1282,7 +1282,7 @@ because they depend on Node-specific packages.
 
 # Contributing
 
-Clone repo, run `npm i` to install all dependencies, and then
+Clone repo, run `npm i` to install all dependencies, run `npm run build` to create an initial build, and then
 `npm run test -- --watchAll` to start writing code.
 
 For code coverage, run `npm run cover`.
