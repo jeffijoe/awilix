@@ -451,6 +451,24 @@ boring. You can automate this by using `loadModules`.
 > * `module.exports = ...`
 > * `module.exports.default = ...`
 > * `export default ...`
+> 
+> To load a non-default export, set the `[RESOLVER]` property on it:
+> 
+> ```js
+> const { RESOLVER } = require('awilix');
+> export class ServiceClass {
+> }
+> ServiceClass[RESOLVER] = {}
+> ```
+>
+> Or even more concise using TypeScript:
+> ```typescript
+> // TypeScript
+> import { RESOLVER } from 'awilix'
+> export class ServiceClass {
+>   static [RESOLVER] = {}
+> }
+> ```
 
 Imagine this app structure:
 

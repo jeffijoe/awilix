@@ -15,12 +15,17 @@ describe('loadModules', function() {
     const container = createContainer()
 
     class SomeClass {}
+    class SomeNonDefaultClass {
+      static [RESOLVER] = {}
+    }
 
     const modules: any = {
       'nope.js': undefined,
       'standard.js': jest.fn(() => 42),
       'default.js': { default: jest.fn(() => 1337) },
-      'someClass.js': SomeClass
+      'someClass.js': SomeClass,
+      'someNonDefaultClass.js': { SomeNonDefaultClass },
+      'nopeClass.js': { SomeClass }
     }
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
@@ -31,10 +36,13 @@ describe('loadModules', function() {
 
     const result = loadModules(deps, 'anything')
     expect(result).toEqual({ loadedModules: moduleLookupResult })
-    expect(Object.keys(container.registrations).length).toBe(3)
+    expect(Object.keys(container.registrations).length).toBe(4)
     expect(container.resolve('standard')).toBe(42)
     expect(container.resolve('default')).toBe(1337)
     expect(container.resolve('someClass')).toBeInstanceOf(SomeClass)
+    expect(container.resolve('someNonDefaultClass')).toBeInstanceOf(
+      SomeNonDefaultClass
+    )
   })
 
   it('uses built-in formatter when given a formatName as a string', function() {

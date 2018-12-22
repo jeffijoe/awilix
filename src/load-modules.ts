@@ -97,26 +97,37 @@ export function loadModules(
       return undefined
     }
 
-    if (!isFunction(loaded)) {
-      if (loaded.default && isFunction(loaded.default)) {
-        // ES6 default export
+    if (isFunction(loaded)) {
+      return {
+        name: m.name,
+        path: m.path,
+        value: loaded,
+        opts: m.opts
+      }
+    }
+
+    if (loaded.default && isFunction(loaded.default)) {
+      // ES6 default export
+      return {
+        name: m.name,
+        path: m.path,
+        value: loaded.default,
+        opts: m.opts
+      }
+    }
+
+    for (const key of Object.keys(loaded)) {
+      if (isFunction(loaded[key]) && RESOLVER in loaded[key]) {
         return {
           name: m.name,
           path: m.path,
-          value: loaded.default,
+          value: loaded[key],
           opts: m.opts
         }
       }
-
-      return undefined
     }
 
-    return {
-      name: m.name,
-      path: m.path,
-      value: loaded,
-      opts: m.opts
-    }
+    return undefined
   })
   result.filter(x => x).forEach(registerDescriptor.bind(null, container, opts))
   return {
