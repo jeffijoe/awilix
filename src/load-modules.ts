@@ -98,6 +98,7 @@ export function loadModules(
     }
 
     if (isFunction(loaded)) {
+      // for module.exports = ...
       return {
         name: m.name,
         path: m.path,
@@ -116,6 +117,8 @@ export function loadModules(
       }
     }
 
+    // no export found so far - loop through non-default exports, but require the RESOLVER property set for
+    // it to be a valid service module export.
     for (const key of Object.keys(loaded)) {
       if (isFunction(loaded[key]) && RESOLVER in loaded[key]) {
         return {
