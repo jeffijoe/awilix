@@ -1,6 +1,7 @@
 # v4.1.0
 
 - Extract dependencies from base class when no parameters were extracted. This works for ES6 classes as well as the old-school prototype approach to inheritance. Uses `Object.getPrototypeOf`. ([#107](https://github.com/jeffijoe/awilix/issues/107))
+- Allow auto-loading of named exports that expose a `RESOLVER` symbol prop. ([#115](https://github.com/jeffijoe/awilix/pull/115))
 
 # v4.0.1
 
