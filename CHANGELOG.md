@@ -1,3 +1,7 @@
+# v4.1.0
+
+- Extract dependencies from base class when no parameters were extracted. This works for ES6 classes as well as the old-school prototype approach to inheritance. Uses `Object.getPrototypeOf`. ([#107](https://github.com/jeffijoe/awilix/issues/107))
+
 # v4.0.1
 
 - Support returning the `cradle` in `async` functions ([#109](https://github.com/jeffijoe/awilix/issues/109), [andyfleming](https://github.com/andyfleming)))

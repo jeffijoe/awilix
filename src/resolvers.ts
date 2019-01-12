@@ -1,7 +1,7 @@
 import { Lifetime, LifetimeType } from './lifetime'
 import { InjectionMode, InjectionModeType } from './injection-mode'
 import { isFunction, uniq } from './utils'
-import { parseParameterList } from './param-parser'
+import { parseParameterList, Parameter } from './param-parser'
 import { AwilixTypeError } from './errors'
 import { AwilixContainer, FunctionReturning, ResolveOptions } from './container'
 
@@ -200,7 +200,7 @@ export function asClass<T = {}>(
     return Reflect.construct(Type, arguments)
   }
 
-  const resolve = generateResolve(newClass, Type.prototype.constructor)
+  const resolve = generateResolve(newClass, Type)
   return createDisposableResolver(
     createBuildResolver({
       ...opts,
@@ -437,15 +437,18 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
     dependencyParseTarget = fn
   }
 
-  // Try to resolve the dependencies
-  const dependencies = parseParameterList(dependencyParseTarget.toString())
+  // Parse out the dependencies
+  // NOTE: we do this regardless of whether PROXY is used or not,
+  // because if this fails, we want it to fail early (at startup) rather
+  // than at resolution time.
+  const dependencies = parseDependencies(dependencyParseTarget)
 
   // Use a regular function instead of an arrow function to facilitate binding to the resolver.
   return function resolve(
     this: BuildResolver<any>,
     container: AwilixContainer
   ) {
-    // Because the container holds a global reolutionMode we need to determine it in the proper order or precedence:
+    // Because the container holds a global reolutionMode we need to determine it in the proper order of precedence:
     // resolver -> container -> default value
     const injectionMode =
       this.injectionMode ||
@@ -476,4 +479,23 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
 
     return fn()
   }
+}
+
+/**
+ * Parses the dependencies from the given function.
+ * If it's a class and has an extends clause, and no reported dependencies, attempt to parse it's super constructor.
+ */
+function parseDependencies(fn: Function): Array<Parameter> {
+  const result = parseParameterList(fn.toString())
+  if (result.length > 0) {
+    return result
+  }
+
+  const parent = Object.getPrototypeOf(fn)
+  if (typeof parent === 'function' && parent !== Function.prototype) {
+    // Try to parse the parent
+    return parseDependencies(parent)
+  }
+
+  return result
 }
