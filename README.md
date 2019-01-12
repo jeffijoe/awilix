@@ -470,6 +470,11 @@ boring. You can automate this by using `loadModules`.
 > }
 > ```
 
+Note that **multiple** services can be registered per file, i.e. it is
+possible to have a file with a default export and named exports and for
+all of them to be loaded. The named exports do require the `RESOLVER`
+token to be recognized.
+
 Imagine this app structure:
 
 * `app`

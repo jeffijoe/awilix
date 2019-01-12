@@ -15,16 +15,60 @@ describe('loadModules', function() {
     const container = createContainer()
 
     class SomeClass {}
-    class SomeNonDefaultClass {
-      static [RESOLVER] = {}
-    }
 
     const modules: any = {
       'nope.js': undefined,
       'standard.js': jest.fn(() => 42),
       'default.js': { default: jest.fn(() => 1337) },
-      'someClass.js': SomeClass,
-      'someNonDefaultClass.js': { SomeNonDefaultClass },
+      'someClass.js': SomeClass
+    }
+    const moduleLookupResult = lookupResultFor(modules)
+    const deps = {
+      container,
+      listModules: jest.fn(() => moduleLookupResult),
+      require: jest.fn(path => modules[path])
+    }
+
+    const result = loadModules(deps, 'anything')
+    expect(result).toEqual({ loadedModules: moduleLookupResult })
+    expect(Object.keys(container.registrations).length).toBe(3)
+    expect(container.resolve('standard')).toBe(42)
+    expect(container.resolve('default')).toBe(1337)
+    expect(container.resolve('someClass')).toBeInstanceOf(SomeClass)
+  })
+
+  it('registers non-default export modules containing RESOLVER token with the container', function() {
+    const container = createContainer()
+
+    class SomeNonDefaultClass {
+      static [RESOLVER] = {}
+    }
+
+    const modules: any = {
+      'someIgnoredName.js': { SomeNonDefaultClass }
+    }
+    const moduleLookupResult = lookupResultFor(modules)
+    const deps = {
+      container,
+      listModules: jest.fn(() => moduleLookupResult),
+      require: jest.fn(path => modules[path])
+    }
+
+    const result = loadModules(deps, 'anything')
+    expect(result).toEqual({ loadedModules: moduleLookupResult })
+    expect(Object.keys(container.registrations).length).toBe(1)
+    // Note the capital first letter because the export key name is used instead of the filename
+    expect(container.resolve('SomeNonDefaultClass')).toBeInstanceOf(
+      SomeNonDefaultClass
+    )
+  })
+
+  it('does not register non-default modules without a RESOLVER token', function() {
+    const container = createContainer()
+
+    class SomeClass {}
+
+    const modules: any = {
       'nopeClass.js': { SomeClass }
     }
     const moduleLookupResult = lookupResultFor(modules)
@@ -36,12 +80,87 @@ describe('loadModules', function() {
 
     const result = loadModules(deps, 'anything')
     expect(result).toEqual({ loadedModules: moduleLookupResult })
-    expect(Object.keys(container.registrations).length).toBe(4)
-    expect(container.resolve('standard')).toBe(42)
-    expect(container.resolve('default')).toBe(1337)
-    expect(container.resolve('someClass')).toBeInstanceOf(SomeClass)
-    expect(container.resolve('someNonDefaultClass')).toBeInstanceOf(
+    expect(Object.keys(container.registrations).length).toBe(0)
+  })
+
+  it('registers multiple loaded modules from one file with the container', function() {
+    const container = createContainer()
+
+    class SomeClass {}
+    class SomeNonDefaultClass {
+      static [RESOLVER] = {}
+    }
+    class SomeNamedNonDefaultClass {
+      static [RESOLVER] = {
+        name: 'nameOverride'
+      }
+    }
+
+    const modules: any = {
+      'mixedFile.js': {
+        default: SomeClass,
+        nonDefault: SomeNonDefaultClass,
+        namedNonDefault: SomeNamedNonDefaultClass
+      }
+    }
+    const moduleLookupResult = lookupResultFor(modules)
+    const deps = {
+      container,
+      listModules: jest.fn(() => moduleLookupResult),
+      require: jest.fn(path => modules[path])
+    }
+
+    const result = loadModules(deps, 'anything')
+    expect(result).toEqual({ loadedModules: moduleLookupResult })
+    expect(Object.keys(container.registrations).length).toBe(3)
+    expect(container.resolve('mixedFile')).toBeInstanceOf(SomeClass)
+    expect(container.resolve('nonDefault')).toBeInstanceOf(SomeNonDefaultClass)
+    expect(container.resolve('nameOverride')).toBeInstanceOf(
+      SomeNamedNonDefaultClass
+    )
+  })
+
+  it('registers only the last module with a certain name with the container', function() {
+    const container = createContainer()
+
+    class SomeClass {}
+    class SomeNonDefaultClass {
+      static [RESOLVER] = {}
+    }
+    class SomeNamedNonDefaultClass {
+      static [RESOLVER] = {
+        name: 'nameOverride'
+      }
+    }
+
+    const modules: any = {
+      'mixedFileOne.js': {
+        default: SomeClass,
+        nameOverride: SomeNonDefaultClass,
+        // this will override the above named export with its specified name
+        namedNonDefault: SomeNamedNonDefaultClass
+      },
+      'mixedFileTwo.js': {
+        // this will override the default export from mixedFileOne
+        mixedFileOne: SomeNonDefaultClass
+      }
+    }
+
+    const moduleLookupResult = lookupResultFor(modules)
+    const deps = {
+      container,
+      listModules: jest.fn(() => moduleLookupResult),
+      require: jest.fn(path => modules[path])
+    }
+
+    const result = loadModules(deps, 'anything')
+    expect(result).toEqual({ loadedModules: moduleLookupResult })
+    expect(Object.keys(container.registrations).length).toBe(2)
+    expect(container.resolve('mixedFileOne')).toBeInstanceOf(
       SomeNonDefaultClass
+    )
+    expect(container.resolve('nameOverride')).toBeInstanceOf(
+      SomeNamedNonDefaultClass
     )
   })
 
