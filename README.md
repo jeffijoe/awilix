@@ -451,6 +451,29 @@ boring. You can automate this by using `loadModules`.
 > * `module.exports = ...`
 > * `module.exports.default = ...`
 > * `export default ...`
+> 
+> To load a non-default export, set the `[RESOLVER]` property on it:
+> 
+> ```js
+> const { RESOLVER } = require('awilix');
+> export class ServiceClass {
+> }
+> ServiceClass[RESOLVER] = {}
+> ```
+>
+> Or even more concise using TypeScript:
+> ```typescript
+> // TypeScript
+> import { RESOLVER } from 'awilix'
+> export class ServiceClass {
+>   static [RESOLVER] = {}
+> }
+> ```
+
+Note that **multiple** services can be registered per file, i.e. it is
+possible to have a file with a default export and named exports and for
+all of them to be loaded. The named exports do require the `RESOLVER`
+token to be recognized.
 
 Imagine this app structure:
 

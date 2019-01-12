@@ -90,35 +90,68 @@ export function loadModules(
   const modules = dependencies.listModules(globPatterns, opts)
 
   const result = modules.map(m => {
+    const items: Array<{
+      name: string
+      path: string
+      opts: object
+      value: unknown
+    }> = []
+
     const loaded = dependencies.require(m.path)
 
     // Meh, it happens.
     if (!loaded) {
-      return undefined
+      return items
     }
 
-    if (!isFunction(loaded)) {
-      if (loaded.default && isFunction(loaded.default)) {
-        // ES6 default export
-        return {
-          name: m.name,
-          path: m.path,
-          value: loaded.default,
-          opts: m.opts
-        }
+    if (isFunction(loaded)) {
+      // for module.exports = ...
+      items.push({
+        name: m.name,
+        path: m.path,
+        value: loaded,
+        opts: m.opts
+      })
+
+      return items
+    }
+
+    if (loaded.default && isFunction(loaded.default)) {
+      // ES6 default export
+      items.push({
+        name: m.name,
+        path: m.path,
+        value: loaded.default,
+        opts: m.opts
+      })
+    }
+
+    // loop through non-default exports, but require the RESOLVER property set for
+    // it to be a valid service module export.
+    for (const key of Object.keys(loaded)) {
+      if (key === 'default') {
+        // default case handled separately due to its different name (file name)
+        continue
       }
 
-      return undefined
+      if (isFunction(loaded[key]) && RESOLVER in loaded[key]) {
+        items.push({
+          name: key,
+          path: m.path,
+          value: loaded[key],
+          opts: m.opts
+        })
+      }
     }
 
-    return {
-      name: m.name,
-      path: m.path,
-      value: loaded,
-      opts: m.opts
-    }
+    return items
   })
-  result.filter(x => x).forEach(registerDescriptor.bind(null, container, opts))
+
+  result
+    .reduce((acc, cur) => acc.concat(cur), [])
+    .filter(x => x)
+    .forEach(registerDescriptor.bind(null, container, opts))
+
   return {
     loadedModules: modules
   }
