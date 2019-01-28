@@ -79,6 +79,16 @@ export interface AwilixContainer {
    */
   resolve<T>(name: string | symbol, resolveOptions?: ResolveOptions): T
   /**
+   * Checks if the registration with the given name exists.
+   *
+   * @param {string | symbol} name
+   * The name of the registration to resolve.
+   *
+   * @return {boolean}
+   * Whether or not the registration exists.
+   */
+  has(name: string | symbol): boolean
+  /**
    * Given a resolver, class or function, builds it up and returns it.
    * Does not cache it, this means that any lifetime configured in case of passing
    * a resolver will not be used.
@@ -277,6 +287,7 @@ export function createContainer(
     register: register as any,
     build,
     resolve,
+    has,
     dispose,
     [util.inspect.custom]: inspect,
     // tslint:disable-next-line
@@ -490,6 +501,29 @@ export function createContainer(
     } catch (err) {
       // When we get an error we need to reset the stack.
       resolutionStack = []
+      throw err
+    }
+  }
+
+  /**
+   * Checks if the registration with the given name exists.
+   *
+   * @param {string | symbol} name
+   * The name of the registration to resolve.
+   *
+   * @return {boolean}
+   * Whether or not the registration exists.
+   */
+  function has(name: string | symbol): boolean {
+    try {
+      resolve(name)
+
+      return true
+    } catch (err) {
+      if (err instanceof AwilixResolutionError) {
+        return false
+      }
+
       throw err
     }
   }

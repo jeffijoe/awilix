@@ -103,6 +103,19 @@ describe('container', function() {
     })
   })
 
+  describe('has', function() {
+    it('returns true if the registration does exist', function() {
+      const container = createContainer()
+      container.register({ theValue: asValue('theValue') })
+
+      expect(container.has('theValue')).toBe(true)
+    })
+
+    it('returns false if the registration does not exist', function() {
+      expect(createContainer().has('theValue')).toBe(false)
+    })
+  })
+
   describe('resolve', function() {
     it('resolves the dependency graph and supports all resolvers', function() {
       class TestClass {
