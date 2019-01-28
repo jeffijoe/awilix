@@ -515,7 +515,7 @@ export function createContainer(
    * Whether or not the registration exists.
    */
   function has(name: string | symbol): boolean {
-    return name in registrations;
+    return name in rollUpRegistrations()
   }
 
   /**
