@@ -1,3 +1,7 @@
+# v4.2.0
+
+- Add `has` method to container to check for an existing registration ([#119](https://github.com/jeffijoe/awilix/pull/119), [faustbrian](https://github.com/faustbrian))
+
 # v4.1.0
 
 - Extract dependencies from base class when no parameters were extracted. This works for ES6 classes as well as the old-school prototype approach to inheritance. Uses `Object.getPrototypeOf`. ([#107](https://github.com/jeffijoe/awilix/issues/107))
