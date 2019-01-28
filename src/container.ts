@@ -515,17 +515,7 @@ export function createContainer(
    * Whether or not the registration exists.
    */
   function has(name: string | symbol): boolean {
-    try {
-      resolve(name)
-
-      return true
-    } catch (err) {
-      if (err instanceof AwilixResolutionError) {
-        return false
-      }
-
-      throw err
-    }
+    return name in registrations;
   }
 
   /**
