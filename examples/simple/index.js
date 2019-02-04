@@ -10,7 +10,8 @@ container.register('database', awilix.asValue('stuffs_db'))
 // Auto-load our services and our repositories.
 const opts = {
   // We want ClassicalService to be registered as classicalService.
-  formatName: 'camelCase'
+  formatName: 'camelCase',
+  cwd: __dirname
 }
 container.loadModules(
   [
