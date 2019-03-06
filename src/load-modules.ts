@@ -210,7 +210,8 @@ function registerDescriptor(
 
   const regOpts: BuildResolver<any> = {
     ...opts.resolverOptions,
-    ...moduleDescriptorOpts
+    ...moduleDescriptorOpts,
+    ...inlineConfig
   }
 
   const reg: Function = regOpts.register

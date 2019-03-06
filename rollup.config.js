@@ -13,7 +13,8 @@ const tsOpts = {
   tsconfigOverride: {
     compilerOptions: {
       // Don't emit declarations, that's done by the regular build.
-      declaration: false
+      declaration: false,
+      module: 'ESNext'
     }
   }
 }
@@ -72,7 +73,8 @@ export default [
             compilerOptions: {
               target: 'es5',
               declaration: false,
-              noUnusedLocals: false
+              noUnusedLocals: false,
+              module: 'ESNext'
             }
           }
         })

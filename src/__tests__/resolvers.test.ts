@@ -92,7 +92,7 @@ describe('registrations', function() {
 
     it('supports arrow functions', function() {
       const arrowWithParen = (dep: any) => dep
-      const arrowWithoutParen: ((arg: any) => any) = dep => dep
+      const arrowWithoutParen: (arg: any) => any = dep => dep
       container.register({
         withParen: asFunction(arrowWithParen).classic(),
         withoutParen: asFunction(arrowWithoutParen).classic(),

@@ -275,9 +275,7 @@ export function createContainer(
   )
 
   // The container being exposed.
-  const container: AwilixContainer & {
-    [ROLL_UP_REGISTRATIONS]: typeof rollUpRegistrations
-  } = {
+  const container = {
     options,
     cradle: cradle as any,
     inspect,
@@ -360,7 +358,7 @@ export function createContainer(
    * @return {object}
    * The scoped container.
    */
-  function createScope() {
+  function createScope(): AwilixContainer {
     return createContainer(options, container)
   }
 
