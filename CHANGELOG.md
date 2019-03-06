@@ -1,3 +1,8 @@
+# v4.2.1
+
+- Fix `register` option in `loadModules` ([#124](https://github.com/jeffijoe/awilix/issues/124))
+- Update packages
+
 # v4.2.0
 
 - Add `has` method to container to check for an existing registration ([#119](https://github.com/jeffijoe/awilix/pull/119), [faustbrian](https://github.com/faustbrian))

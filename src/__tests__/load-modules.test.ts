@@ -2,12 +2,13 @@ import { loadModules, LoadModulesOptions } from '../load-modules'
 import { createContainer } from '../container'
 import { Lifetime } from '../lifetime'
 import { InjectionMode } from '../injection-mode'
-import { asFunction, RESOLVER, BuildResolver } from '../resolvers'
+import { asFunction, RESOLVER, BuildResolver, asValue } from '../resolvers'
 
 const lookupResultFor = (modules: any) =>
   Object.keys(modules).map(key => ({
     name: key.replace('.js', ''),
-    path: key
+    path: key,
+    opts: null
   }))
 
 describe('loadModules', function() {
@@ -285,7 +286,7 @@ describe('loadModules', function() {
       container,
       listModules: jest.fn(() => [
         { name: 'test', path: 'test.js', opts: Lifetime.SCOPED },
-        { name: 'test2', path: 'test2.js' }
+        { name: 'test2', path: 'test2.js', opts: null }
       ]),
       require: jest.fn(path => modules[path])
     }
@@ -311,7 +312,7 @@ describe('loadModules', function() {
       container,
       listModules: jest.fn(() => [
         { name: 'test', path: 'test.js', opts: { lifetime: Lifetime.SCOPED } },
-        { name: 'test2', path: 'test2.js' }
+        { name: 'test2', path: 'test2.js', opts: null }
       ]),
       require: jest.fn(path => modules[path])
     }
@@ -341,7 +342,7 @@ describe('loadModules', function() {
           path: 'test.js',
           opts: { injectionMode: InjectionMode.PROXY }
         },
-        { name: 'test2', path: 'test2.js' }
+        { name: 'test2', path: 'test2.js', opts: null }
       ]),
       require: jest.fn(path => modules[path])
     }
@@ -374,16 +375,24 @@ describe('loadModules', function() {
         lifetime: Lifetime.SCOPED
       }
 
+      class Test3Class {}
+
+      ;(Test3Class as any)[RESOLVER] = {
+        register: asValue
+      }
+
       const modules: any = {
         'test.js': test1Func,
-        'test2.js': Test2Class
+        'test2.js': Test2Class,
+        'test3.js': Test3Class
       }
 
       const deps = {
         container,
         listModules: jest.fn(() => [
-          { name: 'test', path: 'test.js' },
-          { name: 'test2', path: 'test2.js' }
+          { name: 'test', path: 'test.js', opts: null },
+          { name: 'test2', path: 'test2.js', opts: null },
+          { name: 'test3', path: 'test3.js', opts: null }
         ]),
         require: jest.fn(path => modules[path])
       }
@@ -402,6 +411,7 @@ describe('loadModules', function() {
       expect(
         (container.registrations.test2 as BuildResolver<any>).injectionMode
       ).toBe(InjectionMode.CLASSIC)
+      expect(container.resolve('test3')).toBe(Test3Class)
     })
 
     it('allows setting a name to register as', () => {
@@ -421,8 +431,8 @@ describe('loadModules', function() {
       const deps = {
         container,
         listModules: jest.fn(() => [
-          { name: 'test', path: 'test.js' },
-          { name: 'test2', path: 'test2.js' }
+          { name: 'test', path: 'test.js', opts: null },
+          { name: 'test2', path: 'test2.js', opts: null }
         ]),
         require: jest.fn(path => modules[path])
       }

@@ -16,3 +16,4 @@ lib
 
 # System
 .DS_Store
+.log
