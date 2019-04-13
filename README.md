@@ -1161,13 +1161,17 @@ container.register({
 const scope1 = container.createScope()
 const scope2 = container.createScope()
 
+// The root container is also a scope.
+container.cradle.counterValue === 1
 container.cradle.counterValue === 1
 
-// These are resolved to the parent's cached value.
-scope1.cradle.counterValue === 1
-scope1.cradle.counterValue === 1
-scope2.cradle.counterValue === 1
-scope2.cradle.counterValue === 1
+// This scope resolves and caches it's own.
+scope1.cradle.counterValue === 2
+scope1.cradle.counterValue === 2
+
+// This scope resolves and caches it's own.
+scope2.cradle.counterValue === 3
+scope2.cradle.counterValue === 3
 ```
 
 A scope may also register additional stuff - they will only be available within
