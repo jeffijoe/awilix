@@ -1,3 +1,8 @@
+# v4.2.2
+
+- Fix issue where the tokenizer was being too eager. ([#30](https://github.com/jeffijoe/awilix/issues/130))
+- Update packages
+
 # v4.2.1
 
 - Fix `register` option in `loadModules` ([#124](https://github.com/jeffijoe/awilix/issues/124))

@@ -21,6 +21,17 @@ export interface Token {
 }
 
 /**
+ * Flags that can be passed to the tokenizer to toggle certain things.
+ */
+export const enum TokenizerFlags {
+  None = 0,
+  /**
+   * If this is set, the tokenizer will not attempt to be smart about skipping expressions.
+   */
+  Dumb = 1
+}
+
+/**
  * Creates a tokenizer for the specified source.
  *
  * @param source
@@ -30,7 +41,7 @@ export function createTokenizer(source: string) {
   let pos: number = 0
   let type: TokenType = 'EOF'
   let value: string = ''
-
+  let flags = TokenizerFlags.None
   // These are used to greedily skip as much as possible.
   // Whenever we reach a paren, we increment these.
   let parenLeft = 0
@@ -44,7 +55,8 @@ export function createTokenizer(source: string) {
   /**
    * Advances the tokenizer and returns the next token.
    */
-  function next(): Token {
+  function next(nextFlags = TokenizerFlags.None): Token {
+    flags = nextFlags
     advance()
     return createToken()
   }
@@ -84,7 +96,10 @@ export function createTokenizer(source: string) {
           return (type = ch)
         case '=':
           pos++
-          skipExpression()
+          if ((flags & TokenizerFlags.Dumb) === 0) {
+            // Not in dumb-mode, so attempt to skip.
+            skipExpression()
+          }
           // We need to know that there's a default value so we can
           // skip it if it does not exist when resolving.
           return (type = ch)

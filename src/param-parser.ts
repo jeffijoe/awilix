@@ -1,4 +1,4 @@
-import { createTokenizer, Token } from './function-tokenizer'
+import { createTokenizer, Token, TokenizerFlags } from './function-tokenizer'
 
 /**
  * A parameter for a function.
@@ -110,7 +110,7 @@ export function parseParameterList(source: string): Array<Parameter> {
    */
   function skipUntilConstructor() {
     while (!isConstructorToken() && !done()) {
-      nextToken()
+      nextToken(TokenizerFlags.Dumb)
     }
   }
 
@@ -124,8 +124,8 @@ export function parseParameterList(source: string): Array<Parameter> {
   /**
    * Advances the tokenizer and stores the previous token in history
    */
-  function nextToken() {
-    t = _next()
+  function nextToken(flags = TokenizerFlags.None) {
+    t = _next(flags)
     return t
   }
 
