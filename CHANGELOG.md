@@ -1,6 +1,7 @@
 # v4.2.2
 
 - Fix issue where the tokenizer was being too eager. ([#30](https://github.com/jeffijoe/awilix/issues/130))
+- Make tests pass on Node v12
 - Update packages
 
 # v4.2.1

@@ -471,11 +471,14 @@ describe('container', function() {
       expect(
         util.inspect(container.createScope().register({ val3: asValue(3) }))
       ).toBe('[AwilixContainer (scoped, registrations: 5)]')
+
+      expect(container.resolve('inspect')).toBeInstanceOf(Function)
+      expect(container.resolve(util.inspect.custom)).toBeInstanceOf(Function)
     })
   })
 
   describe('using util.inspect on the cradle', function() {
-    it('should return a summary', function() {
+    it('should return the preconfigured string', function() {
       const container = createContainer().register({
         val1: asValue(1),
         val2: asValue(2),
@@ -484,6 +487,13 @@ describe('container', function() {
       })
 
       expect(util.inspect(container.cradle)).toBe('[AwilixContainer.cradle]')
+    })
+  })
+
+  describe('resolving reserved names', () => {
+    it('returns the createContainer function for constructor', () => {
+      const container = createContainer()
+      expect(container.resolve('constructor')).toBe(createContainer)
     })
   })
 
@@ -557,14 +567,6 @@ describe('setting a name on the registration options', () => {
 
     expect(container.resolve('test')).toBe(42)
     expect(container.registrations.lol).toBe(undefined)
-  })
-})
-
-describe('util.inspect on the cradle', () => {
-  it('should not throw an error', () => {
-    const container = createContainer()
-    const result = util.inspect(container.cradle)
-    expect(result).toBe('[AwilixContainer.cradle]')
   })
 })
 

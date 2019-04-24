@@ -60,6 +60,7 @@ export default [
         'loadModules,':
           'loadModules: () => { throw new Error("loadModules is not supported in the browser.") },',
         '[util.inspect.custom]: inspect,': comment,
+        '[util.inspect.custom]: inspectCradle': comment,
         'name === util.inspect.custom || ': '',
         "const camelCase = require('camel-case')":
           'const camelCase = null as any',

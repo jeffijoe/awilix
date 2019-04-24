@@ -222,7 +222,9 @@ export function createContainer(
    * it is where registered things come to life at resolution-time.
    */
   const cradle: { [key: string]: any } = new Proxy(
-    {},
+    {
+      [util.inspect.custom]: inspectCradle
+    },
     {
       /**
        * The `get` handler is invoked whenever a get-call for `container.cradle.*` is made.
