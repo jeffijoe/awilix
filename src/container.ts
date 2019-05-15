@@ -12,7 +12,12 @@ import {
   DisposableResolver,
   BuildResolverOptions
 } from './resolvers'
-import { last, nameValueToObject, isClass } from './utils'
+import {
+  last,
+  nameValueToObject,
+  isClass,
+  capitalizeFirstLetter
+} from './utils'
 import { InjectionMode, InjectionModeType } from './injection-mode'
 import { Lifetime } from './lifetime'
 import { AwilixResolutionError, AwilixTypeError } from './errors'
@@ -74,6 +79,8 @@ export interface AwilixContainer {
    * @param  {string} name
    * The name of the registration to resolve.
    *
+   * @param  {ResolveOptions} resolveOptions
+   *
    * @return {*}
    * Whatever was resolved.
    */
@@ -117,6 +124,7 @@ export interface ResolveOptions {
    * returns `undefined` rather than throwing an error.
    */
   allowUnregistered?: boolean
+  allowCyclic?: boolean
 }
 
 /**
@@ -158,6 +166,7 @@ export type ClassOrFunctionReturning<T> = FunctionReturning<T> | Constructor<T>
 export interface ContainerOptions {
   require?: (id: string) => any
   injectionMode?: InjectionModeType
+  allowCyclic?: boolean
 }
 
 /**
@@ -169,6 +178,8 @@ export type RegistrationHash = Record<string | symbol | number, Resolver<any>>
  * Resolution stack.
  */
 export interface ResolutionStack extends Array<string | symbol> {}
+
+export type Dependency = { dependency: string; dependent: string }
 
 /**
  * Family tree symbol.
@@ -216,6 +227,9 @@ export function createContainer(
   // Internal registration store for this container.
   const registrations: RegistrationHash = {}
 
+  let cyclicDependencies: Array<Dependency> = []
+  let resolvedRegistrations: Map<string, any> = new Map()
+
   /**
    * The `Proxy` that is passed to functions so they can resolve their dependencies without
    * knowing where they come from. I call it the "cradle" because
@@ -238,7 +252,8 @@ export function createContainer(
        * @return {*}
        * Whatever the resolve call returns.
        */
-      get: (target, name) => resolve(name as string),
+      get: (target, name) =>
+        resolve(name as string, { allowCyclic: (options || {}).allowCyclic }),
 
       /**
        * Setting things on the cradle throws an error.
@@ -402,6 +417,9 @@ export function createContainer(
    * Whatever was resolved.
    */
   function resolve(name: string | symbol, resolveOpts?: ResolveOptions): any {
+    // if (resolveOpts) {
+    //   console.log('valod ', resolveOpts);
+    // }
     resolveOpts = resolveOpts || {}
     if (!resolutionStack.length) {
       // Root resolve busts the registration cache.
@@ -412,11 +430,20 @@ export function createContainer(
       // Grab the registration by name.
       const resolver = computedRegistrations![name as any]
       if (resolutionStack.indexOf(name) > -1) {
-        throw new AwilixResolutionError(
-          name,
-          resolutionStack,
-          'Cyclic dependencies detected.'
-        )
+        if (!resolveOpts.allowCyclic) {
+          throw new AwilixResolutionError(
+            name,
+            resolutionStack,
+            'Cyclic dependencies detected.'
+          )
+        }
+
+        cyclicDependencies.push({
+          dependency: name as string,
+          dependent: resolutionStack[resolutionStack.length - 1] as string
+        })
+
+        return null
       }
 
       // Used in console.log.
@@ -497,10 +524,15 @@ export function createContainer(
       }
       // Pop it from the stack again, ready for the next resolution
       resolutionStack.pop()
+      resolvedRegistrations.set(name.toString(), resolved)
+      if (!resolutionStack.length) {
+        setCyclicDependencies()
+      }
       return resolved
     } catch (err) {
       // When we get an error we need to reset the stack.
       resolutionStack = []
+      resolvedRegistrations = new Map()
       throw err
     }
   }
@@ -600,5 +632,27 @@ export function createContainer(
         return Promise.resolve()
       })
     ).then(() => undefined)
+  }
+
+  function setCyclicDependencies(): void {
+    cyclicDependencies.forEach(c => {
+      const dependent = resolvedRegistrations.get(c.dependent)
+      const dependency = resolvedRegistrations.get(c.dependency)
+      const dependencySetter =
+        dependent['set' + capitalizeFirstLetter(c.dependency)]
+      if (typeof dependencySetter === 'function') {
+        Reflect.apply(dependencySetter, dependent, [dependency])
+      } else if (Reflect.has(dependent, c.dependency)) {
+        Reflect.set(dependent, c.dependency, dependency)
+      } else {
+        throw new AwilixResolutionError(
+          c.dependent,
+          [],
+          `Setter method or property is missing in ${
+            c.dependent
+          } for resolving cyclic dependency ${c.dependency}`
+        )
+      }
+    })
   }
 }

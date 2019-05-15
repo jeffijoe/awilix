@@ -119,3 +119,15 @@ export function uniq<T>(arr: Array<T>): Array<T> {
 
   return result
 }
+
+/**
+ * capitalizes the first letter of string
+ *
+ * @param {str}
+ *
+ * @return {str}
+ *
+ */
+export function capitalizeFirstLetter(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}

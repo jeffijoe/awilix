@@ -411,6 +411,42 @@ describe('container', function() {
       expect(err.message).toContain('first -> second -> third -> second')
     })
 
+    it('resolves cyclic dependencies with setter method', function() {
+      const container = createContainer({ allowCyclic: true })
+
+      class FirstClass {
+        second: any
+        constructor(cradle: any) {
+          this.second = cradle.second
+        }
+
+        getSecond(): SecondClass {
+          return this.second
+        }
+      }
+      class SecondClass {
+        first: any
+        constructor(cradle: any) {
+          this.first = cradle.first
+        }
+
+        getFirst(): FirstClass {
+          return this.first
+        }
+
+        setFirst(first: FirstClass) {
+          this.first = first
+        }
+      }
+      container.register({
+        first: asClass(FirstClass),
+        second: asClass(SecondClass)
+      })
+
+      let first: FirstClass = container.resolve('first')
+      expect(first.getSecond().getFirst()).not.toBeNull()
+    })
+
     it('throws an AwilixResolutionError when the lifetime is unknown', function() {
       const container = createContainer()
       container.register({

@@ -15,7 +15,7 @@
   "scripts": {
     "build": "rimraf lib && tsc -p tsconfig.build.json && rollup -c",
     "check": "tsc -p tsconfig.json --noEmit --pretty",
-    "test": "npm run check && jest",
+    "test": "npm run check && jest ",
     "lint": "npm run check && tslint --project tsconfig.json --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",
     "precommit": "lint-staged && npm test",
     "cover": "npm run test -- --coverage",
