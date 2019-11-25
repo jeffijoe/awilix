@@ -238,7 +238,15 @@ export function createContainer(
        * @return {*}
        * Whatever the resolve call returns.
        */
-      get: (target, name) => resolve(name as string),
+      get: (target, name) => {
+        if (name === 'toJSON') {
+          return () => {
+            return '[AWILIX CONTAINER]'
+          }
+        }
+
+        return resolve(name as string)
+      },
 
       /**
        * Setting things on the cradle throws an error.
