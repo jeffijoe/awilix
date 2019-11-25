@@ -239,12 +239,6 @@ export function createContainer(
        * Whatever the resolve call returns.
        */
       get: (target, name) => {
-        if (name === 'toJSON') {
-          return () => {
-            return '[AWILIX CONTAINER]'
-          }
-        }
-
         return resolve(name as string)
       },
 
@@ -425,6 +419,11 @@ export function createContainer(
           resolutionStack,
           'Cyclic dependencies detected.'
         )
+      }
+
+      // Used in JSON.stringify.
+      if (name === 'toJSON') {
+        return inspectCradle
       }
 
       // Used in console.log.

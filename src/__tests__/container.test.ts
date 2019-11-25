@@ -751,13 +751,13 @@ describe('memoizing registrations', () => {
   })
 
   describe('Safely stringify cradle', function() {
-    it('should have toJSON() return [AWILIX CONTAINER]', () => {
-      expect(createContainer().cradle.toJSON()).toBe('[AWILIX CONTAINER]')
+    it('should have toJSON() return [AwilixContainer.cradle]', () => {
+      expect(createContainer().cradle.toJSON()).toBe('[AwilixContainer.cradle]')
     })
 
-    it('JSON.stringify() should return [AWILIX CONTAINER]', () => {
+    it('JSON.stringify() should return [AwilixContainer.cradle]', () => {
       expect(JSON.stringify(createContainer().cradle)).toBe(
-        '"[AWILIX CONTAINER]"'
+        '"[AwilixContainer.cradle]"'
       )
     })
   })
