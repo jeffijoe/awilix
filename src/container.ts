@@ -419,6 +419,11 @@ export function createContainer(
         )
       }
 
+      // Used in JSON.stringify.
+      if (name === 'toJSON') {
+        return inspectCradle
+      }
+
       // Used in console.log.
       if (name === 'constructor') {
         return createContainer

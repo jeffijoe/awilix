@@ -749,4 +749,16 @@ describe('memoizing registrations', () => {
       expect(otherContainer.build(fn)).toBe(1337)
     })
   })
+
+  describe('Safely stringify cradle', function() {
+    it('should have toJSON() return [AwilixContainer.cradle]', () => {
+      expect(createContainer().cradle.toJSON()).toBe('[AwilixContainer.cradle]')
+    })
+
+    it('JSON.stringify() should return [AwilixContainer.cradle]', () => {
+      expect(JSON.stringify(createContainer().cradle)).toBe(
+        '"[AwilixContainer.cradle]"'
+      )
+    })
+  })
 })
