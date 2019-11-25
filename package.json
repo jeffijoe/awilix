@@ -72,6 +72,7 @@
     "rollup-plugin-typescript2": "^0.25.2",
     "smid": "^0.1.1",
     "ts-jest": "^24.2.0",
+    "tslib": "^1.10.0",
     "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
