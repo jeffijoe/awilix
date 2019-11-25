@@ -238,9 +238,7 @@ export function createContainer(
        * @return {*}
        * Whatever the resolve call returns.
        */
-      get: (target, name) => {
-        return resolve(name as string)
-      },
+      get: (target, name) => resolve(name as string),
 
       /**
        * Setting things on the cradle throws an error.
