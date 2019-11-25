@@ -1,3 +1,8 @@
+# v4.2.3
+
+* Fix issue where calling `JSON.stringify` on the cradle would result in memory leak ([#153](https://github.com/jeffijoe/awilix/pull/119), [berndartmueller](https://github.com/berndartmueller))
+* Update packages
+
 # v4.2.2
 
 - Fix issue where the tokenizer was being too eager. ([#30](https://github.com/jeffijoe/awilix/issues/130))
