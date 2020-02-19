@@ -9,8 +9,7 @@ import {
 import { AwilixContainer } from './container'
 import { isClass, isFunction } from './utils'
 import { BuildResolver } from './awilix'
-
-const camelCase = require('camel-case')
+import { camelCase } from 'camel-case'
 
 /**
  * The options when invoking loadModules().
@@ -50,8 +49,8 @@ export interface LoadModulesDeps {
   require(path: string): any
 }
 
-const nameFormatters = {
-  camelCase
+const nameFormatters: Record<string, NameFormatter> = {
+  camelCase: s => camelCase(s)
 }
 
 /**
@@ -197,7 +196,7 @@ function registerDescriptor(
       }
 
       if (formatter) {
-        name = (formatter as NameFormatter)(name, moduleDescriptor)
+        name = formatter(name, moduleDescriptor)
       }
     }
   }
