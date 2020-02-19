@@ -107,14 +107,14 @@ export function createTokenizer(source: string) {
           pos++
           const nextCh = source.charAt(pos)
           if (nextCh === '/') {
-            skipUntil(c => c === '\n')
+            skipUntil(c => c === '\n', true)
             pos++
           }
           if (nextCh === '*') {
             skipUntil(c => {
               const closing = source.charAt(pos + 1)
               return c === '*' && closing === '/'
-            })
+            }, true)
             pos++
           }
           continue
@@ -178,22 +178,28 @@ export function createTokenizer(source: string) {
 
   /**
    * Skips strings and whilespace until the predicate is true.
+   *
+   * @param callback stops skipping when this returns `true`.
+   * @param dumb if `true`, does not skip whitespace and strings;
+   * it only stops once the callback returns `true`.
    */
-  function skipUntil(callback: (ch: string) => boolean) {
+  function skipUntil(callback: (ch: string) => boolean, dumb = false) {
     while (pos < source.length) {
       let ch = source.charAt(pos)
       if (callback(ch)) {
         return
       }
 
-      if (isWhiteSpace(ch)) {
-        pos++
-        continue
-      }
+      if (!dumb) {
+        if (isWhiteSpace(ch)) {
+          pos++
+          continue
+        }
 
-      if (isStringQuote(ch)) {
-        skipString()
-        continue
+        if (isStringQuote(ch)) {
+          skipString()
+          continue
+        }
       }
       pos++
     }
