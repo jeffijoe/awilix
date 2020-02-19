@@ -33,3 +33,30 @@ class Service2 {
   const params = parseParameterList(code)
   expect(params).toEqual([{ name: 'injectedService', optional: false }])
 })
+
+// https://github.com/jeffijoe/awilix/issues/164
+//
+// Caused by the `skipUntil` in the tokenizer trying to parse strings when it should just be
+// dumb and only care about scanning until the end of the line (single comment) or the end
+// of a block comment marker.
+test('#164', () => {
+  const classCode = `
+  class TestClass {
+    constructor(injectedService // '
+
+    ) {}
+  }
+    `
+
+  expect(parseParameterList(classCode)).toEqual([
+    { name: 'injectedService', optional: false }
+  ])
+
+  const funcCode = `
+  ( // "
+
+) => {}
+    `
+
+  expect(parseParameterList(funcCode)).toEqual([])
+})

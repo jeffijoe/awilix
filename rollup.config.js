@@ -62,7 +62,7 @@ export default [
         '[util.inspect.custom]: inspect,': comment,
         '[util.inspect.custom]: inspectCradle': comment,
         'name === util.inspect.custom || ': '',
-        "const camelCase = require('camel-case')":
+        "import { camelCase } from 'camel-case'":
           'const camelCase = null as any',
         "export * from './list-modules'": comment,
         "import * as util from 'util'": '',
