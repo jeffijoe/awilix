@@ -1,7 +1,11 @@
+# v4.2.4
+
+- Fix issue with parsing comments ([#165](https://github.com/jeffijoe/awilix/pull/165), reported by [Jamie Corkhill](https://github.com/JamieCorkhill))
+
 # v4.2.3
 
-* Fix issue where calling `JSON.stringify` on the cradle would result in memory leak ([#153](https://github.com/jeffijoe/awilix/pull/119), [berndartmueller](https://github.com/berndartmueller))
-* Update packages
+- Fix issue where calling `JSON.stringify` on the cradle would result in memory leak ([#153](https://github.com/jeffijoe/awilix/pull/119), [berndartmueller](https://github.com/berndartmueller))
+- Update packages
 
 # v4.2.2
 
