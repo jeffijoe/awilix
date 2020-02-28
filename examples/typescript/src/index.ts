@@ -3,8 +3,13 @@ import { createContainer, asClass, InjectionMode } from '../../../src/awilix'
 import TestService from './services/TestService'
 import DependentService from './services/DependentService'
 
+interface ICradle {
+  testService: TestService
+  depService: DependentService
+}
+
 // Create the container
-const container = createContainer({
+const container = createContainer<ICradle>({
   injectionMode: InjectionMode.CLASSIC
 })
 
@@ -15,7 +20,7 @@ container.register({
 })
 
 // Resolve a dependency using the cradle.
-let dep1: DependentService = container.cradle.depService
+let dep1 = container.cradle.depService
 // Resolve a dependency using `resolve`
 let dep2 = container.resolve<DependentService>('depService')
 

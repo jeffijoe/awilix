@@ -21,7 +21,7 @@ import { AwilixResolutionError, AwilixTypeError } from './errors'
  * The container returned from createContainer has some methods and properties.
  * @interface AwilixContainer
  */
-export interface AwilixContainer {
+export interface AwilixContainer<Cradle extends object = any> {
   /**
    * Options the container was configured with.
    */
@@ -30,7 +30,7 @@ export interface AwilixContainer {
    * The proxy injected when using `PROXY` injection mode.
    * Can be used as-is.
    */
-  readonly cradle: any
+  readonly cradle: Cradle
   /**
    * Getter for the rolled up registrations that merges the container family tree.
    */
@@ -42,7 +42,7 @@ export interface AwilixContainer {
   /**
    * Creates a scoped container with this one as the parent.
    */
-  createScope(): AwilixContainer
+  createScope<T extends object = any>(): AwilixContainer<Cradle & T>
   /**
    * Used by `util.inspect`.
    */
@@ -67,7 +67,7 @@ export interface AwilixContainer {
   /**
    * Pairs resolvers to registration names and registers them.
    */
-  register(nameAndRegistrationPair: NameAndRegistrationPair): this
+  register(nameAndRegistrationPair: NameAndRegistrationPair<Cradle>): this
   /**
    * Resolves the registration with the given name.
    *
@@ -122,23 +122,23 @@ export interface ResolveOptions {
 /**
  * Cache entry.
  */
-export interface CacheEntry {
+export interface CacheEntry<T = any> {
   /**
    * The resolver that resolved the value.
    */
-  resolver: Resolver<any>
+  resolver: Resolver<T>
   /**
    * The resolved value.
    */
-  value: any
+  value: T
 }
 
 /**
  * Register a Registration
  * @interface NameAndRegistrationPair
  */
-export interface NameAndRegistrationPair {
-  [key: string]: Resolver<any>
+export type NameAndRegistrationPair<T> = {
+  [U in keyof T]?: Resolver<T[U]>
 }
 
 /**
@@ -194,10 +194,10 @@ const ROLL_UP_REGISTRATIONS = Symbol('rollUpRegistrations')
  * @return {object}
  * The container.
  */
-export function createContainer(
+export function createContainer<T extends object = any, U extends object = any>(
   options?: ContainerOptions,
-  parentContainer?: AwilixContainer
-): AwilixContainer {
+  parentContainer?: AwilixContainer<U>
+): AwilixContainer<T> {
   options = {
     injectionMode: InjectionMode.PROXY,
     ...options
@@ -221,7 +221,7 @@ export function createContainer(
    * knowing where they come from. I call it the "cradle" because
    * it is where registered things come to life at resolution-time.
    */
-  const cradle: { [key: string]: any } = new Proxy(
+  const cradle = new Proxy(
     {
       [util.inspect.custom]: inspectCradle
     },
@@ -274,12 +274,12 @@ export function createContainer(
         return undefined
       }
     }
-  )
+  ) as T
 
   // The container being exposed.
   const container = {
     options,
-    cradle: cradle as any,
+    cradle,
     inspect,
     cache: new Map<string | symbol, CacheEntry>(),
     loadModules,
@@ -360,14 +360,14 @@ export function createContainer(
    * @return {object}
    * The scoped container.
    */
-  function createScope(): AwilixContainer {
-    return createContainer(options, container)
+  function createScope<P extends object>(): AwilixContainer<P & T> {
+    return createContainer(options, container as AwilixContainer<T>)
   }
 
   /**
    * Adds a registration for a resolver.
    */
-  function register(arg1: any, arg2: any): AwilixContainer {
+  function register(arg1: any, arg2: any): AwilixContainer<T> {
     const obj = nameValueToObject(arg1, arg2)
     const keys = [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)]
 
