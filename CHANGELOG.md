@@ -1,10 +1,14 @@
+# v4.2.5
+
+- Add optional generic parameter to container typing. Allows for a typed `ICradle`. ([#169](https://github.com/jeffijoe/awilix/pull/169), [roikoren755](https://github.com/roikoren755))
+
 # v4.2.4
 
 - Fix issue with parsing comments ([#165](https://github.com/jeffijoe/awilix/pull/165), reported by [Jamie Corkhill](https://github.com/JamieCorkhill))
 
 # v4.2.3
 
-- Fix issue where calling `JSON.stringify` on the cradle would result in memory leak ([#153](https://github.com/jeffijoe/awilix/pull/119), [berndartmueller](https://github.com/berndartmueller))
+- Fix issue where calling `JSON.stringify` on the cradle would result in memory leak ([#153](https://github.com/jeffijoe/awilix/pull/153), [berndartmueller](https://github.com/berndartmueller))
 - Update packages
 
 # v4.2.2
