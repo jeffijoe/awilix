@@ -18,13 +18,15 @@ export const RESOLVER = Symbol('Awilix Resolver Config')
  *
  * @type {Function}
  */
-export type InjectorFunction = (container: AwilixContainer) => object
+export type InjectorFunction = <T extends object>(
+  container: AwilixContainer<T>
+) => object
 
 /**
  * A resolver object returned by asClass(), asFunction() or asValue().
  */
 export interface Resolver<T> extends ResolverOptions<T> {
-  resolve(container: AwilixContainer): T
+  resolve<U extends object>(container: AwilixContainer<U>): T
 }
 
 /**
@@ -335,7 +337,10 @@ function updateResolver<T, A extends Resolver<T>, B>(
  * @param  {Object} locals
  * @return {Function}
  */
-function wrapWithLocals(container: AwilixContainer, locals: any) {
+function wrapWithLocals<T extends object>(
+  container: AwilixContainer<T>,
+  locals: any
+) {
   return function wrappedResolve(name: string, resolveOpts: ResolveOptions) {
     if (name in locals) {
       return locals[name]
@@ -353,8 +358,8 @@ function wrapWithLocals(container: AwilixContainer, locals: any) {
  * @param  {Function} injector
  * @return {Proxy}
  */
-function createInjectorProxy(
-  container: AwilixContainer,
+function createInjectorProxy<T extends object>(
+  container: AwilixContainer<T>,
   injector: InjectorFunction
 ) {
   const locals = injector(container) as any
@@ -444,9 +449,9 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
   const dependencies = parseDependencies(dependencyParseTarget)
 
   // Use a regular function instead of an arrow function to facilitate binding to the resolver.
-  return function resolve(
+  return function resolve<T extends object>(
     this: BuildResolver<any>,
-    container: AwilixContainer
+    container: AwilixContainer<T>
   ) {
     // Because the container holds a global reolutionMode we need to determine it in the proper order of precedence:
     // resolver -> container -> default value
