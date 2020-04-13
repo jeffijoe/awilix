@@ -42,7 +42,7 @@ export interface AwilixContainer<Cradle extends object = any> {
   /**
    * Creates a scoped container with this one as the parent.
    */
-  createScope<T extends object = any>(): AwilixContainer<Cradle & T>
+  createScope<T extends object = {}>(): AwilixContainer<Cradle & T>
   /**
    * Used by `util.inspect`.
    */
