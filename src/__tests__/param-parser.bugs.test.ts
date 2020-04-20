@@ -49,7 +49,7 @@ test('#164', () => {
     `
 
   expect(parseParameterList(classCode)).toEqual([
-    { name: 'injectedService', optional: false }
+    { name: 'injectedService', optional: false },
   ])
 
   const funcCode = `

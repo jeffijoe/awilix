@@ -24,7 +24,7 @@ container.register({
   // resolved for each request.
   messageService: asClass(MessageService).scoped(),
   // only resolved once
-  messageRepository: asFunction(makeMessageRepository).singleton()
+  messageRepository: asFunction(makeMessageRepository).singleton(),
 })
 
 // For each request we want a custom scope.
@@ -36,18 +36,18 @@ app.use((ctx, next) => {
     // This is where you'd use something like Passport,
     // and retrieve the req.user or something.
     currentUser: asValue({
-      id: ctx.request.query.userId
-    })
+      id: ctx.request.query.userId,
+    }),
   })
 
   return next()
 })
 
 // Register a route..
-router.get('/messages', ctx => {
+router.get('/messages', (ctx) => {
   // Use the scope to resolve the message service.
   const messageService = ctx.scope.resolve('messageService')
-  return messageService.findMessages().then(messages => {
+  return messageService.findMessages().then((messages) => {
     ctx.body = messages
     ctx.status = 200
   })

@@ -23,5 +23,5 @@ export const Lifetime: Record<LifetimeType, LifetimeType> = {
    * The registration will be resolved once per scope.
    * @type {String}
    */
-  SCOPED: 'SCOPED'
+  SCOPED: 'SCOPED',
 }

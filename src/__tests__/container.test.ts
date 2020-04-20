@@ -30,23 +30,23 @@ class ManualTest {
   }
 }
 
-describe('createContainer', function() {
-  it('returns an object', function() {
+describe('createContainer', function () {
+  it('returns an object', function () {
     const container = createContainer()
     expect(typeof container).toBe('object')
   })
 })
 
-describe('container', function() {
-  it('lets me register something and resolve it', function() {
+describe('container', function () {
+  it('lets me register something and resolve it', function () {
     const container = createContainer()
     container.register({ someValue: asValue(42) })
     container.register({
       test: asFunction((deps: any) => {
         return {
-          someValue: deps.someValue
+          someValue: deps.someValue,
         }
-      })
+      }),
     })
 
     const test = container.cradle.test
@@ -54,13 +54,13 @@ describe('container', function() {
     expect(test.someValue).toBe(42)
   })
 
-  it('lets me register something and resolve it via classic injection mode', function() {
+  it('lets me register something and resolve it via classic injection mode', function () {
     const container = createContainer({
-      injectionMode: InjectionMode.CLASSIC
+      injectionMode: InjectionMode.CLASSIC,
     })
     container.register({
       manual: asClass(ManualTest),
-      repo: asClass(Repo)
+      repo: asClass(Repo),
     })
 
     const test = container.cradle.manual
@@ -68,21 +68,21 @@ describe('container', function() {
     expect(test.repo).toBeTruthy()
   })
 
-  describe('register', function() {
-    it('supports multiple registrations in a single call', function() {
+  describe('register', function () {
+    it('supports multiple registrations in a single call', function () {
       const container = createContainer()
       container.register({
         universe: asValue(42),
-        leet: asValue(1337)
+        leet: asValue(1337),
       })
 
       container.register({
         service: asFunction(({ func, universe }: any) => ({
-          method: () => func(universe)
+          method: () => func(universe),
         })),
         func: asFunction(() => (answer: any) =>
           'Hello world, the answer is ' + answer
-        )
+        ),
       })
 
       expect(Object.keys(container.registrations).length).toBe(4)
@@ -92,32 +92,32 @@ describe('container', function() {
       )
     })
 
-    it('supports classes', function() {
+    it('supports classes', function () {
       const container = createContainer()
       container.register({
         test: asClass(Test),
-        repo: asClass(Repo)
+        repo: asClass(Repo),
       })
 
       expect(container.resolve<Test>('test').stuff()).toBe('stuff')
     })
   })
 
-  describe('has', function() {
-    it('returns true if the registration does exist', function() {
+  describe('has', function () {
+    it('returns true if the registration does exist', function () {
       const container = createContainer()
       container.register({ theValue: asValue('theValue') })
 
       expect(container.has('theValue')).toBe(true)
     })
 
-    it('returns false if the registration does not exist', function() {
+    it('returns false if the registration does not exist', function () {
       expect(createContainer().has('theValue')).toBe(false)
     })
   })
 
-  describe('resolve', function() {
-    it('resolves the dependency graph and supports all resolvers', function() {
+  describe('resolve', function () {
+    it('resolves the dependency graph and supports all resolvers', function () {
       class TestClass {
         factoryResult: any
         constructor({ factory }: any) {
@@ -125,11 +125,11 @@ describe('container', function() {
         }
       }
 
-      const factorySpy = jest.fn(cradle => 'factory ' + cradle.value)
+      const factorySpy = jest.fn((cradle) => 'factory ' + cradle.value)
       const container = createContainer()
       container.register({ value: asValue(42) })
       container.register({
-        factory: asFunction((cradle: any) => () => factorySpy(cradle))
+        factory: asFunction((cradle: any) => () => factorySpy(cradle)),
       })
       container.register({ theClass: asClass(TestClass) })
 
@@ -137,14 +137,14 @@ describe('container', function() {
       expect(root.factoryResult).toBe('factory 42')
     })
 
-    it('throws an AwilixResolutionError when there are unregistered dependencies', function() {
+    it('throws an AwilixResolutionError when there are unregistered dependencies', function () {
       const container = createContainer()
       const err = throws(() => container.resolve('nope'))
       expect(err).toBeInstanceOf(AwilixResolutionError)
       expect(err.message).toMatch(/nope/i)
     })
 
-    it('throws an AwilixResolutionError that supports symbols', function() {
+    it('throws an AwilixResolutionError that supports symbols', function () {
       const container = createContainer()
       const S = Symbol('i am the derg')
       const err = throws(() => container.resolve(S))
@@ -152,25 +152,25 @@ describe('container', function() {
       expect(err.message).toMatch(/i am the derg/i)
     })
 
-    it('throws an AwilixResolutionError with a resolution path when resolving an unregistered dependency', function() {
+    it('throws an AwilixResolutionError with a resolution path when resolving an unregistered dependency', function () {
       const container = createContainer()
       container.register({
         first: asFunction((cradle: any) => cradle.second),
         second: asFunction((cradle: any) => cradle.third),
-        third: asFunction((cradle: any) => cradle.unregistered)
+        third: asFunction((cradle: any) => cradle.unregistered),
       })
 
       const err = throws(() => container.resolve('first'))
       expect(err.message).toContain('first -> second -> third')
     })
 
-    it('does not screw up the resolution stack when called twice', function() {
+    it('does not screw up the resolution stack when called twice', function () {
       const container = createContainer()
       container.register({
         first: asFunction((cradle: any) => cradle.second),
         otherFirst: asFunction((cradle: any) => cradle.second),
         second: asFunction((cradle: any) => cradle.third),
-        third: asFunction((cradle: any) => cradle.unregistered)
+        third: asFunction((cradle: any) => cradle.unregistered),
       })
 
       const err1 = throws(() => container.resolve('first'))
@@ -179,33 +179,33 @@ describe('container', function() {
       expect(err2.message).toContain('otherFirst -> second -> third')
     })
 
-    it('supports transient lifetime', function() {
+    it('supports transient lifetime', function () {
       const container = createContainer()
       let counter = 1
       container.register({
-        hehe: asFunction(() => counter++).transient()
+        hehe: asFunction(() => counter++).transient(),
       })
 
       expect(container.cradle.hehe).toBe(1)
       expect(container.cradle.hehe).toBe(2)
     })
 
-    it('supports singleton lifetime', function() {
+    it('supports singleton lifetime', function () {
       const container = createContainer()
       let counter = 1
       container.register({
-        hehe: asFunction(() => counter++).singleton()
+        hehe: asFunction(() => counter++).singleton(),
       })
 
       expect(container.cradle.hehe).toBe(1)
       expect(container.cradle.hehe).toBe(1)
     })
 
-    it('supports scoped lifetime', function() {
+    it('supports scoped lifetime', function () {
       const container = createContainer()
       let scopedCounter = 1
       container.register({
-        scoped: asFunction(() => scopedCounter++).scoped()
+        scoped: asFunction(() => scopedCounter++).scoped(),
       })
 
       const scope1 = container.createScope()
@@ -217,11 +217,11 @@ describe('container', function() {
       expect(scope2.cradle.scoped).toBe(2)
     })
 
-    it('caches singletons regardless of scope', function() {
+    it('caches singletons regardless of scope', function () {
       const container = createContainer()
       let singletonCounter = 1
       container.register({
-        singleton: asFunction(() => singletonCounter++).singleton()
+        singleton: asFunction(() => singletonCounter++).singleton(),
       })
 
       const scope1 = container.createScope()
@@ -233,11 +233,11 @@ describe('container', function() {
       expect(scope2.cradle.singleton).toBe(1)
     })
 
-    it('resolves transients regardless of scope', function() {
+    it('resolves transients regardless of scope', function () {
       const container = createContainer()
       let transientCounter = 1
       container.register({
-        transient: asFunction(() => transientCounter++).transient()
+        transient: asFunction(() => transientCounter++).transient(),
       })
 
       const scope1 = container.createScope()
@@ -249,11 +249,11 @@ describe('container', function() {
       expect(scope2.cradle.transient).toBe(4)
     })
 
-    it('does not use parents cache when scoped', function() {
+    it('does not use parents cache when scoped', function () {
       const container = createContainer()
       let scopedCounter = 1
       container.register({
-        scoped: asFunction(() => scopedCounter++).scoped()
+        scoped: asFunction(() => scopedCounter++).scoped(),
       })
 
       const scope1 = container.createScope()
@@ -275,7 +275,7 @@ describe('container', function() {
       const container = createContainer()
       let counter = 1
       container.register({
-        counterValue: asFunction(() => counter++).scoped()
+        counterValue: asFunction(() => counter++).scoped(),
       })
       const scope1 = container.createScope()
       const scope2 = container.createScope()
@@ -290,13 +290,13 @@ describe('container', function() {
       expect(scope1Child.cradle.counterValue === 3).toBe(true)
     })
 
-    it('supports nested scopes', function() {
+    it('supports nested scopes', function () {
       const container = createContainer()
 
       // Increments the counter every time it is resolved.
       let counter = 1
       container.register({
-        counterValue: asFunction(() => counter++).scoped()
+        counterValue: asFunction(() => counter++).scoped(),
       })
       const scope1 = container.createScope()
       const scope2 = container.createScope()
@@ -310,37 +310,37 @@ describe('container', function() {
       expect(scope1Child.cradle.counterValue).toBe(3)
     })
 
-    it('resolves dependencies in scope', function() {
+    it('resolves dependencies in scope', function () {
       const container = createContainer()
       // Register a transient function
       // that returns the value of the scope-provided dependency.
       // For this example we could also use scoped lifetime.
       container.register({
-        scopedValue: asFunction((cradle: any) => 'Hello ' + cradle.someValue)
+        scopedValue: asFunction((cradle: any) => 'Hello ' + cradle.someValue),
       })
 
       // Create a scope and register a value.
       const scope = container.createScope()
       scope.register({
-        someValue: asValue('scope')
+        someValue: asValue('scope'),
       })
 
       expect(scope.cradle.scopedValue).toBe('Hello scope')
     })
 
-    it('cannot find a scope-registered value when resolved from root', function() {
+    it('cannot find a scope-registered value when resolved from root', function () {
       const container = createContainer()
       // Register a transient function
       // that returns the value of the scope-provided dependency.
       // For this example we could also use scoped lifetime.
       container.register({
-        scopedValue: asFunction((cradle: any) => 'Hello ' + cradle.someValue)
+        scopedValue: asFunction((cradle: any) => 'Hello ' + cradle.someValue),
       })
 
       // Create a scope and register a value.
       const scope = container.createScope()
       scope.register({
-        someValue: asValue('scope')
+        someValue: asValue('scope'),
       })
 
       expect(() => container.cradle.scopedValue).toThrowError(
@@ -348,7 +348,7 @@ describe('container', function() {
       )
     })
 
-    it('supports overwriting values in a scope', function() {
+    it('supports overwriting values in a scope', function () {
       const container = createContainer()
       // It does not matter when the scope is created,
       // it will still have anything that is registered
@@ -357,11 +357,11 @@ describe('container', function() {
 
       container.register({
         value: asValue('root'),
-        usedValue: asFunction((cradle: any) => cradle.value)
+        usedValue: asFunction((cradle: any) => cradle.value),
       })
 
       scope.register({
-        value: asValue('scope')
+        value: asValue('scope'),
       })
 
       expect(container.cradle.usedValue).toBe('root')
@@ -370,7 +370,7 @@ describe('container', function() {
 
     it('supports default parameters in CLASSIC mode', () => {
       const container = createContainer({
-        injectionMode: InjectionMode.CLASSIC
+        injectionMode: InjectionMode.CLASSIC,
       })
 
       class ClassWithDefaults {
@@ -390,7 +390,7 @@ describe('container', function() {
       container.register({
         val: asValue(123),
         cls: asClass(ClassWithDefaults),
-        fn: asFunction(fnWithDefaults)
+        fn: asFunction(fnWithDefaults),
       })
 
       expect(container.resolve<ClassWithDefaults>('cls').val).toBe(123)
@@ -399,23 +399,23 @@ describe('container', function() {
       )
     })
 
-    it('throws an AwilixResolutionError when there are cyclic dependencies', function() {
+    it('throws an AwilixResolutionError when there are cyclic dependencies', function () {
       const container = createContainer()
       container.register({
         first: asFunction((cradle: any) => cradle.second),
         second: asFunction((cradle: any) => cradle.third),
-        third: asFunction((cradle: any) => cradle.second)
+        third: asFunction((cradle: any) => cradle.second),
       })
 
       const err = throws(() => container.resolve('first'))
       expect(err.message).toContain('first -> second -> third -> second')
     })
 
-    it('throws an AwilixResolutionError when the lifetime is unknown', function() {
+    it('throws an AwilixResolutionError when the lifetime is unknown', function () {
       const container = createContainer()
       container.register({
         first: asFunction((cradle: any) => cradle.second),
-        second: asFunction((cradle: any) => 'hah', { lifetime: 'lol' as any })
+        second: asFunction((cradle: any) => 'hah', { lifetime: 'lol' as any }),
       })
 
       const err = throws(() => container.resolve('first'))
@@ -423,7 +423,7 @@ describe('container', function() {
       expect(err.message).toContain('lol')
     })
 
-    it('behaves properly when the cradle is returned from an async function', async function() {
+    it('behaves properly when the cradle is returned from an async function', async function () {
       const container = createContainer()
       container.register({ value: asValue(42) })
 
@@ -437,32 +437,32 @@ describe('container', function() {
     })
   })
 
-  describe('loadModules', function() {
+  describe('loadModules', function () {
     let container: AwilixContainer
-    beforeEach(function() {
+    beforeEach(function () {
       container = createContainer()
     })
 
-    it('returns the container', function() {
+    it('returns the container', function () {
       expect(container.loadModules([])).toBe(container)
     })
   })
 
-  describe('setting a property on the cradle', function() {
-    it('should fail', function() {
+  describe('setting a property on the cradle', function () {
+    it('should fail', function () {
       expect(() => {
         createContainer().cradle.lol = 'nope'
       }).toThrowError(Error)
     })
   })
 
-  describe('using util.inspect on the container', function() {
-    it('should return a summary', function() {
+  describe('using util.inspect on the container', function () {
+    it('should return a summary', function () {
       const container = createContainer().register({
         val1: asValue(1),
         val2: asValue(2),
         fn1: asFunction(() => true),
-        c1: asClass(Repo)
+        c1: asClass(Repo),
       })
 
       expect(util.inspect(container)).toBe(
@@ -477,13 +477,13 @@ describe('container', function() {
     })
   })
 
-  describe('using util.inspect on the cradle', function() {
-    it('should return the preconfigured string', function() {
+  describe('using util.inspect on the cradle', function () {
+    it('should return the preconfigured string', function () {
       const container = createContainer().register({
         val1: asValue(1),
         val2: asValue(2),
         fn1: asFunction(() => true),
-        c1: asClass(Repo)
+        c1: asClass(Repo),
       })
 
       expect(util.inspect(container.cradle)).toBe('[AwilixContainer.cradle]')
@@ -497,20 +497,20 @@ describe('container', function() {
     })
   })
 
-  describe('using Array.from on the cradle', function() {
-    it('should return an Array with registration names', function() {
+  describe('using Array.from on the cradle', function () {
+    it('should return an Array with registration names', function () {
       const container = createContainer().register({
         val1: asValue(1),
         val2: asValue(2),
         fn1: asFunction(() => true),
-        c1: asClass(Repo)
+        c1: asClass(Repo),
       })
 
       expect(Array.from(container.cradle)).toEqual([
         'val1',
         'val2',
         'fn1',
-        'c1'
+        'c1',
       ])
     })
 
@@ -524,7 +524,7 @@ describe('container', function() {
       const container = createContainer().register({
         val1: asValue(1),
         val2: asValue(2),
-        test: asClass(KeysTest).inject(() => ({ injected: true }))
+        test: asClass(KeysTest).inject(() => ({ injected: true })),
       })
 
       const result = container.resolve<KeysTest>('test')
@@ -532,25 +532,25 @@ describe('container', function() {
     })
   })
 
-  describe('explicitly trying to fuck shit up', function() {
-    it('should prevent you from fucking shit up', function() {
+  describe('explicitly trying to fuck shit up', function () {
+    it('should prevent you from fucking shit up', function () {
       const container = createContainer({
-        injectionMode: null as any
+        injectionMode: null as any,
       }).register({
         answer: asValue(42),
-        theAnswer: asFunction(({ answer }: any) => () => answer)
+        theAnswer: asFunction(({ answer }: any) => () => answer),
       })
 
       const theAnswer = container.resolve<Function>('theAnswer')
       expect(theAnswer()).toBe(42)
     })
 
-    it('should default to PROXY injection mode when unknown', function() {
+    it('should default to PROXY injection mode when unknown', function () {
       const container = createContainer({
-        injectionMode: 'I dunno maaaang...' as any
+        injectionMode: 'I dunno maaaang...' as any,
       }).register({
         answer: asValue(42),
-        theAnswer: asFunction(({ answer }: any) => () => answer)
+        theAnswer: asFunction(({ answer }: any) => () => answer),
       })
 
       const theAnswer = container.resolve<Function>('theAnswer')
@@ -562,7 +562,7 @@ describe('container', function() {
 describe('setting a name on the registration options', () => {
   it('should not work', () => {
     const container = createContainer().register({
-      test: asFunction(() => 42, { lifetime: Lifetime.SCOPED, name: 'lol' })
+      test: asFunction(() => 42, { lifetime: Lifetime.SCOPED, name: 'lol' }),
     })
 
     expect(container.resolve('test')).toBe(42)
@@ -576,7 +576,7 @@ describe('registering and resolving symbols', () => {
     const S2 = Symbol('test 2')
     const container = createContainer()
       .register({
-        [S1]: asValue(42)
+        [S1]: asValue(42),
       })
       .register(S2, asValue(24))
 
@@ -592,7 +592,7 @@ describe('spreading the cradle', () => {
   it('does not throw', () => {
     const container = createContainer().register({
       val1: asValue(1),
-      val2: asValue(2)
+      val2: asValue(2),
     })
     expect([...container.cradle]).toEqual(['val1', 'val2'])
   })
@@ -602,7 +602,7 @@ describe('using Object.keys() on the cradle', () => {
   it('should return the registration keys', () => {
     const container = createContainer().register({
       val1: asValue(1),
-      val2: asValue(2)
+      val2: asValue(2),
     })
     expect(Object.keys(container.cradle)).toEqual(['val1', 'val2'])
   })
@@ -617,7 +617,7 @@ describe('using Object.keys() on the cradle', () => {
     const container = createContainer().register({
       val1: asValue(1),
       val2: asValue(2),
-      test: asClass(KeysTest).inject(() => ({ injected: true, val2: 10 }))
+      test: asClass(KeysTest).inject(() => ({ injected: true, val2: 10 })),
     })
 
     const result = container.resolve<KeysTest>('test')
@@ -641,7 +641,7 @@ describe('using Object.getOwnPropertyDescriptor with injector proxy', () => {
     const container = createContainer()
       .register({ val1: asValue(1), val2: asValue(2) })
       .register({
-        test: asClass(KeysTest).inject(() => ({ injected: true }))
+        test: asClass(KeysTest).inject(() => ({ injected: true })),
       })
 
     const result = container.resolve<KeysTest>('test')
@@ -666,7 +666,7 @@ describe('using Object.getOwnPropertyDescriptor with container cradle', () => {
     const container = createContainer()
       .register({ val1: asValue(1), val2: asValue(2) })
       .register({
-        test: asClass(KeysTest)
+        test: asClass(KeysTest),
       })
 
     const result = container.resolve<KeysTest>('test')
@@ -691,15 +691,15 @@ describe('memoizing registrations', () => {
 
     container.register({ val3: asValue(1337) }).register({
       keys: asFunction((cradle: any) => Object.keys(cradle)).inject(() => ({
-        injected: true
-      }))
+        injected: true,
+      })),
     })
     expect(scope2.resolve('keys')).toEqual([
       'val1',
       'val2',
       'val3',
       'keys',
-      'injected'
+      'injected',
     ])
   })
 
@@ -743,14 +743,14 @@ describe('memoizing registrations', () => {
 
     it('uses containers injection mode by default', () => {
       const otherContainer = createContainer({
-        injectionMode: InjectionMode.CLASSIC
+        injectionMode: InjectionMode.CLASSIC,
       })
       otherContainer.register({ val: asValue(1337) })
       expect(otherContainer.build(fn)).toBe(1337)
     })
   })
 
-  describe('Safely stringify cradle', function() {
+  describe('Safely stringify cradle', function () {
     it('should have toJSON() return [AwilixContainer.cradle]', () => {
       expect(createContainer().cradle.toJSON()).toBe('[AwilixContainer.cradle]')
     })

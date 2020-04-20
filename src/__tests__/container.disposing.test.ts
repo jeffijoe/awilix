@@ -21,7 +21,7 @@ function testFunc(notDisposer: {}): TestFunc {
   return {
     destroy() {
       return Promise.resolve(42)
-    }
+    },
   }
 }
 
@@ -32,30 +32,30 @@ describe('disposing container', () => {
   beforeEach(() => {
     order = []
     container = createContainer({
-      injectionMode: InjectionMode.CLASSIC
+      injectionMode: InjectionMode.CLASSIC,
     }).register({
       notDisposer: asFunction(() => ({})).scoped(),
       scopedButRegedAtRoot: asFunction(testFunc)
         .scoped()
-        .disposer(t => {
+        .disposer((t) => {
           order.push(2)
           return t.destroy()
         }),
       funcDisposer: asFunction(testFunc)
         .singleton()
-        .disposer(t => {
+        .disposer((t) => {
           order.push(2)
           return t.destroy()
-        })
+        }),
     })
 
     scope = container.createScope().register({
       classDisposer: asClass(TestClass, {
-        dispose: t => {
+        dispose: (t) => {
           order.push(1)
           return t.dispose()
-        }
-      }).scoped()
+        },
+      }).scoped(),
     })
   })
 

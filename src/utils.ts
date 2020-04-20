@@ -12,8 +12,8 @@ import { Constructor } from './resolvers'
  */
 export function flatten<T>(array: Array<Array<T>>): Array<T> {
   const result: Array<T> = []
-  array.forEach(arr => {
-    arr.forEach(item => {
+  array.forEach((arr) => {
+    arr.forEach((item) => {
       result.push(item)
     })
   })

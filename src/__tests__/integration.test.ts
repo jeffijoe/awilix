@@ -4,8 +4,8 @@ const AnotherService = require('./fixture/services/anotherService')
   .AnotherService
 const fixture = require('./fixture')
 
-describe('integration tests', function() {
-  it('bootstraps everything so the answer can be resolved', function() {
+describe('integration tests', function () {
+  it('bootstraps everything so the answer can be resolved', function () {
     const container = fixture()
     const anotherService = container.resolve('anotherService')
     expect(anotherService).toBeInstanceOf(AnotherService)
@@ -14,7 +14,7 @@ describe('integration tests', function() {
     expect(Object.keys(container.registrations).length).toBe(4)
   })
 
-  it('registered all services as scoped', function() {
+  it('registered all services as scoped', function () {
     const container = fixture()
     const scope1 = container.createScope()
     const scope2 = container.createScope()

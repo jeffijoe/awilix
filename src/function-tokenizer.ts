@@ -28,7 +28,7 @@ export const enum TokenizerFlags {
   /**
    * If this is set, the tokenizer will not attempt to be smart about skipping expressions.
    */
-  Dumb = 1
+  Dumb = 1,
 }
 
 /**
@@ -49,7 +49,7 @@ export function createTokenizer(source: string) {
 
   return {
     next,
-    done
+    done,
   }
 
   /**
@@ -107,11 +107,11 @@ export function createTokenizer(source: string) {
           pos++
           const nextCh = source.charAt(pos)
           if (nextCh === '/') {
-            skipUntil(c => c === '\n', true)
+            skipUntil((c) => c === '\n', true)
             pos++
           }
           if (nextCh === '*') {
-            skipUntil(c => {
+            skipUntil((c) => {
               const closing = source.charAt(pos + 1)
               return c === '*' && closing === '/'
             }, true)
@@ -154,7 +154,7 @@ export function createTokenizer(source: string) {
    * Checks the parenthesis balance so we correctly skip function calls.
    */
   function skipExpression() {
-    skipUntil(ch => {
+    skipUntil((ch) => {
       const isAtRoot = parenLeft === parenRight + 1
       if (ch === ',' && isAtRoot) {
         return true
@@ -230,7 +230,7 @@ export function createTokenizer(source: string) {
             pos = pos + 2
             // Skip strings and whitespace until we reach the ending }.
             // This includes skipping nested interpolated strings. :D
-            skipUntil(ch => ch === '}')
+            skipUntil((ch) => ch === '}')
           }
         }
       }

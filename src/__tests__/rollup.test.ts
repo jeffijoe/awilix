@@ -33,7 +33,7 @@ function getValue(pkg: any) {
     .createContainer()
     .register({
       value: pkg.asValue(123),
-      fn: pkg.asFunction(({ value }: any) => value)
+      fn: pkg.asFunction(({ value }: any) => value),
     })
     .resolve('fn')
 }
@@ -45,10 +45,10 @@ function runLoadModules(pkg: any) {
     .loadModules(
       [
         ['services/*.js', pkg.Lifetime.SCOPED],
-        ['repositories/*.js', { injector: () => ({ timeout: 10 }) }]
+        ['repositories/*.js', { injector: () => ({ timeout: 10 }) }],
       ],
       {
-        cwd: path.join(process.cwd(), 'src/__tests__/fixture')
+        cwd: path.join(process.cwd(), 'src/__tests__/fixture'),
       }
     )
     .resolve('mainService')

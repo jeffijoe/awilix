@@ -22,12 +22,12 @@ export class ExtendableError extends Error {
     // extending Error is weird and does not propagate `message`
     Object.defineProperty(this, 'message', {
       enumerable: false,
-      value: message
+      value: message,
     })
 
     Object.defineProperty(this, 'name', {
       enumerable: false,
-      value: this.constructor.name
+      value: this.constructor.name,
     })
 
     Error.captureStackTrace(this, this.constructor)

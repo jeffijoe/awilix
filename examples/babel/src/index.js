@@ -3,12 +3,12 @@ import { TestService } from './services/testService'
 import { DependentService } from './services/dependentService'
 
 const container = createContainer({
-  injectionMode: InjectionMode.CLASSIC
+  injectionMode: InjectionMode.CLASSIC,
 })
 
 container.register({
   testService: asClass(TestService),
-  dep: asClass(DependentService)
+  dep: asClass(DependentService),
 })
 
 const depService = container.cradle.dep

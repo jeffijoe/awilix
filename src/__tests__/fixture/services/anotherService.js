@@ -6,6 +6,6 @@ class AnotherService {
 
 module.exports.AnotherService = AnotherService
 
-module.exports.default = function(deps) {
+module.exports.default = function (deps) {
   return new AnotherService(deps.answerRepository)
 }

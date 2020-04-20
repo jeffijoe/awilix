@@ -2,7 +2,7 @@ import * as util from 'util'
 import { GlobWithOptions, listModules } from './list-modules'
 import {
   LoadModulesOptions,
-  loadModules as realLoadModules
+  loadModules as realLoadModules,
 } from './load-modules'
 import {
   Resolver,
@@ -10,7 +10,7 @@ import {
   asClass,
   asFunction,
   DisposableResolver,
-  BuildResolverOptions
+  BuildResolverOptions,
 } from './resolvers'
 import { last, nameValueToObject, isClass } from './utils'
 import { InjectionMode, InjectionModeType } from './injection-mode'
@@ -200,7 +200,7 @@ export function createContainer<T extends object = any, U extends object = any>(
 ): AwilixContainer<T> {
   options = {
     injectionMode: InjectionMode.PROXY,
-    ...options
+    ...options,
   }
 
   // The resolution stack is used to keep track
@@ -223,7 +223,7 @@ export function createContainer<T extends object = any, U extends object = any>(
    */
   const cradle = new Proxy(
     {
-      [util.inspect.custom]: inspectCradle
+      [util.inspect.custom]: inspectCradle,
     },
     {
       /**
@@ -248,7 +248,9 @@ export function createContainer<T extends object = any, U extends object = any>(
        */
       set: (_target, name, value) => {
         throw new Error(
-          `Attempted setting property "${name as any}" on container cradle - this is not allowed.`
+          `Attempted setting property "${
+            name as any
+          }" on container cradle - this is not allowed.`
         )
       },
 
@@ -267,12 +269,12 @@ export function createContainer<T extends object = any, U extends object = any>(
         if (Object.getOwnPropertyDescriptor(regs, key)) {
           return {
             enumerable: true,
-            configurable: true
+            configurable: true,
           }
         }
 
         return undefined
-      }
+      },
     }
   ) as T
 
@@ -294,15 +296,15 @@ export function createContainer<T extends object = any, U extends object = any>(
     [ROLL_UP_REGISTRATIONS!]: rollUpRegistrations,
     get registrations() {
       return rollUpRegistrations()
-    }
+    },
   }
 
   // Track the family tree.
   const familyTree: Array<AwilixContainer> = parentContainer
-      ? [container].concat((parentContainer as any)[FAMILY_TREE])
-      : [container]
+    ? [container].concat((parentContainer as any)[FAMILY_TREE])
+    : [container]
 
-    // Save it so we can access it from a scoped container.
+  // Save it so we can access it from a scoped container.
   ;(container as any)[FAMILY_TREE] = familyTree
 
   // We need a reference to the root container,
@@ -338,7 +340,7 @@ export function createContainer<T extends object = any, U extends object = any>(
     computedRegistrations = {
       ...(parentContainer &&
         (parentContainer as any)[ROLL_UP_REGISTRATIONS](bustCache)),
-      ...registrations
+      ...registrations,
     }
 
     return computedRegistrations!
@@ -578,11 +580,11 @@ export function createContainer<T extends object = any, U extends object = any>(
     const _loadModulesDeps = {
       require:
         options!.require ||
-        function(uri) {
+        function (uri) {
           return require(uri)
         },
       listModules,
-      container
+      container,
     }
     realLoadModules(_loadModulesDeps, globPatterns, opts)
     return container

@@ -11,13 +11,13 @@ container.register('database', awilix.asValue('stuffs_db'))
 const opts = {
   // We want ClassicalService to be registered as classicalService.
   formatName: 'camelCase',
-  cwd: __dirname
+  cwd: __dirname,
 }
 container.loadModules(
   [
     // Glob patterns
     'services/*.js',
-    'repositories/*.js'
+    'repositories/*.js',
   ],
   opts
 )
@@ -39,6 +39,6 @@ console.log(
 )
 
 // Let's do something!
-classicalService.actAllCool().then(r => {
+classicalService.actAllCool().then((r) => {
   console.log('Result from classical service:', r)
 })

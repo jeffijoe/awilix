@@ -61,10 +61,10 @@ function _listModules(
   }
 
   const result = opts.glob!(globPattern, { cwd: opts.cwd })
-  const mapped = result.map(p => ({
+  const mapped = result.map((p) => ({
     name: nameExpr.exec(path.basename(p))![1],
     path: path.resolve(opts!.cwd!, p),
-    opts: patternOpts
+    opts: patternOpts,
   }))
   return mapped
 }
@@ -89,7 +89,7 @@ export function listModules(
   opts?: ListModulesOptions
 ) {
   if (Array.isArray(globPatterns)) {
-    return flatten(globPatterns.map(p => _listModules(p, opts)))
+    return flatten(globPatterns.map((p) => _listModules(p, opts)))
   }
 
   return _listModules(globPatterns, opts)

@@ -17,7 +17,7 @@ function getStuffAndDeleteSecret(opts, someArgument) {
   const stuffs = opts.stuffs
 
   // We may now carry on.
-  return stuffs.getStuff(someArgument).then(stuff => {
+  return stuffs.getStuff(someArgument).then((stuff) => {
     // Modify return value. Just to prove this is testable.
     delete stuff.secret
     return stuff
@@ -25,13 +25,13 @@ function getStuffAndDeleteSecret(opts, someArgument) {
 }
 
 // NOTE: When using ES6 import-export, you can simply use `export default`.
-module.exports = function(opts) {
+module.exports = function (opts) {
   // "opts" is the container "cradle", whenever a property getter is invoked, it will
   // result in a resolution.
   return {
     getStuffAndDeleteSecret: getStuffAndDeleteSecret.bind(null, {
-      stuffs: opts.stuffs
-    })
+      stuffs: opts.stuffs,
+    }),
   }
 }
 

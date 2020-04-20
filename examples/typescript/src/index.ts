@@ -10,13 +10,13 @@ interface ICradle {
 
 // Create the container
 const container = createContainer<ICradle>({
-  injectionMode: InjectionMode.CLASSIC
+  injectionMode: InjectionMode.CLASSIC,
 })
 
 // Register the classes
 container.register({
   testService: asClass(TestService),
-  depService: asClass(DependentService).classic()
+  depService: asClass(DependentService).classic(),
 })
 
 // Resolve a dependency using the cradle.

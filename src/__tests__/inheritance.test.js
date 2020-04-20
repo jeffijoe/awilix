@@ -35,34 +35,34 @@ test('parses parent classes if there are no declared parameters', () => {
     level1: asClass(Level1),
     level2: asClass(Level2),
     level3: asClass(Level3),
-    level4: asClass(Level4)
+    level4: asClass(Level4),
   })
 
   expect(container.resolve('level1')).toEqual(
     expect.objectContaining({
       arg1: 1,
-      arg2: 2
+      arg2: 2,
     })
   )
 
   expect(container.resolve('level2')).toEqual(
     expect.objectContaining({
       arg1: 1,
-      arg2: 2
+      arg2: 2,
     })
   )
 
   expect(container.resolve('level3')).toEqual(
     expect.objectContaining({
       arg1: 1,
-      arg2: 2
+      arg2: 2,
     })
   )
 
   expect(container.resolve('level4')).toEqual(
     expect.objectContaining({
       arg1: 4,
-      arg2: undefined
+      arg2: undefined,
     })
   )
 })

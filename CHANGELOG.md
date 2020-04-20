@@ -1,3 +1,9 @@
+# v4.2.6
+
+- Fix return type for `createScope` when using a cradle typing. ([#182](https://github.com/jeffijoe/awilix/pull/182), [moltar](https://github.com/moltar))
+- Remove `yarn.lock`, contributing docs now recommend `npm`.
+- Update packages, upgrade to Prettier 2.0
+
 # v4.2.5
 
 - Add optional generic parameter to container typing. Allows for a typed `ICradle`. ([#169](https://github.com/jeffijoe/awilix/pull/169), [roikoren755](https://github.com/roikoren755))
@@ -67,14 +73,14 @@ import { Logger } from './logger'
 import { createContainer, asClass, InjectionMode } from 'awilix'
 
 const container = createContainer({
-  injectionMode: InjectionMode.CLASSIC
+  injectionMode: InjectionMode.CLASSIC,
 }).register({
-  logger: asClass(Logger).scoped()
+  logger: asClass(Logger).scoped(),
 })
 
 const scope = container.createScope()
 scope.register({
-  loggerPrefix: asValue('dope scope')
+  loggerPrefix: asValue('dope scope'),
 })
 
 const rootLogger = container.resolve('logger')
@@ -174,7 +180,7 @@ const container = createContainer()
 
 container.register({
   laughingOutLoud: asValue('hahahahaha'),
-  lol: alias('laughingOutLoud')
+  lol: alias('laughingOutLoud'),
 })
 
 container.resolve('lol') // 'hahahahaha'

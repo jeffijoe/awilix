@@ -18,5 +18,5 @@ export const InjectionMode: Record<InjectionModeType, InjectionModeType> = {
    *
    * @type {String}
    */
-  CLASSIC: 'CLASSIC'
+  CLASSIC: 'CLASSIC',
 }

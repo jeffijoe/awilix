@@ -2,18 +2,18 @@
 const messages = {
   1: [
     {
-      message: 'hello'
+      message: 'hello',
     },
     {
-      message: 'world'
-    }
+      message: 'world',
+    },
   ],
 
   2: [
     {
-      message: 'damn son'
-    }
-  ]
+      message: 'damn son',
+    },
+  ],
 }
 
 /**
@@ -31,6 +31,6 @@ module.exports = function makeMessageRepository({ DB_CONNECTION_STRING }) {
   }
 
   return {
-    findMessagesForUser
+    findMessagesForUser,
   }
 }

@@ -9,7 +9,7 @@ describe('tokenizer', () => {
       { type: '(' },
       { type: 'ident', value: 'p1' },
       { type: ')' },
-      { type: 'EOF' }
+      { type: 'EOF' },
     ])
   })
 
@@ -24,7 +24,7 @@ describe('tokenizer', () => {
       { type: ',' },
       { type: 'ident', value: 'p2' },
       { type: ')' },
-      { type: 'EOF' }
+      { type: 'EOF' },
     ])
   })
 

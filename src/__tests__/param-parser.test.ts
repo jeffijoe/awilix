@@ -1,11 +1,11 @@
 import { parseParameterList } from '../param-parser'
 
-describe('parseParameterList', function() {
-  it('returns an empty array when invalid input is given', function() {
+describe('parseParameterList', function () {
+  it('returns an empty array when invalid input is given', function () {
     expect(parseParameterList('')).toEqual([])
   })
 
-  it('supports regular functions', function() {
+  it('supports regular functions', function () {
     expect(
       parseParameterList(
         function hello(dep1: any, dep2: any) {
@@ -14,28 +14,28 @@ describe('parseParameterList', function() {
       )
     ).toEqual([
       { name: 'dep1', optional: false },
-      { name: 'dep2', optional: false }
+      { name: 'dep2', optional: false },
     ])
     expect(
       parseParameterList(
-        function(dep1: any, dep2: any) {
-          /**/
-        }.toString()
-      )
-    ).toEqual([
-      { name: 'dep1', optional: false },
-      { name: 'dep2', optional: false }
-    ])
-    expect(
-      parseParameterList(
-        function(dep1: any, dep2: any, dep3: any) {
+        function (dep1: any, dep2: any) {
           /**/
         }.toString()
       )
     ).toEqual([
       { name: 'dep1', optional: false },
       { name: 'dep2', optional: false },
-      { name: 'dep3', optional: false }
+    ])
+    expect(
+      parseParameterList(
+        function (dep1: any, dep2: any, dep3: any) {
+          /**/
+        }.toString()
+      )
+    ).toEqual([
+      { name: 'dep1', optional: false },
+      { name: 'dep2', optional: false },
+      { name: 'dep3', optional: false },
     ])
     expect(
       parseParameterList(
@@ -46,14 +46,14 @@ describe('parseParameterList', function() {
     ).toEqual([])
     expect(
       parseParameterList(
-        function() {
+        function () {
           /**/
         }.toString()
       )
     ).toEqual([])
   })
 
-  it('supports regular functions with default params', function() {
+  it('supports regular functions with default params', function () {
     expect(
       parseParameterList(
         `function hello(
@@ -64,11 +64,11 @@ describe('parseParameterList', function() {
       )
     ).toEqual([
       { name: 'dep1', optional: true },
-      { name: 'dep2', optional: true }
+      { name: 'dep2', optional: true },
     ])
   })
 
-  it('supports arrow functions', function() {
+  it('supports arrow functions', function () {
     expect(
       parseParameterList(
         ((dep1: any, dep2: any) => {
@@ -77,13 +77,13 @@ describe('parseParameterList', function() {
       )
     ).toEqual([
       { name: 'dep1', optional: false },
-      { name: 'dep2', optional: false }
+      { name: 'dep2', optional: false },
     ])
     expect(
       parseParameterList(((dep1: any, dep2: any) => 42).toString())
     ).toEqual([
       { name: 'dep1', optional: false },
-      { name: 'dep2', optional: false }
+      { name: 'dep2', optional: false },
     ])
     expect(
       parseParameterList(
@@ -94,7 +94,7 @@ describe('parseParameterList', function() {
     ).toEqual([
       { name: 'dep1', optional: false },
       { name: 'dep2', optional: false },
-      { name: 'dep3', optional: false }
+      { name: 'dep3', optional: false },
     ])
     expect(
       parseParameterList(
@@ -105,11 +105,11 @@ describe('parseParameterList', function() {
     ).toEqual([])
     expect(parseParameterList((() => 42).toString())).toEqual([])
     expect(parseParameterList(`dep1 => lol`)).toEqual([
-      { name: 'dep1', optional: false }
+      { name: 'dep1', optional: false },
     ])
   })
 
-  it('supports arrow function with default params', function() {
+  it('supports arrow function with default params', function () {
     expect(
       parseParameterList(
         ((dep1 = 123, dep2 = 456) => {
@@ -118,17 +118,17 @@ describe('parseParameterList', function() {
       )
     ).toEqual([
       { name: 'dep1', optional: true },
-      { name: 'dep2', optional: true }
+      { name: 'dep2', optional: true },
     ])
     expect(
       parseParameterList(((dep1 = 123, dep2 = 456) => 789).toString())
     ).toEqual([
       { name: 'dep1', optional: true },
-      { name: 'dep2', optional: true }
+      { name: 'dep2', optional: true },
     ])
   })
 
-  it('supports class constructors', function() {
+  it('supports class constructors', function () {
     class Test {
       dep1: any
       constructor(dep1: any, dep2: any) {
@@ -142,7 +142,7 @@ describe('parseParameterList', function() {
 
     expect(parseParameterList(Test.prototype.constructor.toString())).toEqual([
       { name: 'dep1', optional: false },
-      { name: 'dep2', optional: false }
+      { name: 'dep2', optional: false },
     ])
   })
 
@@ -165,28 +165,28 @@ describe('parseParameterList', function() {
     `
     expect(parseParameterList(cls)).toEqual([
       { name: 'dep1', optional: false },
-      { name: 'dep2', optional: true }
+      { name: 'dep2', optional: true },
     ])
   })
 
-  it('supports carriage return in function signature', function() {
+  it('supports carriage return in function signature', function () {
     expect(parseParameterList(`function (\r\ndep1,\r\ndep2\r\n) {}`)).toEqual([
       { name: 'dep1', optional: false },
-      { name: 'dep2', optional: false }
+      { name: 'dep2', optional: false },
     ])
   })
 
-  it('supports weird formatting', function() {
+  it('supports weird formatting', function () {
     expect(
       parseParameterList(`function(  dep1    \n,\r\n  dep2 = 123 \r\n) {}`)
     ).toEqual([
       { name: 'dep1', optional: false },
-      { name: 'dep2', optional: true }
+      { name: 'dep2', optional: true },
     ])
   })
 
-  it('supports the problem posted in issue #30', function() {
-    const fn = function(a: any) {
+  it('supports the problem posted in issue #30', function () {
+    const fn = function (a: any) {
       return {}
     }
 
@@ -195,10 +195,10 @@ describe('parseParameterList', function() {
     }
 
     expect(parseParameterList(fn.toString())).toEqual([
-      { name: 'a', optional: false }
+      { name: 'a', optional: false },
     ])
     expect(parseParameterList(fn2.toString())).toEqual([
-      { name: 'a', optional: false }
+      { name: 'a', optional: false },
     ])
   })
 
@@ -219,7 +219,7 @@ class UserController {
     `
 
     expect(parseParameterList(cls)).toEqual([
-      { name: 'userService', optional: false }
+      { name: 'userService', optional: false },
     ])
   })
 
@@ -242,7 +242,7 @@ class UserController {
     `
 
     expect(parseParameterList(cls)).toEqual([
-      { name: 'userService', optional: false }
+      { name: 'userService', optional: false },
     ])
   })
 
@@ -268,7 +268,7 @@ class UserController {
         `
 
     expect(parseParameterList(cls)).toEqual([
-      { name: 'userService', optional: false }
+      { name: 'userService', optional: false },
     ])
   })
 
@@ -276,29 +276,29 @@ class UserController {
     expect(parseParameterList(`async function (first, second) {}`)).toEqual([
       {
         name: 'first',
-        optional: false
+        optional: false,
       },
       {
         name: 'second',
-        optional: false
-      }
+        optional: false,
+      },
     ])
     expect(parseParameterList(`async (first, second) => {}`)).toEqual([
       {
         name: 'first',
-        optional: false
+        optional: false,
       },
       {
         name: 'second',
-        optional: false
-      }
+        optional: false,
+      },
     ])
     expect(parseParameterList(`async () => {}`)).toEqual([])
     expect(parseParameterList(`async => {}`)).toEqual([
       {
         name: 'async',
-        optional: false
-      }
+        optional: false,
+      },
     ])
   })
 
@@ -306,22 +306,22 @@ class UserController {
     expect(parseParameterList(`async function* (first, second) {}`)).toEqual([
       {
         name: 'first',
-        optional: false
+        optional: false,
       },
       {
         name: 'second',
-        optional: false
-      }
+        optional: false,
+      },
     ])
     expect(parseParameterList(`async function *(first, second) {}`)).toEqual([
       {
         name: 'first',
-        optional: false
+        optional: false,
       },
       {
         name: 'second',
-        optional: false
-      }
+        optional: false,
+      },
     ])
   })
 })

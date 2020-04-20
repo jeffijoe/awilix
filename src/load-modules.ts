@@ -4,7 +4,7 @@ import {
   RESOLVER,
   asClass,
   asFunction,
-  BuildResolverOptions
+  BuildResolverOptions,
 } from './resolvers'
 import { AwilixContainer } from './container'
 import { isClass, isFunction } from './utils'
@@ -50,7 +50,7 @@ export interface LoadModulesDeps {
 }
 
 const nameFormatters: Record<string, NameFormatter> = {
-  camelCase: s => camelCase(s)
+  camelCase: (s) => camelCase(s),
 }
 
 /**
@@ -88,7 +88,7 @@ export function loadModules(
   opts = optsWithDefaults(opts, container)
   const modules = dependencies.listModules(globPatterns, opts)
 
-  const result = modules.map(m => {
+  const result = modules.map((m) => {
     const items: Array<{
       name: string
       path: string
@@ -109,7 +109,7 @@ export function loadModules(
         name: m.name,
         path: m.path,
         value: loaded,
-        opts: m.opts
+        opts: m.opts,
       })
 
       return items
@@ -121,7 +121,7 @@ export function loadModules(
         name: m.name,
         path: m.path,
         value: loaded.default,
-        opts: m.opts
+        opts: m.opts,
       })
     }
 
@@ -138,7 +138,7 @@ export function loadModules(
           name: key,
           path: m.path,
           value: loaded[key],
-          opts: m.opts
+          opts: m.opts,
         })
       }
     }
@@ -148,11 +148,11 @@ export function loadModules(
 
   result
     .reduce((acc, cur) => acc.concat(cur), [])
-    .filter(x => x)
+    .filter((x) => x)
     .forEach(registerDescriptor.bind(null, container, opts))
 
   return {
-    loadedModules: modules
+    loadedModules: modules,
   }
 }
 
@@ -167,9 +167,9 @@ function optsWithDefaults(
     // Does a somewhat-deep merge on the registration options.
     resolverOptions: {
       lifetime: Lifetime.TRANSIENT,
-      ...(opts && opts.resolverOptions)
+      ...(opts && opts.resolverOptions),
     },
-    ...opts
+    ...opts,
   }
 }
 
@@ -210,7 +210,7 @@ function registerDescriptor(
   const regOpts: BuildResolver<any> = {
     ...opts.resolverOptions,
     ...moduleDescriptorOpts,
-    ...inlineConfig
+    ...inlineConfig,
   }
 
   const reg: Function = regOpts.register

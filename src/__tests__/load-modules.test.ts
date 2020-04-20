@@ -5,14 +5,14 @@ import { InjectionMode } from '../injection-mode'
 import { asFunction, RESOLVER, BuildResolver, asValue } from '../resolvers'
 
 const lookupResultFor = (modules: any) =>
-  Object.keys(modules).map(key => ({
+  Object.keys(modules).map((key) => ({
     name: key.replace('.js', ''),
     path: key,
-    opts: null
+    opts: null,
   }))
 
-describe('loadModules', function() {
-  it('registers loaded modules with the container using the name of the file', function() {
+describe('loadModules', function () {
+  it('registers loaded modules with the container using the name of the file', function () {
     const container = createContainer()
 
     class SomeClass {}
@@ -21,13 +21,13 @@ describe('loadModules', function() {
       'nope.js': undefined,
       'standard.js': jest.fn(() => 42),
       'default.js': { default: jest.fn(() => 1337) },
-      'someClass.js': SomeClass
+      'someClass.js': SomeClass,
     }
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
       container,
       listModules: jest.fn(() => moduleLookupResult),
-      require: jest.fn(path => modules[path])
+      require: jest.fn((path) => modules[path]),
     }
 
     const result = loadModules(deps, 'anything')
@@ -38,7 +38,7 @@ describe('loadModules', function() {
     expect(container.resolve('someClass')).toBeInstanceOf(SomeClass)
   })
 
-  it('registers non-default export modules containing RESOLVER token with the container', function() {
+  it('registers non-default export modules containing RESOLVER token with the container', function () {
     const container = createContainer()
 
     class SomeNonDefaultClass {
@@ -46,13 +46,13 @@ describe('loadModules', function() {
     }
 
     const modules: any = {
-      'someIgnoredName.js': { SomeNonDefaultClass }
+      'someIgnoredName.js': { SomeNonDefaultClass },
     }
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
       container,
       listModules: jest.fn(() => moduleLookupResult),
-      require: jest.fn(path => modules[path])
+      require: jest.fn((path) => modules[path]),
     }
 
     const result = loadModules(deps, 'anything')
@@ -64,19 +64,19 @@ describe('loadModules', function() {
     )
   })
 
-  it('does not register non-default modules without a RESOLVER token', function() {
+  it('does not register non-default modules without a RESOLVER token', function () {
     const container = createContainer()
 
     class SomeClass {}
 
     const modules: any = {
-      'nopeClass.js': { SomeClass }
+      'nopeClass.js': { SomeClass },
     }
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
       container,
       listModules: jest.fn(() => moduleLookupResult),
-      require: jest.fn(path => modules[path])
+      require: jest.fn((path) => modules[path]),
     }
 
     const result = loadModules(deps, 'anything')
@@ -84,7 +84,7 @@ describe('loadModules', function() {
     expect(Object.keys(container.registrations).length).toBe(0)
   })
 
-  it('registers multiple loaded modules from one file with the container', function() {
+  it('registers multiple loaded modules from one file with the container', function () {
     const container = createContainer()
 
     class SomeClass {}
@@ -93,7 +93,7 @@ describe('loadModules', function() {
     }
     class SomeNamedNonDefaultClass {
       static [RESOLVER] = {
-        name: 'nameOverride'
+        name: 'nameOverride',
       }
     }
 
@@ -101,14 +101,14 @@ describe('loadModules', function() {
       'mixedFile.js': {
         default: SomeClass,
         nonDefault: SomeNonDefaultClass,
-        namedNonDefault: SomeNamedNonDefaultClass
-      }
+        namedNonDefault: SomeNamedNonDefaultClass,
+      },
     }
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
       container,
       listModules: jest.fn(() => moduleLookupResult),
-      require: jest.fn(path => modules[path])
+      require: jest.fn((path) => modules[path]),
     }
 
     const result = loadModules(deps, 'anything')
@@ -121,7 +121,7 @@ describe('loadModules', function() {
     )
   })
 
-  it('registers only the last module with a certain name with the container', function() {
+  it('registers only the last module with a certain name with the container', function () {
     const container = createContainer()
 
     class SomeClass {}
@@ -130,7 +130,7 @@ describe('loadModules', function() {
     }
     class SomeNamedNonDefaultClass {
       static [RESOLVER] = {
-        name: 'nameOverride'
+        name: 'nameOverride',
       }
     }
 
@@ -139,19 +139,19 @@ describe('loadModules', function() {
         default: SomeClass,
         nameOverride: SomeNonDefaultClass,
         // this will override the above named export with its specified name
-        namedNonDefault: SomeNamedNonDefaultClass
+        namedNonDefault: SomeNamedNonDefaultClass,
       },
       'mixedFileTwo.js': {
         // this will override the default export from mixedFileOne
-        mixedFileOne: SomeNonDefaultClass
-      }
+        mixedFileOne: SomeNonDefaultClass,
+      },
     }
 
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
       container,
       listModules: jest.fn(() => moduleLookupResult),
-      require: jest.fn(path => modules[path])
+      require: jest.fn((path) => modules[path]),
     }
 
     const result = loadModules(deps, 'anything')
@@ -165,19 +165,19 @@ describe('loadModules', function() {
     )
   })
 
-  it('uses built-in formatter when given a formatName as a string', function() {
+  it('uses built-in formatter when given a formatName as a string', function () {
     const container = createContainer()
     const modules: any = {
-      'SomeClass.js': jest.fn(() => 42)
+      'SomeClass.js': jest.fn(() => 42),
     }
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
       container,
       listModules: jest.fn(() => moduleLookupResult),
-      require: jest.fn(path => modules[path])
+      require: jest.fn((path) => modules[path]),
     }
     const opts: LoadModulesOptions = {
-      formatName: 'camelCase'
+      formatName: 'camelCase',
     }
     const result = loadModules(deps, 'anything', opts)
     expect(result).toEqual({ loadedModules: moduleLookupResult })
@@ -185,22 +185,22 @@ describe('loadModules', function() {
     expect(reg).toBeTruthy()
   })
 
-  it('uses the function passed in as formatName', function() {
+  it('uses the function passed in as formatName', function () {
     const container = createContainer()
     const modules: any = {
-      'SomeClass.js': jest.fn(() => 42)
+      'SomeClass.js': jest.fn(() => 42),
     }
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
       container,
       listModules: jest.fn(() => moduleLookupResult),
-      require: jest.fn(path => modules[path])
+      require: jest.fn((path) => modules[path]),
     }
     const opts: LoadModulesOptions = {
       formatName: (name, descriptor) => {
         expect(descriptor.path).toBeTruthy()
         return name + 'IsGreat'
-      }
+      },
     }
     const result = loadModules(deps, 'anything', opts)
     expect(result).toEqual({ loadedModules: moduleLookupResult })
@@ -208,19 +208,19 @@ describe('loadModules', function() {
     expect(reg).toBeTruthy()
   })
 
-  it('does nothing with the name if the string formatName does not match a formatter', function() {
+  it('does nothing with the name if the string formatName does not match a formatter', function () {
     const container = createContainer()
     const modules: any = {
-      'SomeClass.js': jest.fn(() => 42)
+      'SomeClass.js': jest.fn(() => 42),
     }
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
       container,
       listModules: jest.fn(() => moduleLookupResult),
-      require: jest.fn(path => modules[path])
+      require: jest.fn((path) => modules[path]),
     }
     const opts: any = {
-      formatName: 'unknownformatternope'
+      formatName: 'unknownformatternope',
     }
     const result = loadModules(deps, 'anything', opts)
     expect(result).toEqual({ loadedModules: moduleLookupResult })
@@ -228,19 +228,19 @@ describe('loadModules', function() {
     expect(reg).toBeTruthy()
   })
 
-  it('defaults to transient lifetime if option is unreadable', function() {
+  it('defaults to transient lifetime if option is unreadable', function () {
     const container = createContainer()
     const modules: any = {
-      'test.js': jest.fn(() => 42)
+      'test.js': jest.fn(() => 42),
     }
     const moduleLookupResult = lookupResultFor(modules)
     const deps = {
       container,
       listModules: jest.fn(() => moduleLookupResult),
-      require: jest.fn(path => modules[path])
+      require: jest.fn((path) => modules[path]),
     }
     const opts = {
-      resolverOptions: {}
+      resolverOptions: {},
     }
     const result = loadModules(deps, 'anything', opts)
     expect(result).toEqual({ loadedModules: moduleLookupResult })
@@ -248,25 +248,25 @@ describe('loadModules', function() {
     expect(reg).toBeTruthy()
   })
 
-  it('supports passing in a register function', function() {
+  it('supports passing in a register function', function () {
     const container = createContainer()
     const moduleSpy = jest.fn(() => () => 42)
     const modules: any = {
-      'test.js': moduleSpy
+      'test.js': moduleSpy,
     }
     const moduleLookupResult = lookupResultFor(modules)
     const registerSpy = jest.fn(asFunction)
     const deps = {
       container,
       listModules: jest.fn(() => moduleLookupResult),
-      require: jest.fn(path => modules[path])
+      require: jest.fn((path) => modules[path]),
     }
     const regOpts = {
       register: registerSpy,
-      lifetime: Lifetime.SCOPED
+      lifetime: Lifetime.SCOPED,
     }
     const opts = {
-      resolverOptions: regOpts
+      resolverOptions: regOpts,
     }
     const result = loadModules(deps, 'anything', opts)
     expect(result).toEqual({ loadedModules: moduleLookupResult })
@@ -275,63 +275,63 @@ describe('loadModules', function() {
     expect(registerSpy).toHaveBeenCalledWith(moduleSpy, regOpts)
   })
 
-  it('supports array opts syntax with string (lifetime)', function() {
+  it('supports array opts syntax with string (lifetime)', function () {
     const container = createContainer()
     const modules: any = {
       'test.js': jest.fn(() => 42),
-      'test2.js': jest.fn(() => 42)
+      'test2.js': jest.fn(() => 42),
     }
 
     const deps = {
       container,
       listModules: jest.fn(() => [
         { name: 'test', path: 'test.js', opts: Lifetime.SCOPED },
-        { name: 'test2', path: 'test2.js', opts: null }
+        { name: 'test2', path: 'test2.js', opts: null },
       ]),
-      require: jest.fn(path => modules[path])
+      require: jest.fn((path) => modules[path]),
     }
 
     loadModules(deps, 'anything', {
       resolverOptions: {
-        lifetime: Lifetime.SINGLETON
-      }
+        lifetime: Lifetime.SINGLETON,
+      },
     })
 
     expect(container.registrations.test.lifetime).toBe(Lifetime.SCOPED)
     expect(container.registrations.test2.lifetime).toBe(Lifetime.SINGLETON)
   })
 
-  it('supports array opts syntax with object', function() {
+  it('supports array opts syntax with object', function () {
     const container = createContainer()
     const modules: any = {
       'test.js': jest.fn(() => 42),
-      'test2.js': jest.fn(() => 42)
+      'test2.js': jest.fn(() => 42),
     }
 
     const deps = {
       container,
       listModules: jest.fn(() => [
         { name: 'test', path: 'test.js', opts: { lifetime: Lifetime.SCOPED } },
-        { name: 'test2', path: 'test2.js', opts: null }
+        { name: 'test2', path: 'test2.js', opts: null },
       ]),
-      require: jest.fn(path => modules[path])
+      require: jest.fn((path) => modules[path]),
     }
 
     loadModules(deps, 'anything', {
       resolverOptions: {
-        lifetime: Lifetime.SINGLETON
-      }
+        lifetime: Lifetime.SINGLETON,
+      },
     })
 
     expect(container.registrations.test.lifetime).toBe(Lifetime.SCOPED)
     expect(container.registrations.test2.lifetime).toBe(Lifetime.SINGLETON)
   })
 
-  it('supports passing in a default injectionMode', function() {
+  it('supports passing in a default injectionMode', function () {
     const container = createContainer()
     const modules: any = {
       'test.js': jest.fn(() => 42),
-      'test2.js': jest.fn(() => 42)
+      'test2.js': jest.fn(() => 42),
     }
 
     const deps = {
@@ -340,17 +340,17 @@ describe('loadModules', function() {
         {
           name: 'test',
           path: 'test.js',
-          opts: { injectionMode: InjectionMode.PROXY }
+          opts: { injectionMode: InjectionMode.PROXY },
         },
-        { name: 'test2', path: 'test2.js', opts: null }
+        { name: 'test2', path: 'test2.js', opts: null },
       ]),
-      require: jest.fn(path => modules[path])
+      require: jest.fn((path) => modules[path]),
     }
 
     loadModules(deps, 'anything', {
       resolverOptions: {
-        injectionMode: InjectionMode.CLASSIC
-      }
+        injectionMode: InjectionMode.CLASSIC,
+      },
     })
 
     expect(
@@ -366,25 +366,25 @@ describe('loadModules', function() {
       const container = createContainer()
       const test1Func = jest.fn(() => 42)
       ;(test1Func as any)[RESOLVER] = {
-        injectionMode: InjectionMode.PROXY
+        injectionMode: InjectionMode.PROXY,
       }
 
       class Test2Class {}
 
       ;(Test2Class as any)[RESOLVER] = {
-        lifetime: Lifetime.SCOPED
+        lifetime: Lifetime.SCOPED,
       }
 
       class Test3Class {}
 
       ;(Test3Class as any)[RESOLVER] = {
-        register: asValue
+        register: asValue,
       }
 
       const modules: any = {
         'test.js': test1Func,
         'test2.js': Test2Class,
-        'test3.js': Test3Class
+        'test3.js': Test3Class,
       }
 
       const deps = {
@@ -392,15 +392,15 @@ describe('loadModules', function() {
         listModules: jest.fn(() => [
           { name: 'test', path: 'test.js', opts: null },
           { name: 'test2', path: 'test2.js', opts: null },
-          { name: 'test3', path: 'test3.js', opts: null }
+          { name: 'test3', path: 'test3.js', opts: null },
         ]),
-        require: jest.fn(path => modules[path])
+        require: jest.fn((path) => modules[path]),
       }
 
       loadModules(deps, 'anything', {
         resolverOptions: {
-          injectionMode: InjectionMode.CLASSIC
-        }
+          injectionMode: InjectionMode.CLASSIC,
+        },
       })
 
       expect(container.registrations.test.lifetime).toBe(Lifetime.TRANSIENT)
@@ -419,29 +419,29 @@ describe('loadModules', function() {
       const test1Func = jest.fn(() => 42)
       ;(test1Func as any)[RESOLVER] = {
         name: 'awesome',
-        lifetime: Lifetime.SINGLETON
+        lifetime: Lifetime.SINGLETON,
       }
 
       const test2Func = jest.fn(() => 42)
       const modules: any = {
         'test.js': test1Func,
-        'test2.js': test2Func
+        'test2.js': test2Func,
       }
 
       const deps = {
         container,
         listModules: jest.fn(() => [
           { name: 'test', path: 'test.js', opts: null },
-          { name: 'test2', path: 'test2.js', opts: null }
+          { name: 'test2', path: 'test2.js', opts: null },
         ]),
-        require: jest.fn(path => modules[path])
+        require: jest.fn((path) => modules[path]),
       }
 
       loadModules(deps, 'anything', {
-        formatName: desc => 'formatNameCalled',
+        formatName: (desc) => 'formatNameCalled',
         resolverOptions: {
-          lifetime: Lifetime.SCOPED
-        }
+          lifetime: Lifetime.SCOPED,
+        },
       })
 
       expect(container.registrations.awesome.lifetime).toBe(Lifetime.SINGLETON)

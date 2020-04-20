@@ -125,7 +125,7 @@ export type Constructor<T> = { new (...args: any[]): T }
  */
 export function asValue<T>(value: T): Resolver<T> {
   return {
-    resolve: () => value
+    resolve: () => value,
   }
 }
 
@@ -154,7 +154,7 @@ export function asFunction<T>(
   }
 
   const defaults = {
-    lifetime: Lifetime.TRANSIENT
+    lifetime: Lifetime.TRANSIENT,
   }
 
   opts = makeOptions(defaults, opts, (fn as any)[RESOLVER])
@@ -162,7 +162,7 @@ export function asFunction<T>(
   const resolve = generateResolve(fn)
   let result = {
     resolve,
-    ...opts
+    ...opts,
   }
 
   return createDisposableResolver(createBuildResolver(result))
@@ -192,7 +192,7 @@ export function asClass<T = {}>(
   }
 
   const defaults = {
-    lifetime: Lifetime.TRANSIENT
+    lifetime: Lifetime.TRANSIENT,
   }
 
   opts = makeOptions(defaults, opts, (Type as any)[RESOLVER])
@@ -206,7 +206,7 @@ export function asClass<T = {}>(
   return createDisposableResolver(
     createBuildResolver({
       ...opts,
-      resolve
+      resolve,
     })
   )
 }
@@ -218,7 +218,7 @@ export function aliasTo<T>(name: string): Resolver<T> {
   return {
     resolve(container) {
       return container.resolve(name)
-    }
+    },
   }
 }
 
@@ -238,21 +238,21 @@ export function createBuildResolver<T, B extends Resolver<T>>(
   function setLifetime(this: any, value: LifetimeType) {
     return createBuildResolver({
       ...this,
-      lifetime: value
+      lifetime: value,
     })
   }
 
   function setInjectionMode(this: any, value: InjectionModeType) {
     return createBuildResolver({
       ...this,
-      injectionMode: value
+      injectionMode: value,
     })
   }
 
   function inject(this: any, injector: InjectorFunction) {
     return createBuildResolver({
       ...this,
-      injector
+      injector,
     })
   }
 
@@ -264,7 +264,7 @@ export function createBuildResolver<T, B extends Resolver<T>>(
     singleton: partial(setLifetime, Lifetime.SINGLETON),
     setInjectionMode,
     proxy: partial(setInjectionMode, InjectionMode.PROXY),
-    classic: partial(setInjectionMode, InjectionMode.CLASSIC)
+    classic: partial(setInjectionMode, InjectionMode.CLASSIC),
   })
 }
 
@@ -279,12 +279,12 @@ export function createDisposableResolver<T, B extends Resolver<T>>(
   function disposer(this: any, dispose: Disposer<T>) {
     return createDisposableResolver({
       ...this,
-      dispose
+      dispose,
     })
   }
 
   return updateResolver(obj, {
-    disposer
+    disposer,
   })
 }
 
@@ -324,7 +324,7 @@ function updateResolver<T, A extends Resolver<T>, B>(
 ): Resolver<T> & A & B {
   const result = {
     ...(source as any),
-    ...(target as any)
+    ...(target as any),
   }
   return result
 }
@@ -365,7 +365,7 @@ function createInjectorProxy<T extends object>(
   const locals = injector(container) as any
   const allKeys = uniq([
     ...Reflect.ownKeys(container.cradle),
-    ...Reflect.ownKeys(locals)
+    ...Reflect.ownKeys(locals),
   ])
   // TODO: Lots of duplication here from the container proxy.
   // Need to refactor.
@@ -406,12 +406,12 @@ function createInjectorProxy<T extends object>(
         if (allKeys.indexOf(key) > -1) {
           return {
             enumerable: true,
-            configurable: true
+            configurable: true,
           }
         }
 
         return undefined
-      }
+      },
     }
   )
 
@@ -476,7 +476,7 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
         ? wrapWithLocals(container, this.injector(container))
         : container.resolve
 
-      const children = dependencies.map(p =>
+      const children = dependencies.map((p) =>
         resolve(p.name, { allowUnregistered: p.optional })
       )
       return fn(...children)

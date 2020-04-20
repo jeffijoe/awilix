@@ -1,6 +1,6 @@
 const THE_UNIVERSAL_ANSWER = 42
 
-module.exports = function({ timeout, conn }) {
+module.exports = function ({ timeout, conn }) {
   /* istanbul ignore next */
   if (!timeout) {
     throw new Error('No timeout specified')
@@ -11,13 +11,13 @@ module.exports = function({ timeout, conn }) {
     throw new Error('No conn specified')
   }
 
-  const getAnswerFor = function(question) {
-    return new Promise(resolve => {
+  const getAnswerFor = function (question) {
+    return new Promise((resolve) => {
       setTimeout(() => resolve(THE_UNIVERSAL_ANSWER), timeout)
     })
   }
 
   return {
-    getAnswerFor
+    getAnswerFor,
   }
 }

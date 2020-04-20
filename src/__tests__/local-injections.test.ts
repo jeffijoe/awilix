@@ -23,14 +23,12 @@ const makeCLassicTest = (test: any, value: any) => ({ value, test })
 
 const injector = () => ({ value: 42 })
 
-describe('local injections', function() {
-  it('invokes the injector and provides the result to the constructor', function() {
+describe('local injections', function () {
+  it('invokes the injector and provides the result to the constructor', function () {
     const container = createContainer().register({
       test: asClass(Test).inject(injector),
-      testClassic: asClass(TestClassic)
-        .inject(injector)
-        .classic(),
-      test2: asClass(Test)
+      testClassic: asClass(TestClassic).inject(injector).classic(),
+      test2: asClass(Test),
     })
 
     expect(container.cradle.test.value).toBe(42)
@@ -43,14 +41,14 @@ describe('local injections', function() {
     )
   })
 
-  it('supported by registerClass', function() {
+  it('supported by registerClass', function () {
     const container = createContainer().register({
       test: asClass(Test, { injector }),
       testClassic: asClass(TestClassic, {
         injector,
-        injectionMode: InjectionMode.CLASSIC
+        injectionMode: InjectionMode.CLASSIC,
       }),
-      test2: asClass(Test)
+      test2: asClass(Test),
     })
 
     expect(container.cradle.test.value).toBe(42)
@@ -62,14 +60,14 @@ describe('local injections', function() {
     )
   })
 
-  it('supported by registerFunction', function() {
+  it('supported by registerFunction', function () {
     const container = createContainer().register({
       test: asFunction(makeTest, { injector }),
       testClassic: asFunction(makeCLassicTest, {
         injector,
-        injectionMode: InjectionMode.CLASSIC
+        injectionMode: InjectionMode.CLASSIC,
       }),
-      test2: asFunction(makeTest)
+      test2: asFunction(makeTest),
     })
 
     expect(container.cradle.test.value).toBe(42)

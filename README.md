@@ -19,9 +19,12 @@ written in [TypeScript](http://typescriptlang.org). **Make IoC great again!**
 
 # Table of Contents
 
+- [Awilix](#awilix)
+- [Table of Contents](#table-of-contents)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Lifetime management](#lifetime-management)
+  - [Scoped lifetime](#scoped-lifetime)
 - [Injection modes](#injection-modes)
 - [Auto-loading modules](#auto-loading-modules)
 - [Per-module local injections](#per-module-local-injections)
@@ -1335,10 +1338,10 @@ because they depend on Node-specific packages.
 
 # Contributing
 
-Clone repo, run `yarn` to install all dependencies, run `yarn build` to create an initial build, and then
-`yarn test --watchAll` to start writing code.
+Clone repo, run `npm install` to install all dependencies, run `npm run build` to create an initial build, and then
+`npm run test -- --watchAll` to start writing code.
 
-For code coverage, run `yarn cover`.
+For code coverage, run `npm run cover`.
 
 If you submit a PR, please aim for 100% code coverage and no linting errors.
 Travis will fail if there are linting errors. Thank you for considering

@@ -14,9 +14,9 @@ const tsOpts = {
     compilerOptions: {
       // Don't emit declarations, that's done by the regular build.
       declaration: false,
-      module: 'ESNext'
-    }
-  }
+      module: 'ESNext',
+    },
+  },
 }
 
 export default [
@@ -24,33 +24,33 @@ export default [
   {
     input: 'src/awilix.ts',
     external: ['glob', 'path', 'util', 'camel-case'],
-    treeshake: { pureExternalModules: true },
+    treeshake: { moduleSideEffects: 'no-external' },
     onwarn,
     output: [
       {
         file: 'lib/awilix.module.js',
-        format: 'es'
-      }
+        format: 'es',
+      },
     ],
-    plugins: [typescript(tsOpts)]
+    plugins: [typescript(tsOpts)],
   },
   // Build 2: ES modules for browser builds.
   {
     input: 'src/awilix.ts',
     external: ['glob', 'path', 'util'],
-    treeshake: { pureExternalModules: true },
+    treeshake: { moduleSideEffects: 'no-external' },
     onwarn,
     output: [
       {
         name: 'Awilix',
         file: 'lib/awilix.browser.js',
-        format: 'es'
+        format: 'es',
       },
       {
         name: 'Awilix',
         file: 'lib/awilix.umd.js',
-        format: 'umd'
-      }
+        format: 'umd',
+      },
     ],
     plugins: [
       // Removes stuff that won't work in the browser
@@ -60,13 +60,13 @@ export default [
         'loadModules,':
           'loadModules: () => { throw new Error("loadModules is not supported in the browser.") },',
         '[util.inspect.custom]: inspect,': comment,
-        '[util.inspect.custom]: inspectCradle': comment,
+        '[util.inspect.custom]: inspectCradle,': comment,
         'name === util.inspect.custom || ': '',
         "import { camelCase } from 'camel-case'":
           'const camelCase = null as any',
         "export * from './list-modules'": comment,
         "import * as util from 'util'": '',
-        delimiters: ['', '']
+        delimiters: ['', ''],
       }),
       typescript(
         Object.assign({}, tsOpts, {
@@ -75,15 +75,15 @@ export default [
               target: 'es5',
               declaration: false,
               noUnusedLocals: false,
-              module: 'ESNext'
-            }
-          }
+              module: 'ESNext',
+            },
+          },
         })
       ),
       resolve(),
-      commonjs()
-    ]
-  }
+      commonjs(),
+    ],
+  },
 ]
 
 /**
