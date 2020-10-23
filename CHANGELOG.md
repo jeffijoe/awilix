@@ -1,3 +1,8 @@
+# v4.2.7
+
+- Fixes AwilixResolutionError throwing TypeError if resolution stack contains symbols ([#205](https://github.com/jeffijoe/awilix/pull/205), [astephens25](https://github.com/astephens25))
+- Update packages
+
 # v4.2.6
 
 - Fix return type for `createScope` when using a cradle typing. ([#182](https://github.com/jeffijoe/awilix/pull/182), [moltar](https://github.com/moltar))
