@@ -130,9 +130,9 @@ export class AwilixResolutionError extends AwilixError {
     if (typeof name === 'symbol') {
       name = (name as any).toString()
     }
-    resolutionStack = resolutionStack
-      .slice()
-      .map((val) => (typeof val === 'symbol' ? (val as any).toString() : val))
+    resolutionStack = resolutionStack.map((val) =>
+      typeof val === 'symbol' ? (val as any).toString() : val
+    )
     resolutionStack.push(name)
     const resolutionPathString = resolutionStack.join(' -> ')
     let msg = `Could not resolve '${name as any}'.`
