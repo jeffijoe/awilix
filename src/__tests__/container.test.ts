@@ -152,6 +152,16 @@ describe('container', function () {
       expect(err.message).toMatch(/i am the derg/i)
     })
 
+    it('throws an AwilixResolutionError that supports symbols on multiple levels', function () {
+      const container = createContainer()
+      const S1 = Symbol('i am the derg')
+      const S2 = Symbol('i am not the derg')
+      container.register({ [S2]: asFunction(({ [S1]: theDerg }) => theDerg) })
+      const err = throws(() => container.resolve(S2))
+      expect(err).toBeInstanceOf(AwilixResolutionError)
+      expect(err.message).toMatch(/i am the derg/i)
+    })
+
     it('throws an AwilixResolutionError with a resolution path when resolving an unregistered dependency', function () {
       const container = createContainer()
       container.register({
