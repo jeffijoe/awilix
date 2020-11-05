@@ -551,7 +551,7 @@ container.loadModules([
 container.resolve('userService').getUser(1)
 ```
 
-**Important**: Auto-loading relies on `glob` and therefore does not with
+**Important**: Auto-loading relies on `glob` and therefore does not work with
 bundlers like Webpack, Rollup and Browserify.
 
 # Per-module local injections
