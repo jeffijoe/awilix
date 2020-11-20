@@ -117,7 +117,8 @@
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "__tests__",
-      "lib"
+      "lib",
+      "src/load-module-native.js"
     ],
     "moduleFileExtensions": [
       "ts",
