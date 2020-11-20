@@ -67,8 +67,6 @@ export default [
       replace({
         'loadModules,':
           'loadModules: () => { throw new Error("loadModules is not supported in the browser.") },',
-        'loadModulesNative,':
-          'loadModulesNative: () => { throw new Error("loadModulesNative is not supported in the browser.") },',
         '[util.inspect.custom]: inspect,': comment,
         '[util.inspect.custom]: inspectCradle,': comment,
         'name === util.inspect.custom || ': '',

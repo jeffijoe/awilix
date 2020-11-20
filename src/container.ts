@@ -62,10 +62,6 @@ export interface AwilixContainer<Cradle extends object = any> {
     options?: LoadModulesOptions<ESM>
   ): ESM extends false ? this : Promise<this>
 
-  loadModulesNative(
-    globPatterns: Array<string | GlobWithOptions>,
-    options?: LoadModulesOptions<true>
-  ): Promise<this>
   /**
    * Adds a single registration that using a pre-constructed resolver.
    */
@@ -291,7 +287,6 @@ export function createContainer<T extends object = any, U extends object = any>(
     inspect,
     cache: new Map<string | symbol, CacheEntry>(),
     loadModules,
-    loadModulesNative,
     createScope,
     register: register as any,
     build,
@@ -598,38 +593,15 @@ export function createContainer<T extends object = any, U extends object = any>(
       container,
     }
     if (opts?.esModules) {
-      return new Promise((resolvePromise, reject) => {
-        return (realLoadModules(
-          _loadModulesDeps,
-          globPatterns,
-          opts
-        ) as Promise<LoadModulesResult>)
-          .then(() => {
-            resolvePromise(container)
-          })
-          .catch(reject)
+      return (realLoadModules(_loadModulesDeps, globPatterns, opts) as Promise<
+        LoadModulesResult
+      >).then(() => {
+        return container
       })
     } else {
       realLoadModules(_loadModulesDeps, globPatterns, opts)
       return container
     }
-  }
-
-  async function loadModulesNative(
-    globPatterns: Array<string | GlobWithOptions>,
-    opts: LoadModulesOptions<true>
-  ): Promise<AwilixContainer> {
-    const _loadModulesDeps = {
-      require:
-        options!.require ||
-        function (uri) {
-          return require(uri)
-        },
-      listModules,
-      container,
-    }
-    await realLoadModules(_loadModulesDeps, globPatterns, opts)
-    return container
   }
 
   /**

@@ -20,7 +20,7 @@ import { importModule } from './load-module-native.js'
  * The options when invoking loadModules().
  * @interface LoadModulesOptions
  */
-export interface LoadModulesOptions<ESM extends boolean> {
+export interface LoadModulesOptions<ESM extends boolean = false> {
   cwd?: string
   formatName?: NameFormatter | BuiltInNameFormatters
   resolverOptions?: BuildResolverOptions<any>
