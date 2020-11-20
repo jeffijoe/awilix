@@ -15,7 +15,7 @@ import { AwilixContainer } from './container'
 import { isClass, isFunction } from './utils'
 import { BuildResolver } from './awilix'
 import { camelCase } from 'camel-case'
-import { importModule } from './load-module-native.js'
+
 /**
  * The options when invoking loadModules().
  * @interface LoadModulesOptions
@@ -52,7 +52,7 @@ export type NameFormatter = (
 export interface LoadModulesDeps {
   listModules: typeof listModules
   container: AwilixContainer
-  require(path: string): any
+  require(path: string): any | Promise<any>
 }
 
 const nameFormatters: Record<string, NameFormatter> = {
@@ -110,7 +110,7 @@ export function loadModules<ESM extends boolean>(
   const modules = dependencies.listModules(globPatterns, opts)
 
   if (opts?.esModules) {
-    return loadEsModules(container, modules, opts)
+    return loadEsModules(dependencies, container, modules, opts)
   } else {
     const result = modules.map((m) => {
       const loaded = dependencies.require(m.path)
@@ -134,7 +134,7 @@ async function loadEsModules<ESM extends boolean>(
 ): Promise<LoadModulesResult> {
   const importPromises = []
   for (const m of modules) {
-    importPromises.push(importModule(m.path))
+    importPromises.push(dependencies.require(m.path))
   }
   const imports = await Promise.all(importPromises)
   const result = []

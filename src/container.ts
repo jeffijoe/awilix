@@ -17,7 +17,7 @@ import { last, nameValueToObject, isClass } from './utils'
 import { InjectionMode, InjectionModeType } from './injection-mode'
 import { Lifetime } from './lifetime'
 import { AwilixResolutionError, AwilixTypeError } from './errors'
-
+import { importModule } from './load-module-native.js'
 /**
  * The container returned from createContainer has some methods and properties.
  * @interface AwilixContainer
@@ -593,6 +593,7 @@ export function createContainer<T extends object = any, U extends object = any>(
       container,
     }
     if (opts?.esModules) {
+      _loadModulesDeps.require = importModule
       return (realLoadModules(_loadModulesDeps, globPatterns, opts) as Promise<
         LoadModulesResult
       >).then(() => {
