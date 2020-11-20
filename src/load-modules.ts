@@ -1,4 +1,9 @@
-import { ModuleDescriptor, GlobWithOptions, listModules } from './list-modules'
+import {
+  ModuleDescriptor,
+  ModuleDescriptorVal,
+  GlobWithOptions,
+  listModules,
+} from './list-modules'
 import { Lifetime } from './lifetime'
 import {
   RESOLVER,
@@ -10,15 +15,16 @@ import { AwilixContainer } from './container'
 import { isClass, isFunction } from './utils'
 import { BuildResolver } from './awilix'
 import { camelCase } from 'camel-case'
-
+import { importModule } from './load-module-native.js'
 /**
  * The options when invoking loadModules().
  * @interface LoadModulesOptions
  */
-export interface LoadModulesOptions {
+export interface LoadModulesOptions<ESM extends boolean> {
   cwd?: string
   formatName?: NameFormatter | BuiltInNameFormatters
   resolverOptions?: BuildResolverOptions<any>
+  esModules?: ESM
 }
 
 /**
@@ -53,6 +59,15 @@ const nameFormatters: Record<string, NameFormatter> = {
   camelCase: (s) => camelCase(s),
 }
 
+export interface LoadModulesResult {
+  loadedModules: Array<ModuleDescriptor>
+}
+
+export function loadModules<ESM extends boolean = false>(
+  dependencies: LoadModulesDeps,
+  globPatterns: string | Array<string | GlobWithOptions>,
+  opts?: LoadModulesOptions<ESM>
+): ESM extends true ? Promise<LoadModulesResult> : LoadModulesResult
 /**
  * Given an array of glob strings, will call `require`
  * on them, and call their default exported function with the
@@ -76,81 +91,132 @@ const nameFormatters: Record<string, NameFormatter> = {
  * @param  {(string, ModuleDescriptor) => string} opts.formatName
  * Used to format the name the module is registered with in the container.
  *
+ * @param  {boolean} opts.esModules
+ * Set to `true` to use Node's native ECMAScriptModules modules
+ *
  * @return {Object}
  * Returns an object describing the result.
  */
-export function loadModules(
+export function loadModules<ESM extends boolean>(
   dependencies: LoadModulesDeps,
   globPatterns: string | Array<string | GlobWithOptions>,
-  opts?: LoadModulesOptions
-) {
+  opts?: LoadModulesOptions<ESM>
+): Promise<LoadModulesResult> | LoadModulesResult {
   const container = dependencies.container
   opts = optsWithDefaults(opts, container)
   const modules = dependencies.listModules(globPatterns, opts)
 
-  const result = modules.map((m) => {
-    const items: Array<{
-      name: string
-      path: string
-      opts: object
-      value: unknown
-    }> = []
+  if (opts?.esModules) {
+    return loadEsModules(container, modules, opts)
+  } else {
+    const result = modules.map((m) => {
+      const loaded = dependencies.require(m.path)
+      return parseLoadedModule(loaded, m)
+    })
+    return registerModules(result, container, modules, opts)
+  }
+}
 
-    const loaded = dependencies.require(m.path)
+/**
+ * Loads the modules using native ES6 modules and the async import()
+ * @param {AwilixContainer} container
+ * @param {ModuleDescriptor[]} modules
+ * @param {LoadModulesOptions} opts
+ */
+async function loadEsModules<ESM extends boolean>(
+  container: AwilixContainer,
+  modules: ModuleDescriptor[],
+  opts: LoadModulesOptions<ESM>
+): Promise<LoadModulesResult> {
+  const importPromises = []
+  for (const m of modules) {
+    importPromises.push(importModule(m.path))
+  }
+  const imports = await Promise.all(importPromises)
+  const result = []
+  for (let i = 0; i < modules.length; i++) {
+    result.push(parseLoadedModule(imports[i], modules[i]))
+  }
+  return registerModules(result, container, modules, opts)
+}
 
-    // Meh, it happens.
-    if (!loaded) {
-      return items
-    }
+/**
+ * Parses the module which has been required
+ *
+ * @param {any} loaded
+ * @param {ModuleDescriptor} m
+ */
+function parseLoadedModule(
+  loaded: any,
+  m: ModuleDescriptor
+): Array<ModuleDescriptorVal> {
+  const items: Array<ModuleDescriptorVal> = []
+  // Meh, it happens.
+  if (!loaded) {
+    return items
+  }
 
-    if (isFunction(loaded)) {
-      // for module.exports = ...
-      items.push({
-        name: m.name,
-        path: m.path,
-        value: loaded,
-        opts: m.opts,
-      })
-
-      return items
-    }
-
-    if (loaded.default && isFunction(loaded.default)) {
-      // ES6 default export
-      items.push({
-        name: m.name,
-        path: m.path,
-        value: loaded.default,
-        opts: m.opts,
-      })
-    }
-
-    // loop through non-default exports, but require the RESOLVER property set for
-    // it to be a valid service module export.
-    for (const key of Object.keys(loaded)) {
-      if (key === 'default') {
-        // default case handled separately due to its different name (file name)
-        continue
-      }
-
-      if (isFunction(loaded[key]) && RESOLVER in loaded[key]) {
-        items.push({
-          name: key,
-          path: m.path,
-          value: loaded[key],
-          opts: m.opts,
-        })
-      }
-    }
+  if (isFunction(loaded)) {
+    // for module.exports = ...
+    items.push({
+      name: m.name,
+      path: m.path,
+      value: loaded,
+      opts: m.opts,
+    })
 
     return items
-  })
+  }
 
-  result
+  if (loaded.default && isFunction(loaded.default)) {
+    // ES6 default export
+    items.push({
+      name: m.name,
+      path: m.path,
+      value: loaded.default,
+      opts: m.opts,
+    })
+  }
+
+  // loop through non-default exports, but require the RESOLVER property set for
+  // it to be a valid service module export.
+  for (const key of Object.keys(loaded)) {
+    if (key === 'default') {
+      // default case handled separately due to its different name (file name)
+      continue
+    }
+
+    if (isFunction(loaded[key]) && RESOLVER in loaded[key]) {
+      items.push({
+        name: key,
+        path: m.path,
+        value: loaded[key],
+        opts: m.opts,
+      })
+    }
+  }
+
+  return items
+}
+
+/**
+ * Registers the modules
+ *
+ * @param {ModuleDescriptorVal[][]} modulesToRegister
+ * @param {AwilixContainer} container
+ * @param {ModuleDescriptor[]} modules
+ * @param {LoadModulesOptions} opts
+ */
+function registerModules<ESM extends boolean>(
+  modulesToRegister: ModuleDescriptorVal[][],
+  container: AwilixContainer,
+  modules: ModuleDescriptor[],
+  opts: LoadModulesOptions<ESM>
+): LoadModulesResult {
+  modulesToRegister
     .reduce((acc, cur) => acc.concat(cur), [])
     .filter((x) => x)
     .forEach(registerDescriptor.bind(null, container, opts))
-
   return {
     loadedModules: modules,
   }
@@ -159,10 +225,10 @@ export function loadModules(
 /**
  * Returns a new options object with defaults applied.
  */
-function optsWithDefaults(
-  opts: Partial<LoadModulesOptions> | undefined,
+function optsWithDefaults<ESM extends boolean = false>(
+  opts: Partial<LoadModulesOptions<ESM>> | undefined,
   container: AwilixContainer
-): LoadModulesOptions {
+): LoadModulesOptions<ESM> {
   return {
     // Does a somewhat-deep merge on the registration options.
     resolverOptions: {
@@ -180,9 +246,9 @@ function optsWithDefaults(
  * @param {LoadModulesOptions} opts
  * @param {ModuleDescriptor} moduleDescriptor
  */
-function registerDescriptor(
+function registerDescriptor<ESM extends boolean = false>(
   container: AwilixContainer,
-  opts: LoadModulesOptions,
+  opts: LoadModulesOptions<ESM>,
   moduleDescriptor: ModuleDescriptor & { value: any }
 ) {
   const inlineConfig = moduleDescriptor.value[RESOLVER]

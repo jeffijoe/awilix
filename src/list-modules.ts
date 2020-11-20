@@ -23,6 +23,9 @@ export interface ModuleDescriptor {
   path: string
   opts: any
 }
+export interface ModuleDescriptorVal extends ModuleDescriptor {
+  value: unknown
+}
 
 /**
  * A glob pattern with associated registration options.

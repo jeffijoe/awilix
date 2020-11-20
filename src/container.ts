@@ -3,6 +3,7 @@ import { GlobWithOptions, listModules } from './list-modules'
 import {
   LoadModulesOptions,
   loadModules as realLoadModules,
+  LoadModulesResult,
 } from './load-modules'
 import {
   Resolver,
@@ -56,10 +57,15 @@ export interface AwilixContainer<Cradle extends object = any> {
    *
    * @see src/load-modules.ts documentation.
    */
-  loadModules(
+  loadModules<ESM extends boolean = false>(
     globPatterns: Array<string | GlobWithOptions>,
-    options?: LoadModulesOptions
-  ): this
+    options?: LoadModulesOptions<ESM>
+  ): ESM extends false ? this : Promise<this>
+
+  loadModulesNative(
+    globPatterns: Array<string | GlobWithOptions>,
+    options?: LoadModulesOptions<true>
+  ): Promise<this>
   /**
    * Adds a single registration that using a pre-constructed resolver.
    */
@@ -285,6 +291,7 @@ export function createContainer<T extends object = any, U extends object = any>(
     inspect,
     cache: new Map<string | symbol, CacheEntry>(),
     loadModules,
+    loadModulesNative,
     createScope,
     register: register as any,
     build,
@@ -564,6 +571,10 @@ export function createContainer<T extends object = any, U extends object = any>(
     return resolver.resolve(container)
   }
 
+  function loadModules<ESM extends boolean = false>(
+    globPatterns: Array<string | GlobWithOptions>,
+    opts: LoadModulesOptions<ESM>
+  ): ESM extends false ? AwilixContainer : Promise<AwilixContainer>
   /**
    * Binds `lib/loadModules` to this container, and provides
    * real implementations of it's dependencies.
@@ -573,10 +584,10 @@ export function createContainer<T extends object = any, U extends object = any>(
    *
    * @see lib/loadModules.js documentation.
    */
-  function loadModules(
+  function loadModules<ESM extends boolean = false>(
     globPatterns: Array<string | GlobWithOptions>,
-    opts: LoadModulesOptions
-  ) {
+    opts: LoadModulesOptions<ESM>
+  ): Promise<AwilixContainer> | AwilixContainer {
     const _loadModulesDeps = {
       require:
         options!.require ||
@@ -586,7 +597,38 @@ export function createContainer<T extends object = any, U extends object = any>(
       listModules,
       container,
     }
-    realLoadModules(_loadModulesDeps, globPatterns, opts)
+    if (opts?.esModules) {
+      return new Promise((resolvePromise, reject) => {
+        return (realLoadModules(
+          _loadModulesDeps,
+          globPatterns,
+          opts
+        ) as Promise<LoadModulesResult>)
+          .then(() => {
+            resolvePromise(container)
+          })
+          .catch(reject)
+      })
+    } else {
+      realLoadModules(_loadModulesDeps, globPatterns, opts)
+      return container
+    }
+  }
+
+  async function loadModulesNative(
+    globPatterns: Array<string | GlobWithOptions>,
+    opts: LoadModulesOptions<true>
+  ): Promise<AwilixContainer> {
+    const _loadModulesDeps = {
+      require:
+        options!.require ||
+        function (uri) {
+          return require(uri)
+        },
+      listModules,
+      container,
+    }
+    await realLoadModules(_loadModulesDeps, globPatterns, opts)
     return container
   }
 

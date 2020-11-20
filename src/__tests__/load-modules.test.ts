@@ -176,7 +176,7 @@ describe('loadModules', function () {
       listModules: jest.fn(() => moduleLookupResult),
       require: jest.fn((path) => modules[path]),
     }
-    const opts: LoadModulesOptions = {
+    const opts: LoadModulesOptions<false> = {
       formatName: 'camelCase',
     }
     const result = loadModules(deps, 'anything', opts)
@@ -196,7 +196,7 @@ describe('loadModules', function () {
       listModules: jest.fn(() => moduleLookupResult),
       require: jest.fn((path) => modules[path]),
     }
-    const opts: LoadModulesOptions = {
+    const opts: LoadModulesOptions<false> = {
       formatName: (name, descriptor) => {
         expect(descriptor.path).toBeTruthy()
         return name + 'IsGreat'
