@@ -596,9 +596,7 @@ export function createContainer<T extends object = any, U extends object = any>(
       _loadModulesDeps.require = importModule
       return (realLoadModules(_loadModulesDeps, globPatterns, opts) as Promise<
         LoadModulesResult
-      >).then(() => {
-        return container
-      })
+      >).then(() => container)
     } else {
       realLoadModules(_loadModulesDeps, globPatterns, opts)
       return container
