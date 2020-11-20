@@ -23,7 +23,10 @@ export interface ModuleDescriptor {
   path: string
   opts: any
 }
-export interface ModuleDescriptorVal extends ModuleDescriptor {
+/**
+ * Metadata of the module as well as the loaded module itself.
+ */
+export interface LoadedModuleDescriptor extends ModuleDescriptor {
   value: unknown
 }
 

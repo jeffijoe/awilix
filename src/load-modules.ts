@@ -1,6 +1,6 @@
 import {
   ModuleDescriptor,
-  ModuleDescriptorVal,
+  LoadedModuleDescriptor,
   GlobWithOptions,
   listModules,
 } from './list-modules'
@@ -59,6 +59,9 @@ const nameFormatters: Record<string, NameFormatter> = {
   camelCase: (s) => camelCase(s),
 }
 
+/**
+ * The list of loaded modules
+ */
 export interface LoadModulesResult {
   loadedModules: Array<ModuleDescriptor>
 }
@@ -124,6 +127,7 @@ export function loadModules<ESM extends boolean>(
  * @param {LoadModulesOptions} opts
  */
 async function loadEsModules<ESM extends boolean>(
+  dependencies: LoadModulesDeps,
   container: AwilixContainer,
   modules: ModuleDescriptor[],
   opts: LoadModulesOptions<ESM>
@@ -149,8 +153,8 @@ async function loadEsModules<ESM extends boolean>(
 function parseLoadedModule(
   loaded: any,
   m: ModuleDescriptor
-): Array<ModuleDescriptorVal> {
-  const items: Array<ModuleDescriptorVal> = []
+): Array<LoadedModuleDescriptor> {
+  const items: Array<LoadedModuleDescriptor> = []
   // Meh, it happens.
   if (!loaded) {
     return items
@@ -208,7 +212,7 @@ function parseLoadedModule(
  * @param {LoadModulesOptions} opts
  */
 function registerModules<ESM extends boolean>(
-  modulesToRegister: ModuleDescriptorVal[][],
+  modulesToRegister: LoadedModuleDescriptor[][],
   container: AwilixContainer,
   modules: ModuleDescriptor[],
   opts: LoadModulesOptions<ESM>
