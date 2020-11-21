@@ -458,7 +458,9 @@ describe('container', function () {
     })
 
     it('returns a Promise of the container if used with esModules true', async function () {
-      expect(await container.loadModules([], {esModules:true})).toBe(container);
+      expect(await container.loadModules([], { esModules: true })).toBe(
+        container
+      )
     })
   })
 

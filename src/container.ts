@@ -18,6 +18,7 @@ import { InjectionMode, InjectionModeType } from './injection-mode'
 import { Lifetime } from './lifetime'
 import { AwilixResolutionError, AwilixTypeError } from './errors'
 import { importModule } from './load-module-native.js'
+
 /**
  * The container returned from createContainer has some methods and properties.
  * @interface AwilixContainer

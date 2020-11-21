@@ -54,11 +54,7 @@ describe('loadModules', function () {
     const deps = {
       container,
       listModules: jest.fn(() => moduleLookupResult),
-      require: jest.fn((path) => {
-        return new Promise((resolve) => {
-          resolve(modules[path])
-        })
-      }),
+      require: jest.fn(async (path) => modules[path])
     }
 
     const result = await loadModules(deps, 'anything', { esModules: true })
