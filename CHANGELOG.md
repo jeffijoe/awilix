@@ -1,3 +1,7 @@
+# v4.3.0
+
+- Add support for [Native Node ES modules](https://nodejs.org/api/esm.html) on Node v14+ ([#211](https://github.com/jeffijoe/awilix/pull/211), [Richard Simko](https://github.com/richardsimko))
+
 # v4.2.7
 
 - Fixes AwilixResolutionError throwing TypeError if resolution stack contains symbols ([#205](https://github.com/jeffijoe/awilix/pull/205), [astephens25](https://github.com/astephens25))
