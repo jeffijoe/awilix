@@ -23,6 +23,12 @@ export interface ModuleDescriptor {
   path: string
   opts: any
 }
+/**
+ * Metadata of the module as well as the loaded module itself.
+ */
+export interface LoadedModuleDescriptor extends ModuleDescriptor {
+  value: unknown
+}
 
 /**
  * A glob pattern with associated registration options.

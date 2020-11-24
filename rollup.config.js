@@ -2,6 +2,8 @@ import typescript from 'rollup-plugin-typescript2'
 import replace from 'rollup-plugin-replace'
 import commonjs from 'rollup-plugin-commonjs'
 import resolve from 'rollup-plugin-node-resolve'
+import copy from 'rollup-plugin-copy'
+
 
 const comment = '/* removed in browser build */'
 const ignoredWarnings = ['UNUSED_EXTERNAL_IMPORT']
@@ -23,7 +25,7 @@ export default [
   // Build 1: ES6 modules for Node.
   {
     input: 'src/awilix.ts',
-    external: ['glob', 'path', 'util', 'camel-case'],
+    external: ['glob', 'path', 'util', 'camel-case', './load-module-native.js'],
     treeshake: { moduleSideEffects: 'no-external' },
     onwarn,
     output: [
@@ -32,7 +34,13 @@ export default [
         format: 'es',
       },
     ],
-    plugins: [typescript(tsOpts)],
+    plugins: [
+      // Copy the native module loader
+      copy({
+        targets: [{ src: 'src/load-module-native.js', dest: 'lib' }]
+      }),
+      typescript(tsOpts)
+    ],
   },
   // Build 2: ES modules for browser builds.
   {

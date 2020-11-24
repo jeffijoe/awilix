@@ -81,7 +81,8 @@
   },
   "dependencies": {
     "camel-case": "^4.1.1",
-    "glob": "^7.1.6"
+    "glob": "^7.1.6",
+    "rollup-plugin-copy": "^3.3.0"
   },
   "lint-staged": {
     "*.ts": [
@@ -116,7 +117,8 @@
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "__tests__",
-      "lib"
+      "lib",
+      "src/load-module-native.js"
     ],
     "moduleFileExtensions": [
       "ts",

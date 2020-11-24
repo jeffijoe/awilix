@@ -456,6 +456,12 @@ describe('container', function () {
     it('returns the container', function () {
       expect(container.loadModules([])).toBe(container)
     })
+
+    it('returns a Promise of the container if used with esModules true', async function () {
+      expect(await container.loadModules([], { esModules: true })).toBe(
+        container
+      )
+    })
   })
 
   describe('setting a property on the cradle', function () {

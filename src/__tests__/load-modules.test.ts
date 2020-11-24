@@ -38,6 +38,33 @@ describe('loadModules', function () {
     expect(container.resolve('someClass')).toBeInstanceOf(SomeClass)
   })
 
+  it('registers loaded modules async when using native modules', async function () {
+    const container = createContainer()
+
+    class SomeClass {}
+
+    const modules: any = {
+      'nope.js': undefined,
+      'standard.js': jest.fn(() => 42),
+      'default.js': { default: jest.fn(() => 1337) },
+      'someClass.js': SomeClass,
+    }
+
+    const moduleLookupResult = lookupResultFor(modules)
+    const deps = {
+      container,
+      listModules: jest.fn(() => moduleLookupResult),
+      require: jest.fn(async (path) => modules[path])
+    }
+
+    const result = await loadModules(deps, 'anything', { esModules: true })
+    expect(result).toEqual({ loadedModules: moduleLookupResult })
+    expect(Object.keys(container.registrations).length).toBe(3)
+    expect(container.resolve('standard')).toBe(42)
+    expect(container.resolve('default')).toBe(1337)
+    expect(container.resolve('someClass')).toBeInstanceOf(SomeClass)
+  })
+
   it('registers non-default export modules containing RESOLVER token with the container', function () {
     const container = createContainer()
 

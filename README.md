@@ -1064,6 +1064,7 @@ Args:
   pass the name through as-is. The 2nd parameter is a full module descriptor.
 - `opts.resolverOptions`: An `object` passed to the resolvers. Used to configure
   the lifetime, injection mode and more of the loaded modules.
+- `opts.esModules`: Loads modules using Node's native ES modules. This is only supported on Node 14.0+ and should only be used if you're using the [Native Node ES modules](https://nodejs.org/api/esm.html)
 
 Example:
 
