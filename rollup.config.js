@@ -45,7 +45,7 @@ export default [
   // Build 2: ES modules for browser builds.
   {
     input: 'src/awilix.ts',
-    external: ['glob', 'path', 'util', './load-module-native.js'],
+    external: ['glob', 'path', 'util'],
     treeshake: { moduleSideEffects: 'no-external' },
     onwarn,
     output: [
