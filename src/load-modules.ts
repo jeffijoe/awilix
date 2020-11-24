@@ -105,11 +105,12 @@ export function loadModules<ESM extends boolean>(
   globPatterns: string | Array<string | GlobWithOptions>,
   opts?: LoadModulesOptions<ESM>
 ): Promise<LoadModulesResult> | LoadModulesResult {
+  opts ??= {}
   const container = dependencies.container
   opts = optsWithDefaults(opts, container)
   const modules = dependencies.listModules(globPatterns, opts)
 
-  if (opts?.esModules) {
+  if (opts.esModules) {
     return loadEsModules(dependencies, container, modules, opts)
   } else {
     const result = modules.map((m) => {
