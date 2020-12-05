@@ -1,3 +1,7 @@
+# v4.3.1
+
+- `GlobWithOptions` now includes `BuildResolverOptions` instead of `ResolverOptions` (fixes [#214](https://github.com/jeffijoe/awilix/issues/214))
+
 # v4.3.0
 
 - Add support for [Native Node ES modules](https://nodejs.org/api/esm.html) on Node v14+ ([#211](https://github.com/jeffijoe/awilix/pull/211), [Richard Simko](https://github.com/richardsimko))

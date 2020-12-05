@@ -1,7 +1,7 @@
 import * as glob from 'glob'
 import * as path from 'path'
 import { flatten } from './utils'
-import { ResolverOptions } from './resolvers'
+import { BuildResolverOptions, ResolverOptions } from './resolvers'
 import { LifetimeType } from './awilix'
 
 /**
@@ -35,7 +35,7 @@ export interface LoadedModuleDescriptor extends ModuleDescriptor {
  */
 export type GlobWithOptions =
   | [string]
-  | [string, ResolverOptions<any> | LifetimeType]
+  | [string, BuildResolverOptions<any> | LifetimeType]
 
 // Regex to extract the module name.
 const nameExpr = /(.*)\..*/i
