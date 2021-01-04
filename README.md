@@ -62,7 +62,7 @@ written in [TypeScript](http://typescriptlang.org). **Make IoC great again!**
 Install with `npm`
 
 ```
-npm install awilix --save
+npm install awilix
 ```
 
 Or `yarn`
