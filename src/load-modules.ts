@@ -15,6 +15,7 @@ import { AwilixContainer } from './container'
 import { isClass, isFunction } from './utils'
 import { BuildResolver } from './awilix'
 import { camelCase } from 'camel-case'
+import { pathToFileURL } from 'url';
 
 /**
  * The options when invoking loadModules().
@@ -135,7 +136,8 @@ async function loadEsModules<ESM extends boolean>(
 ): Promise<LoadModulesResult> {
   const importPromises = []
   for (const m of modules) {
-    importPromises.push(dependencies.require(m.path))
+    //importPromises.push(dependencies.require(m.path))
+    importPromises.push(dependencies.require(pathToFileURL(m.path).toString()))
   }
   const imports = await Promise.all(importPromises)
   const result = []
