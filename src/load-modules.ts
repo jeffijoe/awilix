@@ -135,9 +135,11 @@ async function loadEsModules<ESM extends boolean>(
   opts: LoadModulesOptions<ESM>
 ): Promise<LoadModulesResult> {
   const importPromises = []
+  const isWindows = process.platform === 'win32';
   for (const m of modules) {
     //importPromises.push(dependencies.require(m.path))
-    importPromises.push(dependencies.require(pathToFileURL(m.path).toString()))
+    const _path = isWindows? pathToFileURL(m.path).toString(): m.path;
+    importPromises.push(dependencies.require(_path))
   }
   const imports = await Promise.all(importPromises)
   const result = []
