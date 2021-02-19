@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from 'path'
 import { loadModules, LoadModulesOptions } from '../load-modules'
 import { createContainer } from '../container'
 import { Lifetime } from '../lifetime'

@@ -1,4 +1,4 @@
-import { pathToFileURL } from 'url';
+import { pathToFileURL } from 'url'
 import {
   ModuleDescriptor,
   LoadedModuleDescriptor,
@@ -136,7 +136,7 @@ async function loadEsModules<ESM extends boolean>(
 ): Promise<LoadModulesResult> {
   const importPromises = []
   for (const m of modules) {
-    const fileUrl = pathToFileURL(m.path).toString();
+    const fileUrl = pathToFileURL(m.path).toString()
     importPromises.push(dependencies.require(fileUrl))
   }
   const imports = await Promise.all(importPromises)
