@@ -1,3 +1,4 @@
+import * as path from 'path';
 import { loadModules, LoadModulesOptions } from '../load-modules'
 import { createContainer } from '../container'
 import { Lifetime } from '../lifetime'
@@ -54,7 +55,7 @@ describe('loadModules', function () {
     const deps = {
       container,
       listModules: jest.fn(() => moduleLookupResult),
-      require: jest.fn(async (path) => modules[path]),
+      require: jest.fn(async (p) => modules[path.parse(p).base]),
     }
 
     const result = await loadModules(deps, 'anything', { esModules: true })
