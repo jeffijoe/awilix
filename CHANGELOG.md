@@ -1,3 +1,7 @@
+# v4.3.3
+
+- Update packages
+
 # v4.3.2
 
 - Convert paths to file URLs in `loadModules` with ESM, fixes [#225](https://github.com/jeffijoe/awilix/issues/225). ([#227](https://github.com/jeffijoe/awilix/pull/227), [Jamie Corkhill](https://github.com/JamieCorkhill))
