@@ -224,7 +224,7 @@ container.register({
 
 // or using the chaining configuration API..
 container.register({
-  mailService: asClass(MailService).lifetime(Lifetime.SINGLETON)
+  mailService: asClass(MailService).setLifetime(Lifetime.SINGLETON)
 })
 
 // or..
