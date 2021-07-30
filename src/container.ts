@@ -80,6 +80,19 @@ export interface AwilixContainer<Cradle extends object = any> {
    * @return {*}
    * Whatever was resolved.
    */
+  resolve<K extends keyof Cradle>(
+    name: K,
+    resolveOptions?: ResolveOptions
+  ): Cradle[K]
+  /**
+   * Resolves the registration with the given name.
+   *
+   * @param  {string} name
+   * The name of the registration to resolve.
+   *
+   * @return {*}
+   * Whatever was resolved.
+   */
   resolve<T>(name: string | symbol, resolveOptions?: ResolveOptions): T
   /**
    * Checks if the registration with the given name exists.
