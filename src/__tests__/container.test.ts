@@ -80,8 +80,8 @@ describe('container', function () {
         service: asFunction(({ func, universe }: any) => ({
           method: () => func(universe),
         })),
-        func: asFunction(() => (answer: any) =>
-          'Hello world, the answer is ' + answer
+        func: asFunction(
+          () => (answer: any) => 'Hello world, the answer is ' + answer
         ),
       })
 
@@ -394,8 +394,10 @@ describe('container', function () {
         }
       }
 
-      const fnWithDefaults = (val = 456, nope = 'nope') => (p: string) =>
-        p + nope + val
+      const fnWithDefaults =
+        (val = 456, nope = 'nope') =>
+        (p: string) =>
+          p + nope + val
 
       container.register({
         val: asValue(123),
@@ -554,7 +556,11 @@ describe('container', function () {
         injectionMode: null as any,
       }).register({
         answer: asValue(42),
-        theAnswer: asFunction(({ answer }: any) => () => answer),
+        theAnswer: asFunction(
+          ({ answer }: any) =>
+            () =>
+              answer
+        ),
       })
 
       const theAnswer = container.resolve<Function>('theAnswer')
@@ -566,7 +572,11 @@ describe('container', function () {
         injectionMode: 'I dunno maaaang...' as any,
       }).register({
         answer: asValue(42),
-        theAnswer: asFunction(({ answer }: any) => () => answer),
+        theAnswer: asFunction(
+          ({ answer }: any) =>
+            () =>
+              answer
+        ),
       })
 
       const theAnswer = container.resolve<Function>('theAnswer')

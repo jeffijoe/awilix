@@ -1,7 +1,7 @@
 import { Lifetime } from '../lifetime'
 
-const AnotherService = require('./fixture/services/anotherService')
-  .AnotherService
+const AnotherService =
+  require('./fixture/services/anotherService').AnotherService
 const fixture = require('./fixture')
 
 describe('integration tests', function () {

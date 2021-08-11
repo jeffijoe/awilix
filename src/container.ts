@@ -608,11 +608,13 @@ export function createContainer<T extends object = any, U extends object = any>(
     }
     if (opts?.esModules) {
       _loadModulesDeps.require = importModule
-      return (realLoadModules(
-        _loadModulesDeps,
-        globPatterns,
-        opts
-      ) as Promise<LoadModulesResult>).then(() => container)
+      return (
+        realLoadModules(
+          _loadModulesDeps,
+          globPatterns,
+          opts
+        ) as Promise<LoadModulesResult>
+      ).then(() => container)
     } else {
       realLoadModules(_loadModulesDeps, globPatterns, opts)
       return container
