@@ -1,3 +1,12 @@
+# v5.0.0
+
+- Improve resolve typing ([#247](https://github.com/jeffijoe/awilix/pull/247), [Goran Mržljak](https://github.com/mrzli))
+- Update packages
+
+### BREAKING CHANGES 
+
+Dropped Node 10 support. Minimum supported Node version is now 12.
+
 # v4.3.4
 
 - Move rollup-plugin-copy to devDependencies ([#236](https://github.com/jeffijoe/awilix/pull/236), [Evan Sosenko](https://github.com/razor-x))
