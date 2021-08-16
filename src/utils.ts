@@ -108,14 +108,6 @@ export function isFunction(val: any) {
  * @return {Array<T>}
  * The deduped array.
  */
-export function uniq<T>(arr: Array<T>): Array<T> {
-  const result: Array<T> = []
-  for (const idx in arr) {
-    const item = arr[idx]
-    if (result.indexOf(item) === -1) {
-      result.push(item)
-    }
-  }
-
-  return result
+ export function uniq<T>(arr: Array<T>): Array<T> {
+  return Array.from(new Set(arr))
 }
