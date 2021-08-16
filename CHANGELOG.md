@@ -1,3 +1,8 @@
+# v5.0.1
+
+- Improve internal `uniq` function performance by using a `Set` ([#253](https://github.com/jeffijoe/awilix/pull/253), [Anderson Leite](https://github.com/andersonleite))
+- Update packages
+
 # v5.0.0
 
 - Improve resolve typing ([#247](https://github.com/jeffijoe/awilix/pull/247), [Goran Mržljak](https://github.com/mrzli))
