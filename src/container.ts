@@ -262,7 +262,7 @@ export function createContainer<T extends object = any, U extends object = any>(
        * @param  {object} target
        * @param  {string} name
        */
-      set: (_target, name, value) => {
+      set: (_target, name) => {
         throw new Error(
           `Attempted setting property "${
             name as any
@@ -332,7 +332,7 @@ export function createContainer<T extends object = any, U extends object = any>(
   /**
    * Used by util.inspect (which is used by console.log).
    */
-  function inspect(depth: number, opts: any): string {
+  function inspect(): string {
     return `[AwilixContainer (${
       parentContainer ? 'scoped, ' : ''
     }registrations: ${Object.keys(container.registrations).length})]`
