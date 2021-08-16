@@ -108,6 +108,6 @@ export function isFunction(val: any) {
  * @return {Array<T>}
  * The deduped array.
  */
- export function uniq<T>(arr: Array<T>): Array<T> {
+export function uniq<T>(arr: Array<T>): Array<T> {
   return Array.from(new Set(arr))
 }
