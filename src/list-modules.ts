@@ -61,7 +61,7 @@ function _listModules(
 ): Array<ModuleDescriptor> {
   opts = { cwd: process.cwd(), glob: glob.sync, ...opts }
   let patternOpts: ResolverOptions<any> | null = null
-  if (globPattern instanceof Array) {
+  if (Array.isArray(globPattern)) {
     patternOpts = globPattern[1] as ResolverOptions<any>
     globPattern = globPattern[0]
   }
