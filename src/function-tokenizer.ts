@@ -261,7 +261,7 @@ export function createTokenizer(source: string) {
  * Determines if the given character is a whitespace character.
  *
  * @param  {string}  ch
- * @return {Boolean}
+ * @return {boolean}
  */
 function isWhiteSpace(ch: string): boolean {
   switch (ch) {
@@ -276,7 +276,7 @@ function isWhiteSpace(ch: string): boolean {
 /**
  * Determines if the specified character is a string quote.
  * @param  {string}  ch
- * @return {Boolean}
+ * @return {boolean}
  */
 function isStringQuote(ch: string): boolean {
   switch (ch) {

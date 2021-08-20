@@ -13,6 +13,7 @@ export const InjectionMode: Record<InjectionModeType, InjectionModeType> = {
    * @type {String}
    */
   PROXY: 'PROXY',
+
   /**
    * The dependencies will be resolved by inspecting parameter names of the function/constructor.
    *

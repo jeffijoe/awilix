@@ -116,8 +116,9 @@ export function parseParameterList(source: string): Array<Parameter> {
 
   /**
    * Determines if the current token represents a constructor, and the next token after it is a paren
+   * @return {boolean}
    */
-  function isConstructorToken() {
+  function isConstructorToken(): boolean {
     return t.type === 'ident' && t.value === 'constructor'
   }
 

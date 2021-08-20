@@ -61,9 +61,9 @@ export function last<T>(arr: Array<T>): T {
  * Determines if the given function is a class.
  *
  * @param  {Function} fn
- * @return {Boolean}
+ * @return {boolean}
  */
-export function isClass(fn: Function | Constructor<any>) {
+export function isClass(fn: Function | Constructor<any>): boolean {
   /*tslint:disable-next-line*/
   if (typeof fn !== 'function') {
     return false
@@ -92,10 +92,10 @@ export function isClass(fn: Function | Constructor<any>) {
  * @param  {Any} val
  * Any value to check if it's a function.
  *
- * @return {Boolean}
+ * @return {boolean}
  * true if the value is a function, false otherwise.
  */
-export function isFunction(val: any) {
+export function isFunction(val: any): boolean {
   return typeof val === 'function'
 }
 
