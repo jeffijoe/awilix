@@ -1337,6 +1337,10 @@ because they depend on Node-specific packages.
 - Safari >= 10
 - Internet Explorer is not supported
 
+## Contributing
+
+Please see our [contributing.md](./CONTRIBUTING.md)
+
 # What's in a name?
 
 Awilix is the mayan goddess of the moon, and also my favorite character in the
