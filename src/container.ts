@@ -207,7 +207,7 @@ const ROLL_UP_REGISTRATIONS = Symbol('rollUpRegistrations')
  * @param {string} options.injectionMode
  * The mode used by the container to resolve dependencies. Defaults to 'Proxy'.
  *
- * @return {object}
+ * @return {AwilixContainer<T>}
  * The container.
  */
 export function createContainer<T extends object = any, U extends object = any>(
