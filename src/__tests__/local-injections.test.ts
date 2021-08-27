@@ -41,7 +41,7 @@ describe('local injections', function () {
     )
   })
 
-  it('supported by registerClass', function () {
+  it('supported by registerClass', () => {
     const container = createContainer().register({
       test: asClass(Test, { injector }),
       testClassic: asClass(TestClassic, {
