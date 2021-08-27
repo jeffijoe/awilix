@@ -1,36 +1,36 @@
 import { listModules } from '../list-modules'
 
-describe('listModules', function () {
-  it('can find the modules in lib', function () {
+describe('listModules', () => {
+  it('can find the modules in lib', () => {
     const result = listModules('../*.ts', { cwd: __dirname })
     expect(result.some((x) => x.name === 'container')).toBeTruthy()
   })
 
-  it('can find the modules in src without cwd', function () {
+  it('can find the modules in src without cwd', () => {
     const result = listModules('src/*.ts')
     expect(result.some((x) => x.name === 'container')).toBeTruthy()
   })
 
-  it('handles dots in module names', function () {
+  it('handles dots in module names', () => {
     const result = listModules('*.{ts,js}', { cwd: __dirname })
     expect(result.find((x) => x.name === 'container.test')).toBeDefined()
   })
 
-  it('returns a path', function () {
+  it('returns a path', () => {
     const result = listModules('../*.ts', { cwd: __dirname })
     const createContainerModule = result.find((x) => x.name === 'container')!
     expect(createContainerModule.name).toBe('container')
     expect(createContainerModule.path).toContain('container.ts')
   })
 
-  it('supports an array of globs', function () {
+  it('supports an array of globs', () => {
     const result = listModules(['src/*.ts'])
     const createContainerModule = result.find((x) => x.name === 'container')!
     expect(createContainerModule.name).toBe('container')
     expect(createContainerModule.path).toContain('container.ts')
   })
 
-  it('supports array-opts syntax', function () {
+  it('supports array-opts syntax', () => {
     const opts = { value: 'yep' }
     const result = listModules([['src/*.ts', opts as any]])
 

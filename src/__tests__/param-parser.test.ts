@@ -1,11 +1,11 @@
 import { parseParameterList } from '../param-parser'
 
-describe('parseParameterList', function () {
-  it('returns an empty array when invalid input is given', function () {
+describe('parseParameterList', () => {
+  it('returns an empty array when invalid input is given', () => {
     expect(parseParameterList('')).toEqual([])
   })
 
-  it('supports regular functions', function () {
+  it('supports regular functions', () => {
     expect(
       parseParameterList(
         function hello(dep1: any, dep2: any) {
@@ -53,7 +53,7 @@ describe('parseParameterList', function () {
     ).toEqual([])
   })
 
-  it('supports regular functions with default params', function () {
+  it('supports regular functions with default params', () => {
     expect(
       parseParameterList(
         `function hello(
@@ -68,7 +68,7 @@ describe('parseParameterList', function () {
     ])
   })
 
-  it('supports arrow functions', function () {
+  it('supports arrow functions', () => {
     expect(
       parseParameterList(
         ((dep1: any, dep2: any) => {
@@ -109,7 +109,7 @@ describe('parseParameterList', function () {
     ])
   })
 
-  it('supports arrow function with default params', function () {
+  it('supports arrow function with default params', () => {
     expect(
       parseParameterList(
         ((dep1 = 123, dep2 = 456) => {
@@ -128,7 +128,7 @@ describe('parseParameterList', function () {
     ])
   })
 
-  it('supports class constructors', function () {
+  it('supports class constructors', () => {
     class Test {
       dep1: any
       constructor(dep1: any, dep2: any) {
@@ -169,14 +169,14 @@ describe('parseParameterList', function () {
     ])
   })
 
-  it('supports carriage return in function signature', function () {
+  it('supports carriage return in function signature', () => {
     expect(parseParameterList(`function (\r\ndep1,\r\ndep2\r\n) {}`)).toEqual([
       { name: 'dep1', optional: false },
       { name: 'dep2', optional: false },
     ])
   })
 
-  it('supports weird formatting', function () {
+  it('supports weird formatting', () => {
     expect(
       parseParameterList(`function(  dep1    \n,\r\n  dep2 = 123 \r\n) {}`)
     ).toEqual([
@@ -185,7 +185,7 @@ describe('parseParameterList', function () {
     ])
   })
 
-  it('supports the problem posted in issue #30', function () {
+  it('supports the problem posted in issue #30', () => {
     const fn = function (a: any) {
       return {}
     }

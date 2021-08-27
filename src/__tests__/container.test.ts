@@ -30,15 +30,15 @@ class ManualTest {
   }
 }
 
-describe('createContainer', function () {
-  it('returns an object', function () {
+describe('createContainer', () => {
+  it('returns an object', () => {
     const container = createContainer()
     expect(typeof container).toBe('object')
   })
 })
 
-describe('container', function () {
-  it('lets me register something and resolve it', function () {
+describe('container', () => {
+  it('lets me register something and resolve it', () => {
     const container = createContainer()
     container.register({ someValue: asValue(42) })
     container.register({
@@ -54,7 +54,7 @@ describe('container', function () {
     expect(test.someValue).toBe(42)
   })
 
-  it('lets me register something and resolve it via classic injection mode', function () {
+  it('lets me register something and resolve it via classic injection mode', () => {
     const container = createContainer({
       injectionMode: InjectionMode.CLASSIC,
     })
@@ -68,8 +68,8 @@ describe('container', function () {
     expect(test.repo).toBeTruthy()
   })
 
-  describe('register', function () {
-    it('supports multiple registrations in a single call', function () {
+  describe('register', () => {
+    it('supports multiple registrations in a single call', () => {
       const container = createContainer()
       container.register({
         universe: asValue(42),
@@ -92,7 +92,7 @@ describe('container', function () {
       )
     })
 
-    it('supports classes', function () {
+    it('supports classes', () => {
       const container = createContainer()
       container.register({
         test: asClass(Test),
@@ -103,21 +103,21 @@ describe('container', function () {
     })
   })
 
-  describe('has', function () {
-    it('returns true if the registration does exist', function () {
+  describe('has', () => {
+    it('returns true if the registration does exist', () => {
       const container = createContainer()
       container.register({ theValue: asValue('theValue') })
 
       expect(container.has('theValue')).toBe(true)
     })
 
-    it('returns false if the registration does not exist', function () {
+    it('returns false if the registration does not exist', () => {
       expect(createContainer().has('theValue')).toBe(false)
     })
   })
 
-  describe('resolve', function () {
-    it('resolves the dependency graph and supports all resolvers', function () {
+  describe('resolve', () => {
+    it('resolves the dependency graph and supports all resolvers', () => {
       class TestClass {
         factoryResult: any
         constructor({ factory }: any) {
@@ -137,14 +137,14 @@ describe('container', function () {
       expect(root.factoryResult).toBe('factory 42')
     })
 
-    it('throws an AwilixResolutionError when there are unregistered dependencies', function () {
+    it('throws an AwilixResolutionError when there are unregistered dependencies', () => {
       const container = createContainer()
       const err = throws(() => container.resolve('nope'))
       expect(err).toBeInstanceOf(AwilixResolutionError)
       expect(err.message).toMatch(/nope/i)
     })
 
-    it('throws an AwilixResolutionError that supports symbols', function () {
+    it('throws an AwilixResolutionError that supports symbols', () => {
       const container = createContainer()
       const S = Symbol('i am the derg')
       const err = throws(() => container.resolve(S))
@@ -152,7 +152,7 @@ describe('container', function () {
       expect(err.message).toMatch(/i am the derg/i)
     })
 
-    it('throws an AwilixResolutionError that supports symbols on multiple levels', function () {
+    it('throws an AwilixResolutionError that supports symbols on multiple levels', () => {
       const container = createContainer()
       const S1 = Symbol('i am the derg')
       const S2 = Symbol('i am not the derg')
@@ -162,7 +162,7 @@ describe('container', function () {
       expect(err.message).toMatch(/i am the derg/i)
     })
 
-    it('throws an AwilixResolutionError with a resolution path when resolving an unregistered dependency', function () {
+    it('throws an AwilixResolutionError with a resolution path when resolving an unregistered dependency', () => {
       const container = createContainer()
       container.register({
         first: asFunction((cradle: any) => cradle.second),
@@ -174,7 +174,7 @@ describe('container', function () {
       expect(err.message).toContain('first -> second -> third')
     })
 
-    it('does not screw up the resolution stack when called twice', function () {
+    it('does not screw up the resolution stack when called twice', () => {
       const container = createContainer()
       container.register({
         first: asFunction((cradle: any) => cradle.second),
@@ -189,7 +189,7 @@ describe('container', function () {
       expect(err2.message).toContain('otherFirst -> second -> third')
     })
 
-    it('supports transient lifetime', function () {
+    it('supports transient lifetime', () => {
       const container = createContainer()
       let counter = 1
       container.register({
@@ -200,7 +200,7 @@ describe('container', function () {
       expect(container.cradle.hehe).toBe(2)
     })
 
-    it('supports singleton lifetime', function () {
+    it('supports singleton lifetime', () => {
       const container = createContainer()
       let counter = 1
       container.register({
@@ -211,7 +211,7 @@ describe('container', function () {
       expect(container.cradle.hehe).toBe(1)
     })
 
-    it('supports scoped lifetime', function () {
+    it('supports scoped lifetime', () => {
       const container = createContainer()
       let scopedCounter = 1
       container.register({
@@ -227,7 +227,7 @@ describe('container', function () {
       expect(scope2.cradle.scoped).toBe(2)
     })
 
-    it('caches singletons regardless of scope', function () {
+    it('caches singletons regardless of scope', () => {
       const container = createContainer()
       let singletonCounter = 1
       container.register({
@@ -243,7 +243,7 @@ describe('container', function () {
       expect(scope2.cradle.singleton).toBe(1)
     })
 
-    it('resolves transients regardless of scope', function () {
+    it('resolves transients regardless of scope', () => {
       const container = createContainer()
       let transientCounter = 1
       container.register({
@@ -259,7 +259,7 @@ describe('container', function () {
       expect(scope2.cradle.transient).toBe(4)
     })
 
-    it('does not use parents cache when scoped', function () {
+    it('does not use parents cache when scoped', () => {
       const container = createContainer()
       let scopedCounter = 1
       container.register({
@@ -300,7 +300,7 @@ describe('container', function () {
       expect(scope1Child.cradle.counterValue === 3).toBe(true)
     })
 
-    it('supports nested scopes', function () {
+    it('supports nested scopes', () => {
       const container = createContainer()
 
       // Increments the counter every time it is resolved.
@@ -320,7 +320,7 @@ describe('container', function () {
       expect(scope1Child.cradle.counterValue).toBe(3)
     })
 
-    it('resolves dependencies in scope', function () {
+    it('resolves dependencies in scope', () => {
       const container = createContainer()
       // Register a transient function
       // that returns the value of the scope-provided dependency.
@@ -338,7 +338,7 @@ describe('container', function () {
       expect(scope.cradle.scopedValue).toBe('Hello scope')
     })
 
-    it('cannot find a scope-registered value when resolved from root', function () {
+    it('cannot find a scope-registered value when resolved from root', () => {
       const container = createContainer()
       // Register a transient function
       // that returns the value of the scope-provided dependency.
@@ -358,7 +358,7 @@ describe('container', function () {
       )
     })
 
-    it('supports overwriting values in a scope', function () {
+    it('supports overwriting values in a scope', () => {
       const container = createContainer()
       // It does not matter when the scope is created,
       // it will still have anything that is registered
@@ -411,7 +411,7 @@ describe('container', function () {
       )
     })
 
-    it('throws an AwilixResolutionError when there are cyclic dependencies', function () {
+    it('throws an AwilixResolutionError when there are cyclic dependencies', () => {
       const container = createContainer()
       container.register({
         first: asFunction((cradle: any) => cradle.second),
@@ -423,7 +423,7 @@ describe('container', function () {
       expect(err.message).toContain('first -> second -> third -> second')
     })
 
-    it('throws an AwilixResolutionError when the lifetime is unknown', function () {
+    it('throws an AwilixResolutionError when the lifetime is unknown', () => {
       const container = createContainer()
       container.register({
         first: asFunction((cradle: any) => cradle.second),
@@ -435,7 +435,7 @@ describe('container', function () {
       expect(err.message).toContain('lol')
     })
 
-    it('behaves properly when the cradle is returned from an async function', async function () {
+    it('behaves properly when the cradle is returned from an async function', async () => {
       const container = createContainer()
       container.register({ value: asValue(42) })
 
@@ -449,33 +449,33 @@ describe('container', function () {
     })
   })
 
-  describe('loadModules', function () {
+  describe('loadModules', () => {
     let container: AwilixContainer
-    beforeEach(function () {
+    beforeEach(() => {
       container = createContainer()
     })
 
-    it('returns the container', function () {
+    it('returns the container', () => {
       expect(container.loadModules([])).toBe(container)
     })
 
-    it('returns a Promise of the container if used with esModules true', async function () {
+    it('returns a Promise of the container if used with esModules true', async () => {
       expect(await container.loadModules([], { esModules: true })).toBe(
         container
       )
     })
   })
 
-  describe('setting a property on the cradle', function () {
-    it('should fail', function () {
+  describe('setting a property on the cradle', () => {
+    it('should fail', () => {
       expect(() => {
         createContainer().cradle.lol = 'nope'
       }).toThrowError(Error)
     })
   })
 
-  describe('using util.inspect on the container', function () {
-    it('should return a summary', function () {
+  describe('using util.inspect on the container', () => {
+    it('should return a summary', () => {
       const container = createContainer().register({
         val1: asValue(1),
         val2: asValue(2),
@@ -495,8 +495,8 @@ describe('container', function () {
     })
   })
 
-  describe('using util.inspect on the cradle', function () {
-    it('should return the preconfigured string', function () {
+  describe('using util.inspect on the cradle', () => {
+    it('should return the preconfigured string', () => {
       const container = createContainer().register({
         val1: asValue(1),
         val2: asValue(2),
@@ -515,8 +515,8 @@ describe('container', function () {
     })
   })
 
-  describe('using Array.from on the cradle', function () {
-    it('should return an Array with registration names', function () {
+  describe('using Array.from on the cradle', () => {
+    it('should return an Array with registration names', () => {
       const container = createContainer().register({
         val1: asValue(1),
         val2: asValue(2),
@@ -550,8 +550,8 @@ describe('container', function () {
     })
   })
 
-  describe('explicitly trying to fuck shit up', function () {
-    it('should prevent you from fucking shit up', function () {
+  describe('explicitly trying to fuck shit up', () => {
+    it('should prevent you from fucking shit up', () => {
       const container = createContainer({
         injectionMode: null as any,
       }).register({
@@ -567,7 +567,7 @@ describe('container', function () {
       expect(theAnswer()).toBe(42)
     })
 
-    it('should default to PROXY injection mode when unknown', function () {
+    it('should default to PROXY injection mode when unknown', () => {
       const container = createContainer({
         injectionMode: 'I dunno maaaang...' as any,
       }).register({
@@ -776,7 +776,7 @@ describe('memoizing registrations', () => {
     })
   })
 
-  describe('Safely stringify cradle', function () {
+  describe('Safely stringify cradle', () => {
     it('should have toJSON() return [AwilixContainer.cradle]', () => {
       expect(createContainer().cradle.toJSON()).toBe('[AwilixContainer.cradle]')
     })
