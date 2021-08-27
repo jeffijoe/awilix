@@ -427,7 +427,7 @@ describe('container', () => {
       const container = createContainer()
       container.register({
         first: asFunction((cradle: any) => cradle.second),
-        second: asFunction((cradle: any) => 'hah', { lifetime: 'lol' as any }),
+        second: asFunction(() => 'hah', { lifetime: 'lol' as any }),
       })
 
       const err = throws(() => container.resolve('first'))
