@@ -7,7 +7,7 @@ import { asClass, asFunction, asValue } from '../resolvers'
 import { InjectionMode } from '../injection-mode'
 
 class Test {
-  repo: any
+  repo: Repo
   constructor({ repo }: any) {
     this.repo = repo
   }
@@ -24,8 +24,8 @@ class Repo {
 }
 
 class ManualTest {
-  repo: any
-  constructor(repo: any) {
+  repo: Repo
+  constructor(repo: Repo) {
     this.repo = repo
   }
 }
