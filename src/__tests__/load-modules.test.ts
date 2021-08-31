@@ -12,8 +12,8 @@ const lookupResultFor = (modules: any) =>
     opts: null,
   }))
 
-describe('loadModules', function () {
-  it('registers loaded modules with the container using the name of the file', function () {
+describe('loadModules', () => {
+  it('registers loaded modules with the container using the name of the file', () => {
     const container = createContainer()
 
     class SomeClass {}
@@ -39,7 +39,7 @@ describe('loadModules', function () {
     expect(container.resolve('someClass')).toBeInstanceOf(SomeClass)
   })
 
-  it('registers loaded modules async when using native modules', async function () {
+  it('registers loaded modules async when using native modules', async () => {
     const container = createContainer()
 
     class SomeClass {}
@@ -66,7 +66,7 @@ describe('loadModules', function () {
     expect(container.resolve('someClass')).toBeInstanceOf(SomeClass)
   })
 
-  it('registers non-default export modules containing RESOLVER token with the container', function () {
+  it('registers non-default export modules containing RESOLVER token with the container', () => {
     const container = createContainer()
 
     class SomeNonDefaultClass {
@@ -92,7 +92,7 @@ describe('loadModules', function () {
     )
   })
 
-  it('does not register non-default modules without a RESOLVER token', function () {
+  it('does not register non-default modules without a RESOLVER token', () => {
     const container = createContainer()
 
     class SomeClass {}
@@ -112,7 +112,7 @@ describe('loadModules', function () {
     expect(Object.keys(container.registrations).length).toBe(0)
   })
 
-  it('registers multiple loaded modules from one file with the container', function () {
+  it('registers multiple loaded modules from one file with the container', () => {
     const container = createContainer()
 
     class SomeClass {}
@@ -149,7 +149,7 @@ describe('loadModules', function () {
     )
   })
 
-  it('registers only the last module with a certain name with the container', function () {
+  it('registers only the last module with a certain name with the container', () => {
     const container = createContainer()
 
     class SomeClass {}
@@ -193,7 +193,7 @@ describe('loadModules', function () {
     )
   })
 
-  it('uses built-in formatter when given a formatName as a string', function () {
+  it('uses built-in formatter when given a formatName as a string', () => {
     const container = createContainer()
     const modules: any = {
       'SomeClass.js': jest.fn(() => 42),
@@ -213,7 +213,7 @@ describe('loadModules', function () {
     expect(reg).toBeTruthy()
   })
 
-  it('uses the function passed in as formatName', function () {
+  it('uses the function passed in as formatName', () => {
     const container = createContainer()
     const modules: any = {
       'SomeClass.js': jest.fn(() => 42),
@@ -236,7 +236,7 @@ describe('loadModules', function () {
     expect(reg).toBeTruthy()
   })
 
-  it('does nothing with the name if the string formatName does not match a formatter', function () {
+  it('does nothing with the name if the string formatName does not match a formatter', () => {
     const container = createContainer()
     const modules: any = {
       'SomeClass.js': jest.fn(() => 42),
@@ -256,7 +256,7 @@ describe('loadModules', function () {
     expect(reg).toBeTruthy()
   })
 
-  it('defaults to transient lifetime if option is unreadable', function () {
+  it('defaults to transient lifetime if option is unreadable', () => {
     const container = createContainer()
     const modules: any = {
       'test.js': jest.fn(() => 42),
@@ -276,7 +276,7 @@ describe('loadModules', function () {
     expect(reg).toBeTruthy()
   })
 
-  it('supports passing in a register function', function () {
+  it('supports passing in a register function', () => {
     const container = createContainer()
     const moduleSpy = jest.fn(() => () => 42)
     const modules: any = {
@@ -303,7 +303,7 @@ describe('loadModules', function () {
     expect(registerSpy).toHaveBeenCalledWith(moduleSpy, regOpts)
   })
 
-  it('supports array opts syntax with string (lifetime)', function () {
+  it('supports array opts syntax with string (lifetime)', () => {
     const container = createContainer()
     const modules: any = {
       'test.js': jest.fn(() => 42),
@@ -329,7 +329,7 @@ describe('loadModules', function () {
     expect(container.registrations.test2.lifetime).toBe(Lifetime.SINGLETON)
   })
 
-  it('supports array opts syntax with object', function () {
+  it('supports array opts syntax with object', () => {
     const container = createContainer()
     const modules: any = {
       'test.js': jest.fn(() => 42),
@@ -355,7 +355,7 @@ describe('loadModules', function () {
     expect(container.registrations.test2.lifetime).toBe(Lifetime.SINGLETON)
   })
 
-  it('supports passing in a default injectionMode', function () {
+  it('supports passing in a default injectionMode', () => {
     const container = createContainer()
     const modules: any = {
       'test.js': jest.fn(() => 42),
