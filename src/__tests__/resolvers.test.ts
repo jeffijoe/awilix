@@ -38,24 +38,24 @@ class MultipleDeps {
   }
 }
 
-describe('registrations', function () {
+describe('registrations', () => {
   let container: AwilixContainer
   beforeEach(function () {
     container = createContainer()
   })
 
-  describe('asValue', function () {
-    it('creates a registration with a resolve method', function () {
+  describe('asValue', () => {
+    it('creates a registration with a resolve method', () => {
       expect(typeof asValue(42).resolve).toBe('function')
     })
   })
 
-  describe('asFunction', function () {
-    it('creates a registration with a resolve method', function () {
+  describe('asFunction', () => {
+    it('creates a registration with a resolve method', () => {
       expect(typeof asFunction(testFn).resolve).toBe('function')
     })
 
-    it('defaults to transient', function () {
+    it('defaults to transient', () => {
       const testSpy = jest.fn(testFn)
       const reg = asFunction(() => testSpy())
       reg.resolve(container)
@@ -64,7 +64,7 @@ describe('registrations', function () {
       expect(testSpy).toHaveBeenCalledTimes(2)
     })
 
-    it('manually resolves function dependencies', function () {
+    it('manually resolves function dependencies', () => {
       container.register({
         testClass: asClass(TestClass).classic(),
       })
@@ -74,7 +74,7 @@ describe('registrations', function () {
       expect(result).toBeInstanceOf(TestClass)
     })
 
-    it('manually resolves multiple function dependencies', function () {
+    it('manually resolves multiple function dependencies', () => {
       container.register({
         testClass: asClass(TestClass, {
           injectionMode: InjectionMode.CLASSIC,
@@ -90,7 +90,7 @@ describe('registrations', function () {
       expect(result.needsCradle).toBeInstanceOf(NeedsCradle)
     })
 
-    it('supports arrow functions', function () {
+    it('supports arrow functions', () => {
       const arrowWithParen = (dep: any) => dep
       const arrowWithoutParen: (arg: any) => any = (dep) => dep
       container.register({
@@ -103,24 +103,24 @@ describe('registrations', function () {
       expect(container.resolve('withoutParen')).toBe(42)
     })
 
-    it('throws AwilixTypeError when given null', function () {
+    it('throws AwilixTypeError when given null', () => {
       const err = throws(() => asFunction(null as any))
       expect(err).toBeInstanceOf(AwilixTypeError)
     })
   })
 
-  describe('asClass', function () {
-    it('creates a registration with a resolve method', function () {
+  describe('asClass', () => {
+    it('creates a registration with a resolve method', () => {
       expect(typeof asClass(TestClass).resolve).toBe('function')
     })
 
-    it('resolves the class by newing it up', function () {
+    it('resolves the class by newing it up', () => {
       const reg = asClass(TestClass)
       const result = reg.resolve(container)
       expect(result).toBeInstanceOf(TestClass)
     })
 
-    it('resolves dependencies manually', function () {
+    it('resolves dependencies manually', () => {
       container.register({
         testClass: asClass(TestClass),
       })
@@ -130,7 +130,7 @@ describe('registrations', function () {
       expect(result.testClass).toBeInstanceOf(TestClass)
     })
 
-    it('resolves single dependency as cradle', function () {
+    it('resolves single dependency as cradle', () => {
       container.register({
         testClass: asClass(TestClass),
       })
@@ -140,7 +140,7 @@ describe('registrations', function () {
       expect(result.testClass).toBeInstanceOf(TestClass)
     })
 
-    it('resolves multiple dependencies manually', function () {
+    it('resolves multiple dependencies manually', () => {
       container.register({
         testClass: asClass(TestClass),
         needsCradle: asClass(NeedsCradle),
@@ -154,14 +154,14 @@ describe('registrations', function () {
       expect(result.needsCradle).toBeInstanceOf(NeedsCradle)
     })
 
-    it('throws an Error when given null', function () {
+    it('throws an Error when given null', () => {
       const err = throws(() => asClass(null!))
       expect(err).toBeInstanceOf(AwilixTypeError)
     })
   })
 
-  describe('asClass and asFunction fluid interface', function () {
-    it('supports all lifetimes and returns the object itself', function () {
+  describe('asClass and asFunction fluid interface', () => {
+    it('supports all lifetimes and returns the object itself', () => {
       const subjects = [
         asClass<TestClass>(TestClass),
         asFunction(() => {
@@ -190,7 +190,7 @@ describe('registrations', function () {
       })
     })
 
-    it('supports inject()', function () {
+    it('supports inject()', () => {
       const subjects = [
         asClass(TestClass),
         asFunction(() => {

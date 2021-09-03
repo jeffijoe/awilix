@@ -23,8 +23,8 @@ const makeCLassicTest = (test: any, value: any) => ({ value, test })
 
 const injector = () => ({ value: 42 })
 
-describe('local injections', function () {
-  it('invokes the injector and provides the result to the constructor', function () {
+describe('local injections', () => {
+  it('invokes the injector and provides the result to the constructor', () => {
     const container = createContainer().register({
       test: asClass(Test).inject(injector),
       testClassic: asClass(TestClassic).inject(injector).classic(),
@@ -60,7 +60,7 @@ describe('local injections', function () {
     )
   })
 
-  it('supported by registerFunction', function () {
+  it('supported by registerFunction', () => {
     const container = createContainer().register({
       test: asFunction(makeTest, { injector }),
       testClassic: asFunction(makeCLassicTest, {
