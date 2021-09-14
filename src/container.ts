@@ -245,7 +245,7 @@ export function createContainer<T extends object = any, U extends object = any>(
       /**
        * The `get` handler is invoked whenever a get-call for `container.cradle.*` is made.
        *
-       * @param  {object} target
+       * @param  {object} _target
        * The proxy target. Irrelevant.
        *
        * @param  {string} name
@@ -254,7 +254,7 @@ export function createContainer<T extends object = any, U extends object = any>(
        * @return {*}
        * Whatever the resolve call returns.
        */
-      get: (target, name) => resolve(name as string),
+      get: (_target: object, name: string): any => resolve(name),
 
       /**
        * Setting things on the cradle throws an error.
@@ -262,7 +262,7 @@ export function createContainer<T extends object = any, U extends object = any>(
        * @param  {object} target
        * @param  {string} name
        */
-      set: (_target, name) => {
+      set: (_target, name: string) => {
         throw new Error(
           `Attempted setting property "${
             name as any
