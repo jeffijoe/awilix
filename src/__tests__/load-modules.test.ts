@@ -466,7 +466,7 @@ describe('loadModules', () => {
       }
 
       loadModules(deps, 'anything', {
-        formatName: (desc) => 'formatNameCalled',
+        formatName: () => 'formatNameCalled',
         resolverOptions: {
           lifetime: Lifetime.SCOPED,
         },
