@@ -169,6 +169,20 @@ describe('parseParameterList', () => {
     ])
   })
 
+  it('returns null when no constructor is defined', () => {
+    class Test {
+      dep1: any
+
+      method() {
+        /**/
+      }
+    }
+
+    expect(parseParameterList(Test.prototype.constructor.toString())).toBe(null)
+
+    expect(parseParameterList('class Lol extends Wee {}')).toBe(null)
+  })
+
   it('supports carriage return in function signature', () => {
     expect(parseParameterList(`function (\r\ndep1,\r\ndep2\r\n) {}`)).toEqual([
       { name: 'dep1', optional: false },

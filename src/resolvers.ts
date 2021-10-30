@@ -488,18 +488,20 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
 
 /**
  * Parses the dependencies from the given function.
- * If it's a class and has an extends clause, and no reported dependencies, attempt to parse it's super constructor.
+ * If it's a class that extends another class, and it does
+ * not have a defined constructor, attempt to parse it's super constructor.
  */
 function parseDependencies(fn: Function): Array<Parameter> {
   const result = parseParameterList(fn.toString())
-  if (result.length > 0) {
-    return result
-  }
-
-  const parent = Object.getPrototypeOf(fn)
-  if (typeof parent === 'function' && parent !== Function.prototype) {
-    // Try to parse the parent
-    return parseDependencies(parent)
+  if (!result) {
+    // No defined constructor for a class, check if there is a parent
+    // we can parse.
+    const parent = Object.getPrototypeOf(fn)
+    if (typeof parent === 'function' && parent !== Function.prototype) {
+      // Try to parse the parent
+      return parseDependencies(parent)
+    }
+    return []
   }
 
   return result
