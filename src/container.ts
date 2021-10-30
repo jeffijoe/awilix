@@ -105,6 +105,20 @@ export interface AwilixContainer<Cradle extends object = any> {
    */
   hasRegistration(name: string | symbol): boolean
   /**
+   * Recursively gets a registration by name if it exists in the
+   * current container or any of its' parents.
+   *
+   * @param name {string | symbol} The registration name.
+   */
+  getRegistration<K extends keyof Cradle>(name: K): Resolver<Cradle[K]> | null
+  /**
+   * Recursively gets a registration by name if it exists in the
+   * current container or any of its' parents.
+   *
+   * @param name {string | symbol} The registration name.
+   */
+  getRegistration<T = unknown>(name: string | symbol): Resolver<T> | null
+  /**
    * Given a resolver, class or function, builds it up and returns it.
    * Does not cache it, this means that any lifetime configured in case of passing
    * a resolver will not be used.
@@ -169,7 +183,6 @@ export type ClassOrFunctionReturning<T> = FunctionReturning<T> | Constructor<T>
 
 /**
  * The options for the createContainer function.
- * @interface ContainerOptions
  */
 export interface ContainerOptions {
   require?: (id: string) => any
@@ -188,13 +201,11 @@ export interface ResolutionStack extends Array<string | symbol> {}
 
 /**
  * Family tree symbol.
- * @type {Symbol}
  */
 const FAMILY_TREE = Symbol('familyTree')
 
 /**
  * Roll Up Registrations symbol.
- * @type {Symbol}
  */
 const ROLL_UP_REGISTRATIONS = Symbol('rollUpRegistrations')
 
@@ -224,10 +235,6 @@ export function createContainer<T extends object = any, U extends object = any>(
   // an error occurs, we have something to present
   // to the poor developer who fucked up.
   let resolutionStack: ResolutionStack = []
-
-  // For performance reasons, we store
-  // the rolled-up registrations when starting a resolve.
-  let computedRegistrations: RegistrationHash | null = null
 
   // Internal registration store for this container.
   const registrations: RegistrationHash = {}
@@ -307,6 +314,7 @@ export function createContainer<T extends object = any, U extends object = any>(
     resolve,
     hasRegistration,
     dispose,
+    getRegistration,
     [util.inspect.custom]: inspect,
     // tslint:disable-next-line
     [ROLL_UP_REGISTRATIONS!]: rollUpRegistrations,
@@ -340,7 +348,10 @@ export function createContainer<T extends object = any, U extends object = any>(
 
   /**
    * Rolls up registrations from the family tree.
-   * This is cached until `bustCache` clears it.
+   *
+   * This can get pretty expensive. Only used when
+   * iterating the cradle proxy, which is not something
+   * that should be done in day-to-day use, mostly for debugging.
    *
    * @param {boolean} bustCache
    * Forces a recomputation.
@@ -348,24 +359,17 @@ export function createContainer<T extends object = any, U extends object = any>(
    * @return {object}
    * The merged registrations object.
    */
-  function rollUpRegistrations(bustCache: boolean = false): RegistrationHash {
-    if (computedRegistrations && !bustCache) {
-      return computedRegistrations
-    }
-
-    computedRegistrations = {
-      ...(parentContainer &&
-        (parentContainer as any)[ROLL_UP_REGISTRATIONS](bustCache)),
+  function rollUpRegistrations(): RegistrationHash {
+    return {
+      ...(parentContainer && (parentContainer as any)[ROLL_UP_REGISTRATIONS]()),
       ...registrations,
     }
-
-    return computedRegistrations!
   }
 
   /**
    * Used for providing an iterator to the cradle.
    */
-  function* registrationNamesIterator() {
+  function* cradleIterator() {
     const registrations = rollUpRegistrations()
     for (const registrationName in registrations) {
       yield registrationName
@@ -394,8 +398,6 @@ export function createContainer<T extends object = any, U extends object = any>(
       registrations[key as any] = value
     }
 
-    // Invalidates the computed registrations.
-    computedRegistrations = null
     return container
   }
 
@@ -405,6 +407,25 @@ export function createContainer<T extends object = any, U extends object = any>(
    */
   function inspectCradle() {
     return '[AwilixContainer.cradle]'
+  }
+
+  /**
+   * Recursively gets a registration by name if it exists in the
+   * current container or any of its' parents.
+   *
+   * @param name {string | symbol} The registration name.
+   */
+  function getRegistration(name: string | symbol) {
+    const resolver = registrations[name]
+    if (resolver) {
+      return resolver
+    }
+
+    if (parentContainer) {
+      return parentContainer.getRegistration(name)
+    }
+
+    return null
   }
 
   /**
@@ -421,14 +442,10 @@ export function createContainer<T extends object = any, U extends object = any>(
    */
   function resolve(name: string | symbol, resolveOpts?: ResolveOptions): any {
     resolveOpts = resolveOpts || {}
-    if (!resolutionStack.length) {
-      // Root resolve busts the registration cache.
-      rollUpRegistrations(true)
-    }
 
     try {
       // Grab the registration by name.
-      const resolver = computedRegistrations![name as any]
+      const resolver = getRegistration(name)
       if (resolutionStack.indexOf(name) > -1) {
         throw new AwilixResolutionError(
           name,
@@ -448,22 +465,21 @@ export function createContainer<T extends object = any, U extends object = any>(
       }
 
       if (!resolver) {
-        // The following checks ensure that console.log on the cradle does not
-        // throw an error (issue #7).
-        if (name === util.inspect.custom || name === 'inspect') {
-          return inspectCradle
-        }
-
-        // Edge case: Promise unwrapping will look for a "then" property and attempt to call it.
-        // Return undefined so that we won't cause a resolution error. (issue #109)
-        if (name === 'then') {
-          return undefined
-        }
-
-        // When using `Array.from` or spreading the cradle, this will
-        // return the registration names.
-        if (name === Symbol.iterator) {
-          return registrationNamesIterator
+        // Checks for some edge cases.
+        switch (name) {
+          // The following checks ensure that console.log on the cradle does not
+          // throw an error (issue #7).
+          case util.inspect.custom:
+          case 'inspect':
+            return inspectCradle
+          // Edge case: Promise unwrapping will look for a "then" property and attempt to call it.
+          // Return undefined so that we won't cause a resolution error. (issue #109)
+          case 'then':
+            return undefined
+          // When using `Array.from` or spreading the cradle, this will
+          // return the registration names.
+          case Symbol.iterator:
+            return cradleIterator
         }
 
         if (resolveOpts.allowUnregistered) {
@@ -499,7 +515,6 @@ export function createContainer<T extends object = any, U extends object = any>(
           // that resolves the registration also caches it.
           // When a registration is not found, we travel up
           // the family tree until we find one that is cached.
-
           cached = container.cache.get(name)
           if (cached !== undefined) {
             // We found one!
@@ -538,7 +553,7 @@ export function createContainer<T extends object = any, U extends object = any>(
    * Whether or not the registration exists.
    */
   function hasRegistration(name: string | symbol): boolean {
-    return name in rollUpRegistrations()
+    return !!getRegistration(name)
   }
 
   /**
