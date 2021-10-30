@@ -103,7 +103,7 @@ export interface AwilixContainer<Cradle extends object = any> {
    * @return {boolean}
    * Whether or not the registration exists.
    */
-  has(name: string | symbol): boolean
+  hasRegistration(name: string | symbol): boolean
   /**
    * Given a resolver, class or function, builds it up and returns it.
    * Does not cache it, this means that any lifetime configured in case of passing
@@ -305,7 +305,7 @@ export function createContainer<T extends object = any, U extends object = any>(
     register: register as any,
     build,
     resolve,
-    has,
+    hasRegistration,
     dispose,
     [util.inspect.custom]: inspect,
     // tslint:disable-next-line
@@ -537,7 +537,7 @@ export function createContainer<T extends object = any, U extends object = any>(
    * @return {boolean}
    * Whether or not the registration exists.
    */
-  function has(name: string | symbol): boolean {
+  function hasRegistration(name: string | symbol): boolean {
     return name in rollUpRegistrations()
   }
 
