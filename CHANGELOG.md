@@ -1,3 +1,24 @@
+# v6.0.0
+
+Please see the list of breaking changes below.
+
+- Update packages
+- **BREAKING**: [#198](https://github.com/jeffijoe/awilix/issues/198) Don't parse parameters from base class
+- [#270](https://github.com/jeffijoe/awilix/issues/270) Fix exponential performance slowdown for large containers
+  - This was done by not relying on `rollUpRegistrations` in the `resolve` path. As a trade-off, performance
+    for iterating the `cradle` proxy has degraded in order to guarantee accuracy. We consider this acceptable as iterating
+    the `cradle` is not something one should be doing for anything besides debugging. Thanks to [@code-ape](https://github.com/code-ape)
+    for the diagnosis and for coming up with a fix!
+
+### BREAKING CHANGES 
+
+* The `container.registrations` getter on a scoped container no longer rolls up registrations from its' parent.
+* In `CLASSIC` mode, when parsing the constructor of a derived class, Awilix will no longer parse the base class' constructor in
+  case the derived class' defined constructor does not define any arguments. However, if the derived class does _not_ define a constructor,
+  then Awilix will parse the base class' constructor. Please keep in mind that this only works for native classes, as Awilix works on the
+  `toString` representation of the class/function in order to determine when a class with no defined constructor is encountered.
+* Renamed `container.has` to `container.hasRegistration` to avoid ambiguity. _Does it have a registration? Does it have a cached module? Who knows? Let's gooo!_
+
 # v5.0.1
 
 - Improve internal `uniq` function performance by using a `Set` ([#253](https://github.com/jeffijoe/awilix/pull/253), [Anderson Leite](https://github.com/andersonleite))
