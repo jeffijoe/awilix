@@ -14,16 +14,10 @@ test('parses parent classes if there are no declared parameters', () => {
     }
   }
 
-  class Level2 extends Level1 {
-    constructor() {
-      super(...arguments)
-    }
-  }
+  class Level2 extends Level1 {}
 
-  class Level3 extends Level2 {}
-
-  class Level4 extends Level2 {
-    constructor(level4Arg1) {
+  class Level3 extends Level2 {
+    constructor(level3Arg1) {
       super(...arguments)
     }
   }
@@ -31,11 +25,10 @@ test('parses parent classes if there are no declared parameters', () => {
   container.register({
     level1Arg1: asValue(1),
     level1Arg2: asValue(2),
-    level4Arg1: asValue(4),
+    level3Arg1: asValue(4),
     level1: asClass(Level1),
     level2: asClass(Level2),
     level3: asClass(Level3),
-    level4: asClass(Level4),
   })
 
   expect(container.resolve('level1')).toEqual(
@@ -53,13 +46,6 @@ test('parses parent classes if there are no declared parameters', () => {
   )
 
   expect(container.resolve('level3')).toEqual(
-    expect.objectContaining({
-      arg1: 1,
-      arg2: 2,
-    })
-  )
-
-  expect(container.resolve('level4')).toEqual(
     expect.objectContaining({
       arg1: 4,
       arg2: undefined,

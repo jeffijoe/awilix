@@ -108,11 +108,11 @@ describe('container', () => {
       const container = createContainer()
       container.register({ theValue: asValue('theValue') })
 
-      expect(container.has('theValue')).toBe(true)
+      expect(container.hasRegistration('theValue')).toBe(true)
     })
 
     it('returns false if the registration does not exist', () => {
-      expect(createContainer().has('theValue')).toBe(false)
+      expect(createContainer().hasRegistration('theValue')).toBe(false)
     })
   })
 

@@ -53,7 +53,7 @@ written in [TypeScript](http://typescriptlang.org). **Make IoC great again!**
     - [`container.build()`](#containerbuild)
     - [`container.dispose()`](#containerdispose)
 - [Universal Module (Browser Support)](#universal-module-browser-support)
-- [Contributing](#contributing)
+  - [Contributing](#contributing)
 - [What's in a name?](#whats-in-a-name)
 - [Author](#author)
 
@@ -351,8 +351,12 @@ modes are available on `awilix.InjectionMode`
   ```
 
 - `InjectionMode.CLASSIC`: Parses the function/constructor parameters, and
-  matches them with registrations in the container. _Don't use this if you
-  minify your code!_
+  matches them with registrations in the container. `CLASSIC` mode has a 
+  slightly higher initialization cost as it has to parse the function/class 
+  to figure out the dependencies at the time of registration, however resolving 
+  them will be **much faster** than when using `PROXY`. _Don't use `CLASSIC` if 
+  you minify your code!_ We recommend using `CLASSIC` in Node and `PROXY` in 
+  environments where minification is needed.
 
   ```js
   class UserService {
@@ -363,7 +367,8 @@ modes are available on `awilix.InjectionMode`
   }
   ```
 
-  Additionally, if the class has a base class but does not report any dependencies, the base class dependencies are passed in.
+  Additionally, if the class has a base class but does not declare a constructor of its own, Awilix
+  simply invokes the base constructor with whatever dependencies it requires.
 
   ```js
   class Car {
@@ -373,9 +378,8 @@ modes are available on `awilix.InjectionMode`
   }
 
   class Porsche extends Car {
-    constructor() {
-      super(...arguments)
-      console.log(arguments[0]) // whatever "engine" is
+    vroom() {
+      console.log(this.engine) // whatever "engine" is
     }
   }
   ```
@@ -1064,7 +1068,8 @@ Args:
   pass the name through as-is. The 2nd parameter is a full module descriptor.
 - `opts.resolverOptions`: An `object` passed to the resolvers. Used to configure
   the lifetime, injection mode and more of the loaded modules.
-- `opts.esModules`: Loads modules using Node's native ES modules. This is only supported on Node 14.0+ and should only be used if you're using the [Native Node ES modules](https://nodejs.org/api/esm.html)
+- `opts.esModules`: Loads modules using Node's native ES modules. This is only 
+  supported on Node 14.0+ and should only be used if you're using the [Native Node ES modules](https://nodejs.org/api/esm.html)
 
 Example:
 

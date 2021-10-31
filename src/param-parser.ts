@@ -20,10 +20,11 @@ export interface Parameter {
  * @param {string} source
  * The source of a function to extract the parameter list from
  *
- * @return {Array<Parameter>}
- * Returns an array of parameters.
+ * @return {Array<Parameter> | null}
+ * Returns an array of parameters, or `null` if no
+ * constructor was found for a class.
  */
-export function parseParameterList(source: string): Array<Parameter> {
+export function parseParameterList(source: string): Array<Parameter> | null {
   const { next: _next, done } = createTokenizer(source)
   const params: Array<Parameter> = []
 
@@ -33,6 +34,11 @@ export function parseParameterList(source: string): Array<Parameter> {
     switch (t.type) {
       case 'class':
         skipUntilConstructor()
+        // If we didn't find a constructor token, then we know that there
+        // are no dependencies in the defined class.
+        if (!isConstructorToken()) {
+          return null
+        }
         // Next token is the constructor identifier.
         nextToken()
         break

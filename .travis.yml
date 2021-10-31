@@ -1,6 +1,8 @@
 language: node_js
 node_js:
-  - 'stable'
+  # Disabling Stable for now since there's some breakage in tslib
+  # on Node 17.
+  # - 'stable'
   - '16'
   - '14'
   - '12'
