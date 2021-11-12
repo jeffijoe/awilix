@@ -212,6 +212,28 @@ describe('container', () => {
       expect(first.unregistered).toEqual('bar')
     })
 
+    it('allows setting defaultArgs in the constructor', () => {
+      const container = createContainer()
+      class First {
+        constructor({ unregistered = 'bar' }) {
+          this.unregistered = unregistered
+        }
+        unregistered: any
+        static [RESOLVER] = {
+          lifetime: Lifetime.SCOPED,
+          defaultArgs: {
+            unregistered: 'bar',
+          },
+        }
+      }
+      container.register({
+        first: asClass(First).withDefaultArgs({ unregistered: undefined }),
+      })
+
+      const first = container.resolve('first')
+      expect(first.unregistered).toEqual('bar')
+    })
+
     it('does not screw up the resolution stack when called twice', () => {
       const container = createContainer()
       container.register({
