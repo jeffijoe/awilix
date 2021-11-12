@@ -147,6 +147,7 @@ export interface ResolveOptions {
    * returns `undefined` rather than throwing an error.
    */
   allowUnregistered?: boolean
+  defaultArgs?: Map<string, any>
 }
 
 /**
@@ -428,6 +429,12 @@ export function createContainer<T extends object = any, U extends object = any>(
     return null
   }
 
+  function getDefaultArgs() {
+    const previousResolutionName = resolutionStack[resolutionStack.length - 1]
+    const resolver = getRegistration(previousResolutionName)
+    return resolver?.defaultArgs
+  }
+
   /**
    * Resolves the registration with the given name.
    *
@@ -486,7 +493,14 @@ export function createContainer<T extends object = any, U extends object = any>(
           return undefined
         }
 
-        throw new AwilixResolutionError(name, resolutionStack)
+        const defaultArgs = getDefaultArgs()
+        if (defaultArgs?.hasOwnProperty(name)) {
+          return defaultArgs[name]
+        }
+
+        if (!resolver) {
+          throw new AwilixResolutionError(name, resolutionStack)
+        }
       }
 
       // Pushes the currently-resolving module name onto the stack

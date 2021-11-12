@@ -43,6 +43,7 @@ export interface BuildResolver<T> extends Resolver<T>, BuildResolverOptions<T> {
   proxy(): this
   classic(): this
   inject(injector: InjectorFunction): this
+  withDefaultArgs(defaultArgs: any): this
 }
 
 /**
@@ -79,6 +80,7 @@ export interface ResolverOptions<T> {
    * Lifetime setting.
    */
   lifetime?: LifetimeType
+  defaultArgs?: any
   /**
    * Registration function to use. Only used for inline configuration with `loadModules`.
    */
@@ -256,9 +258,17 @@ export function createBuildResolver<T, B extends Resolver<T>>(
     })
   }
 
+  function withDefaultArgs(this: any, defaultArgs: Map<string, any>) {
+    return createBuildResolver({
+      ...this,
+      defaultArgs,
+    })
+  }
+
   return updateResolver(obj, {
     setLifetime,
     inject,
+    withDefaultArgs,
     transient: partial(setLifetime, Lifetime.TRANSIENT),
     scoped: partial(setLifetime, Lifetime.SCOPED),
     singleton: partial(setLifetime, Lifetime.SINGLETON),

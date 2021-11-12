@@ -3,7 +3,7 @@ import * as util from 'util'
 import { createContainer, AwilixContainer } from '../container'
 import { Lifetime } from '../lifetime'
 import { AwilixResolutionError } from '../errors'
-import { asClass, asFunction, asValue } from '../resolvers'
+import { asClass, asFunction, asValue, RESOLVER } from '../resolvers'
 import { InjectionMode } from '../injection-mode'
 
 class Test {
@@ -172,6 +172,44 @@ describe('container', () => {
 
       const err = throws(() => container.resolve('first'))
       expect(err.message).toContain('first -> second -> third')
+    })
+
+    it('allows setting defaultArgs on the class', () => {
+      const container = createContainer()
+      class First {
+        constructor(cradle: any) {
+          this.unregistered = cradle.unregistered
+        }
+        unregistered: any
+        static [RESOLVER] = {
+          lifetime: Lifetime.SCOPED,
+          defaultArgs: {
+            unregistered: 'bar',
+          },
+        }
+      }
+      container.register({
+        first: asClass(First),
+      })
+
+      const first = container.resolve('first')
+      expect(first.unregistered).toEqual('bar')
+    })
+
+    it('allows setting defaultArgs at registration', () => {
+      const container = createContainer()
+      class First {
+        constructor(cradle: any) {
+          this.unregistered = cradle.unregistered
+        }
+        unregistered: any
+      }
+      container.register({
+        first: asClass(First).withDefaultArgs({ unregistered: 'bar' }),
+      })
+
+      const first = container.resolve('first')
+      expect(first.unregistered).toEqual('bar')
     })
 
     it('does not screw up the resolution stack when called twice', () => {
