@@ -80,7 +80,11 @@ export interface ResolverOptions<T> {
    * Lifetime setting.
    */
   lifetime?: LifetimeType
-  defaultArgs?: any
+  /**
+   * A map of dependencies and their default value in case
+   * there is no registration in the container.
+   */
+  defaultArgs?: Map<string, any>
   /**
    * Registration function to use. Only used for inline configuration with `loadModules`.
    */

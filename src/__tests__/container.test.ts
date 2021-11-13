@@ -221,9 +221,6 @@ describe('container', () => {
         unregistered: any
         static [RESOLVER] = {
           lifetime: Lifetime.SCOPED,
-          defaultArgs: {
-            unregistered: 'bar',
-          },
         }
       }
       container.register({

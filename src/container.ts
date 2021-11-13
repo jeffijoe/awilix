@@ -147,6 +147,10 @@ export interface ResolveOptions {
    * returns `undefined` rather than throwing an error.
    */
   allowUnregistered?: boolean
+  /**
+   * A map of dependencies and their default value in case
+   * there is no registration in the container.
+   */
   defaultArgs?: Map<string, any>
 }
 
@@ -495,7 +499,7 @@ export function createContainer<T extends object = any, U extends object = any>(
 
         const defaultArgs = getDefaultArgs()
         if (defaultArgs?.hasOwnProperty(name)) {
-          return defaultArgs[name]
+          return (defaultArgs as any)[name]
         }
 
         if (!resolver) {
