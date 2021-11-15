@@ -182,7 +182,6 @@ describe('container', () => {
         }
         unregistered: any
         static [RESOLVER] = {
-          lifetime: Lifetime.SCOPED,
           defaultArgs: {
             unregistered: 'bar',
           },
@@ -219,9 +218,6 @@ describe('container', () => {
           this.unregistered = unregistered
         }
         unregistered: any
-        static [RESOLVER] = {
-          lifetime: Lifetime.SCOPED,
-        }
       }
       container.register({
         first: asClass(First).withDefaultArgs({ unregistered: undefined }),
@@ -797,6 +793,18 @@ describe('memoizing registrations', () => {
       }
     }
 
+    class DefaultArgs {
+      unresolved: any
+      constructor(cradle: any) {
+        this.unresolved = cradle.unresolved
+      }
+      static [RESOLVER] = {
+        defaultArgs: {
+          unregistered: 'bar',
+        },
+      }
+    }
+
     it('throws when the target is falsy', () => {
       expect(() => createContainer().build(null!)).toThrowError(/null/)
       expect(() => createContainer().build(undefined!)).toThrowError(
@@ -830,6 +838,10 @@ describe('memoizing registrations', () => {
       })
       otherContainer.register({ val: asValue(1337) })
       expect(otherContainer.build(fn)).toBe(1337)
+    })
+
+    it('supports default args', () => {
+      container.build(asClass(DefaultArgs))
     })
   })
 
