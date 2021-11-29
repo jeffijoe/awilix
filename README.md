@@ -47,7 +47,7 @@ written in [TypeScript](http://typescriptlang.org). **Make IoC great again!**
     - [`container.options`](#containeroptions)
     - [`container.resolve()`](#containerresolve)
     - [`container.register()`](#containerregister)
-    - [`container.has()`](#containerhas)
+    - [`container.hasRegistration()`](#containerhasregistration)
     - [`container.loadModules()`](#containerloadmodules)
     - [`container.createScope()`](#containercreatescope)
     - [`container.build()`](#containerbuild)
@@ -1042,9 +1042,9 @@ container.register('context', asClass(SessionContext).scoped())
 **The object syntax, key-value syntax and chaining are valid for all `register`
 calls!**
 
-### `container.has()`
+### `container.hasRegistration()`
 
-- `container.has(name: string | symbol): boolean`
+- `container.hasRegistration(name: string | symbol): boolean`
 
 Determines if the container has a registration with the given name. Also checks ancestor containers.
 
