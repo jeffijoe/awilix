@@ -664,7 +664,7 @@ console.log(container.registrations.awesomeService.injectionMode) // 'CLASSIC'
 ```
 
 Additionally, if we add a `name` field and use `loadModules`, the `name` is used
-for registration.
+for registration (ignoring `formatName` if provided).
 
 ```diff
 // `RESOLVER` is a Symbol.
