@@ -1,9 +1,13 @@
-import { Lifetime, LifetimeType } from './lifetime'
-import { InjectionMode, InjectionModeType } from './injection-mode'
-import { isFunction, uniq } from './utils'
-import { parseParameterList, Parameter } from './param-parser'
-import { AwilixTypeError } from './errors'
-import { AwilixContainer, FunctionReturning, ResolveOptions } from './container'
+import { Lifetime, LifetimeType } from './lifetime.ts'
+import { InjectionMode, InjectionModeType } from './injection-mode.ts'
+import { isFunction, uniq } from './utils.ts'
+import { parseParameterList, Parameter } from './param-parser.ts'
+import { AwilixTypeError } from './errors.ts'
+import {
+  AwilixContainer,
+  FunctionReturning,
+  ResolveOptions,
+} from './container.ts'
 
 /**
  * RESOLVER symbol can be used by modules loaded by

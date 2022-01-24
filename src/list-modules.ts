@@ -1,8 +1,7 @@
-import * as glob from 'glob'
-import * as path from 'path'
-import { flatten } from './utils'
-import { BuildResolverOptions, ResolverOptions } from './resolvers'
-import { LifetimeType } from './awilix'
+import { basename, cwd, glob, resolve } from './deps.deno.ts'
+import { flatten } from './utils.ts'
+import { BuildResolverOptions, ResolverOptions } from './resolvers.ts'
+import { LifetimeType } from './awilix.ts'
 
 /**
  * The options when invoking listModules().
@@ -59,17 +58,17 @@ function _listModules(
   globPattern: string | GlobWithOptions,
   opts?: ListModulesOptions
 ): Array<ModuleDescriptor> {
-  opts = { cwd: process.cwd(), glob: glob.sync, ...opts }
+  opts = { cwd: cwd(), glob: glob.sync, ...opts }
   let patternOpts: ResolverOptions<any> | null = null
   if (Array.isArray(globPattern)) {
     patternOpts = globPattern[1] as ResolverOptions<any>
     globPattern = globPattern[0]
   }
 
-  const result = opts.glob!(globPattern, { cwd: opts.cwd })
+  const result = opts.glob(globPattern, { cwd: opts.cwd })
   const mapped = result.map((p) => ({
-    name: nameExpr.exec(path.basename(p))![1],
-    path: path.resolve(opts!.cwd!, p),
+    name: nameExpr.exec(basename(p))![1],
+    path: resolve(opts!.cwd!, p),
     opts: patternOpts,
   }))
   return mapped

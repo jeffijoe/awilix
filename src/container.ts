@@ -1,10 +1,10 @@
-import * as util from 'util'
-import { GlobWithOptions, listModules } from './list-modules'
+import { inspectCustom, req } from './deps.deno.ts'
+import { GlobWithOptions, listModules } from './list-modules.ts'
 import {
   LoadModulesOptions,
   loadModules as realLoadModules,
   LoadModulesResult,
-} from './load-modules'
+} from './load-modules.ts'
 import {
   Resolver,
   Constructor,
@@ -12,11 +12,11 @@ import {
   asFunction,
   DisposableResolver,
   BuildResolverOptions,
-} from './resolvers'
-import { last, nameValueToObject, isClass } from './utils'
-import { InjectionMode, InjectionModeType } from './injection-mode'
-import { Lifetime } from './lifetime'
-import { AwilixResolutionError, AwilixTypeError } from './errors'
+} from './resolvers.ts'
+import { last, nameValueToObject, isClass } from './utils.ts'
+import { InjectionMode, InjectionModeType } from './injection-mode.ts'
+import { Lifetime } from './lifetime.ts'
+import { AwilixResolutionError, AwilixTypeError } from './errors.ts'
 import { importModule } from './load-module-native.js'
 
 /**
@@ -246,7 +246,7 @@ export function createContainer<T extends object = any, U extends object = any>(
    */
   const cradle = new Proxy(
     {
-      [util.inspect.custom]: inspectCradle,
+      [inspectCustom]: inspectCradle,
     },
     {
       /**
@@ -315,7 +315,7 @@ export function createContainer<T extends object = any, U extends object = any>(
     hasRegistration,
     dispose,
     getRegistration,
-    [util.inspect.custom]: inspect,
+    [inspectCustom]: inspect,
     // tslint:disable-next-line
     [ROLL_UP_REGISTRATIONS!]: rollUpRegistrations,
     get registrations() {
@@ -394,7 +394,7 @@ export function createContainer<T extends object = any, U extends object = any>(
     const keys = [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)]
 
     for (const key of keys) {
-      const value = obj[key as any] as Resolver<any>
+      const value = obj[key as any]
       registrations[key as any] = value
     }
 
@@ -469,7 +469,7 @@ export function createContainer<T extends object = any, U extends object = any>(
         switch (name) {
           // The following checks ensure that console.log on the cradle does not
           // throw an error (issue #7).
-          case util.inspect.custom:
+          case inspectCustom:
           case 'inspect':
             return inspectCradle
           // Edge case: Promise unwrapping will look for a "then" property and attempt to call it.
@@ -589,7 +589,7 @@ export function createContainer<T extends object = any, U extends object = any>(
       targetOrResolver
     )
 
-    const resolver = isClass(targetOrResolver as any)
+    const resolver = isClass(targetOrResolver)
       ? asClass(targetOrResolver as Constructor<T>, opts)
       : asFunction(targetOrResolver as FunctionReturning<T>, opts)
     return resolver.resolve(container)
@@ -616,7 +616,8 @@ export function createContainer<T extends object = any, U extends object = any>(
       require:
         options!.require ||
         function (uri) {
-          return require(uri)
+          // FIXME: use dynamic import (only on Deno, Node 12 does not support it)
+          return req(uri)
         },
       listModules,
       container,
@@ -646,7 +647,7 @@ export function createContainer<T extends object = any, U extends object = any>(
     return Promise.all(
       entries.map(([name, entry]) => {
         const { resolver, value } = entry
-        const disposable = resolver as DisposableResolver<any>
+        const disposable = resolver
         if (disposable.dispose) {
           return Promise.resolve().then(() => disposable.dispose!(value))
         }

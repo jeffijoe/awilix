@@ -1,21 +1,20 @@
-import { pathToFileURL } from 'url'
+import { camelCase, pathToFileURL } from './deps.deno.ts'
 import {
   ModuleDescriptor,
   LoadedModuleDescriptor,
   GlobWithOptions,
   listModules,
-} from './list-modules'
-import { Lifetime } from './lifetime'
+} from './list-modules.ts'
+import { Lifetime } from './lifetime.ts'
 import {
   RESOLVER,
   asClass,
   asFunction,
   BuildResolverOptions,
-} from './resolvers'
-import { AwilixContainer } from './container'
-import { isClass, isFunction } from './utils'
-import { BuildResolver } from './awilix'
-import { camelCase } from 'camel-case'
+} from './resolvers.ts'
+import { AwilixContainer } from './container.ts'
+import { isClass, isFunction } from './utils.ts'
+import { BuildResolver } from './awilix.ts'
 
 /**
  * The options when invoking loadModules().
