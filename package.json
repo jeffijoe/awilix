@@ -14,6 +14,7 @@
   },
   "scripts": {
     "build": "rimraf lib && deno2node tsconfig.build.json && echo 'TODO: fix rollup config'",
+    "cache": "deno cache src/awilix.ts",
     "check": "echo 'TODO: add type checks again'",
     "test": "npm run check && jest",
     "lint": "npm run check && tslint --project tsconfig.json --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",

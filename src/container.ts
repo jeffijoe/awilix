@@ -1,4 +1,4 @@
-import { importModule, inspectCustom, req } from './deps.deno.ts'
+import { inspectCustom, req } from './deps.deno.ts'
 import { GlobWithOptions, listModules } from './list-modules.ts'
 import {
   LoadModulesOptions,
@@ -622,7 +622,7 @@ export function createContainer<T extends object = any, U extends object = any>(
       container,
     }
     if (opts?.esModules) {
-      _loadModulesDeps.require = importModule
+      _loadModulesDeps.require = (id: string) => import(id)
       return (
         realLoadModules(
           _loadModulesDeps,

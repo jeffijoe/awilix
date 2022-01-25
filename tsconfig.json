@@ -9,7 +9,7 @@
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "target": "es6",
-    "module": "commonjs",
+    "module": "Node12",
     "moduleResolution": "node",
     "importHelpers": false,
     "sourceMap": true,
