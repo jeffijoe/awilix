@@ -19,7 +19,7 @@
     "test": "npm run check && jest",
     "lint": "npm run check && tslint --project tsconfig.json --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",
     "cover": "npm run test -- --coverage",
-    "coveralls": "npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "coveralls": "npm run cover && cat ./coverage/lcov.info | coveralls",
     "publish:pre": "npm run lint && npm run build && npm run cover",
     "publish:post": "npm publish && git push --follow-tags",
     "release:prerelease": "npm run publish:pre && npm version prerelease && npm run publish:post",
