@@ -6,6 +6,7 @@ export const glob = {
   sync: (pattern: string, _options?: unknown) =>
     [...expandGlobSync(pattern)].map((e) => e.path),
 }
+export const importModule = (id: string) => import(id)
 export const inspectCustom = Symbol.for('Deno.customInspect')
 export {
   basename,

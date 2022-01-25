@@ -1,4 +1,4 @@
-import { inspectCustom, req } from './deps.deno.ts'
+import { importModule, inspectCustom, req } from './deps.deno.ts'
 import { GlobWithOptions, listModules } from './list-modules.ts'
 import {
   LoadModulesOptions,
@@ -17,7 +17,6 @@ import { last, nameValueToObject, isClass } from './utils.ts'
 import { InjectionMode, InjectionModeType } from './injection-mode.ts'
 import { Lifetime } from './lifetime.ts'
 import { AwilixResolutionError, AwilixTypeError } from './errors.ts'
-import { importModule } from './load-module-native.js'
 
 /**
  * The container returned from createContainer has some methods and properties.
