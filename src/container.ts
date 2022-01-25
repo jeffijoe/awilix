@@ -394,7 +394,7 @@ export function createContainer<T extends object = any, U extends object = any>(
     const keys = [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)]
 
     for (const key of keys) {
-      const value = obj[key as any]
+      const value = obj[key as any] as Resolver<any>
       registrations[key as any] = value
     }
 
@@ -589,7 +589,7 @@ export function createContainer<T extends object = any, U extends object = any>(
       targetOrResolver
     )
 
-    const resolver = isClass(targetOrResolver)
+    const resolver = isClass(targetOrResolver as any)
       ? asClass(targetOrResolver as Constructor<T>, opts)
       : asFunction(targetOrResolver as FunctionReturning<T>, opts)
     return resolver.resolve(container)
@@ -647,7 +647,7 @@ export function createContainer<T extends object = any, U extends object = any>(
     return Promise.all(
       entries.map(([name, entry]) => {
         const { resolver, value } = entry
-        const disposable = resolver
+        const disposable = resolver as DisposableResolver<any>
         if (disposable.dispose) {
           return Promise.resolve().then(() => disposable.dispose!(value))
         }
