@@ -56,16 +56,15 @@ const nameExpr = /(.*)\..*/i
  */
 function _listModules(
   globPattern: string | GlobWithOptions,
-  opts?: ListModulesOptions
+  opts: ListModulesOptions = {}
 ): Array<ModuleDescriptor> {
-  opts = { cwd: cwd(), glob: glob.sync, ...opts }
   let patternOpts: ResolverOptions<any> | null = null
   if (Array.isArray(globPattern)) {
     patternOpts = globPattern[1] as ResolverOptions<any>
     globPattern = globPattern[0]
   }
 
-  const result = opts.glob(globPattern, { cwd: opts.cwd })
+  const result = (opts.glob ?? glob.sync)(globPattern, { cwd: opts.cwd ?? cwd() })
   const mapped = result.map((p) => ({
     name: nameExpr.exec(basename(p))![1],
     path: resolve(opts!.cwd!, p),
