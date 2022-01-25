@@ -1,6 +1,6 @@
-import { createContainer } from '../container'
-import { InjectionMode } from '../injection-mode'
-import { asClass, asValue } from '../resolvers'
+import { createContainer } from '../../lib/container'
+import { InjectionMode } from '../../lib/injection-mode'
+import { asClass, asValue } from '../../lib/resolvers'
 
 // NOTE: this test is in JS because TS won't allow the super(...arguments) trick.
 

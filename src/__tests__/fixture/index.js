@@ -1,4 +1,4 @@
-const awilix = require('../../awilix')
+const awilix = require('../../../lib/awilix')
 
 module.exports = function () {
   const opts = { cwd: __dirname }

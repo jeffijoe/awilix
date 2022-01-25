@@ -1,4 +1,4 @@
-import { parseParameterList } from '../param-parser'
+import { parseParameterList } from '../../lib/param-parser'
 
 describe('parseParameterList', () => {
   it('returns an empty array when invalid input is given', () => {

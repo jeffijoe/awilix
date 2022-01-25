@@ -1,9 +1,9 @@
 import * as path from 'path'
-import { loadModules, LoadModulesOptions } from '../load-modules'
-import { createContainer } from '../container'
-import { Lifetime } from '../lifetime'
-import { InjectionMode } from '../injection-mode'
-import { asFunction, RESOLVER, BuildResolver, asValue } from '../resolvers'
+import { loadModules, LoadModulesOptions } from '../../lib/load-modules'
+import { createContainer } from '../../lib/container'
+import { Lifetime } from '../../lib/lifetime'
+import { InjectionMode } from '../../lib/injection-mode'
+import { asFunction, RESOLVER, BuildResolver, asValue } from '../../lib/resolvers'
 
 const lookupResultFor = (modules: any) =>
   Object.keys(modules).map((key) => ({

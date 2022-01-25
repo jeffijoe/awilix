@@ -5,7 +5,7 @@ import {
   last,
   nameValueToObject,
   uniq,
-} from '../utils'
+} from '../../lib/utils'
 
 describe('flatten', () => {
   it('flattens the array', () => {

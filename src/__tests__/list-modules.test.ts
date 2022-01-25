@@ -1,4 +1,4 @@
-import { listModules } from '../list-modules'
+import { listModules } from '../../lib/list-modules'
 
 describe('listModules', () => {
   it('can find the modules in lib', () => {

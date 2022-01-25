@@ -1,7 +1,7 @@
-import { createContainer } from '../container'
-import { asClass, asFunction } from '../resolvers'
-import { InjectionMode } from '../injection-mode'
-import { AwilixContainer } from '../awilix'
+import { createContainer } from '../../lib/container'
+import { asClass, asFunction } from '../../lib/resolvers'
+import { InjectionMode } from '../../lib/injection-mode'
+import { AwilixContainer } from '../../lib/awilix'
 
 class TestClass {
   constructor(funcDisposer: TestFunc) {

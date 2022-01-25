@@ -1,8 +1,8 @@
-import * as awilix from '../awilix'
-import { createContainer } from '../container'
-import { listModules } from '../list-modules'
-import { AwilixResolutionError } from '../errors'
-import { asValue, asClass, asFunction, aliasTo } from '../resolvers'
+import * as awilix from '../../lib/awilix'
+import { createContainer } from '../../lib/container'
+import { listModules } from '../../lib/list-modules'
+import { AwilixResolutionError } from '../../lib/errors'
+import { asValue, asClass, asFunction, aliasTo } from '../../lib/resolvers'
 
 describe('awilix', () => {
   it('exists', () => {

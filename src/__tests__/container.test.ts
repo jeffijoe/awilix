@@ -1,10 +1,10 @@
 import { throws } from 'smid'
 import * as util from 'util'
-import { createContainer, AwilixContainer } from '../container'
-import { Lifetime } from '../lifetime'
-import { AwilixResolutionError } from '../errors'
-import { asClass, asFunction, asValue } from '../resolvers'
-import { InjectionMode } from '../injection-mode'
+import { createContainer, AwilixContainer } from '../../lib/container'
+import { Lifetime } from '../../lib/lifetime'
+import { AwilixResolutionError } from '../../lib/errors'
+import { asClass, asFunction, asValue } from '../../lib/resolvers'
+import { InjectionMode } from '../../lib/injection-mode'
 
 class Test {
   repo: Repo

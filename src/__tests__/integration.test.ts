@@ -1,4 +1,4 @@
-import { Lifetime } from '../lifetime'
+import { Lifetime } from '../../lib/lifetime'
 
 const AnotherService =
   require('./fixture/services/anotherService').AnotherService

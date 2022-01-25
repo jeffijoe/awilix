@@ -1,4 +1,4 @@
-import { parseParameterList } from '../param-parser'
+import { parseParameterList } from '../../lib/param-parser'
 
 // https://github.com/jeffijoe/awilix/issues/130
 //

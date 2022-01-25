@@ -1,10 +1,10 @@
 import { throws } from 'smid'
-import { asValue, asFunction, asClass } from '../resolvers'
-import { createContainer, AwilixContainer } from '../container'
-import { Lifetime } from '../lifetime'
-import { InjectionMode } from '../injection-mode'
-import { AwilixTypeError } from '../errors'
-import { aliasTo } from '../awilix'
+import { asValue, asFunction, asClass } from '../../lib/resolvers'
+import { createContainer, AwilixContainer } from '../../lib/container'
+import { Lifetime } from '../../lib/lifetime'
+import { InjectionMode } from '../../lib/injection-mode'
+import { AwilixTypeError } from '../../lib/errors'
+import { aliasTo } from '../../lib/awilix'
 
 const testFn = () => 1337
 const depsFn = (testClass: any) => testClass
