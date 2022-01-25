@@ -14,6 +14,6 @@ export {
 } from 'https://deno.land/std@0.122.0/path/mod.ts'
 export const req = (path: string) => {
   throw new Error(
-    `'require' is unsupported on Deno, please specify 'esmModules'! Trying to load: '${path}'`
+    `'require' is unsupported on Deno, please specify 'esModules'! Trying to load: '${path}'`
   )
 }
