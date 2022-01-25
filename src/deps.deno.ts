@@ -17,3 +17,6 @@ export const req = (path: string) => {
     `'require' is unsupported on Deno, please specify 'esModules'! Trying to load: '${path}'`
   )
 }
+export function importModule(path: string) {
+  return import(path)
+}

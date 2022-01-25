@@ -58,16 +58,16 @@ function _listModules(
   globPattern: string | GlobWithOptions,
   opts: ListModulesOptions = {}
 ): Array<ModuleDescriptor> {
+  const options = { cwd: cwd(), glob: glob.sync, ...opts }
   let patternOpts: ResolverOptions<any> | null = null
   if (Array.isArray(globPattern)) {
     patternOpts = globPattern[1] as ResolverOptions<any>
     globPattern = globPattern[0]
   }
-
-  const result = (opts.glob ?? glob.sync)(globPattern, { cwd: opts.cwd ?? cwd() })
+  const result = options.glob(globPattern, { cwd: options.cwd })
   const mapped = result.map((p) => ({
     name: nameExpr.exec(basename(p))![1],
-    path: resolve(opts!.cwd!, p),
+    path: resolve(options!.cwd!, p),
     opts: patternOpts,
   }))
   return mapped
