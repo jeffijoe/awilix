@@ -615,7 +615,6 @@ export function createContainer<T extends object = any, U extends object = any>(
       require:
         options!.require ||
         function (uri) {
-          // FIXME: use dynamic import (only on Deno, Node 12 does not support it)
           return req(uri)
         },
       listModules,
