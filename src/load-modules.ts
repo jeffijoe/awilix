@@ -1,4 +1,4 @@
-import { camelCase, pathToFileURL } from './deps.deno.ts'
+import { camelCase, pathToFileURL } from './deps.ts'
 import {
   ModuleDescriptor,
   LoadedModuleDescriptor,

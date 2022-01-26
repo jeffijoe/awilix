@@ -1,4 +1,4 @@
-import { basename, cwd, glob, resolve } from './deps.deno.ts'
+import { basename, cwd, glob, resolve } from './deps.ts'
 import { flatten } from './utils.ts'
 import { BuildResolverOptions, ResolverOptions } from './resolvers.ts'
 import { LifetimeType } from './awilix.ts'
