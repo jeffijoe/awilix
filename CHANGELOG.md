@@ -1,3 +1,8 @@
+# v6.1.0
+
+* [#284](https://github.com/jeffijoe/awilix/pull/284) Use `fast-glob` instead of `glob` ([Sebastian Plaza](https://github.com/sebaplaza))
+* Update packages
+
 # v6.0.0
 
 Please see the list of breaking changes below.
