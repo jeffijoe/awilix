@@ -51,7 +51,7 @@ export default [
   // Build 2: ES modules for browser builds.
   {
     input: 'src/awilix.ts',
-    external: ['fast-glob', 'path', 'util'],
+    external: ['fast-glob', 'path', 'url', 'util'],
     treeshake: { moduleSideEffects: 'no-external' },
     onwarn,
     output: [
