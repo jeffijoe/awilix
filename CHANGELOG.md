@@ -1,3 +1,19 @@
+# v7.0.0
+
+* **BREAKING**: [#286](https://github.com/jeffijoe/awilix/issues/286) Support `Symbol.toStringTag`. This should fix [es5-shim/480](https://github.com/es-shims/es5-shim/issues/480).
+* Update packages
+
+### BREAKING CHANGES 
+
+#### Cradle JSON and `inspect` representation changed
+
+ The Awilix Cradle's string representation when used by `util.inspect`, `.toJSON()` and others returned `[AwilixContainer.cradle]`. This has been
+ changed to `[object AwilixContainerCradle]` to align with other common string representations in JavaScript.
+
+#### `Symbol.toStringTag` now implemented
+
+When using `Object.prototype.toString.call(container.cradle)`, it would return `[object Object]`. With this change, it now returns `[object AwilixContainerCradle]`.
+
 # v6.1.0
 
 * [#284](https://github.com/jeffijoe/awilix/pull/284) Use `fast-glob` instead of `glob` ([Sebastian Plaza](https://github.com/sebaplaza))
