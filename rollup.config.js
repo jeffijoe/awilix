@@ -74,7 +74,7 @@ export default [
         'loadModules,':
           'loadModules: () => { throw new Error("loadModules is not supported in the browser.") },',
         '[util.inspect.custom]: inspect,': comment,
-        '[util.inspect.custom]: inspectCradle,': comment,
+        '[util.inspect.custom]: toStringRepresentationFn,': comment,
         'case util.inspect.custom:': '',
         "import { camelCase } from 'camel-case'":
           'const camelCase = null as any',
