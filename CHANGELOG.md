@@ -1,3 +1,7 @@
+# v7.0.1
+
+* [#288](https://github.com/jeffijoe/awilix/issues/288) Don't use `Error.captureStackTrace` on unsupported platforms
+
 # v7.0.0
 
 * **BREAKING**: [#286](https://github.com/jeffijoe/awilix/issues/286) Support `Symbol.toStringTag`. This should fix [es5-shim/480](https://github.com/es-shims/es5-shim/issues/480).
