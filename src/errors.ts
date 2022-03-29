@@ -30,7 +30,18 @@ export class ExtendableError extends Error {
       value: this.constructor.name,
     })
 
-    Error.captureStackTrace(this, this.constructor)
+    // Not all browsers have this function.
+    /* istanbul ignore else */
+    if ('captureStackTrace' in Error) {
+      Error.captureStackTrace(this, this.constructor)
+    } else {
+      Object.defineProperty(this, 'stack', {
+        enumerable: false,
+        value: Error(message).stack,
+        writable: true,
+        configurable: true,
+      })
+    }
   }
 }
 
@@ -41,7 +52,6 @@ export class AwilixError extends ExtendableError {}
 
 /**
  * Error thrown to indicate a type mismatch.
- * TODO(v3): remove `AwilixNotAFunctionError` and use this.
  */
 export class AwilixTypeError extends AwilixError {
   /**

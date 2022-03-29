@@ -209,6 +209,11 @@ const FAMILY_TREE = Symbol('familyTree')
 const ROLL_UP_REGISTRATIONS = Symbol('rollUpRegistrations')
 
 /**
+ * The string representation when calling toString.
+ */
+const CRADLE_STRING_TAG = 'AwilixContainerCradle'
+
+/**
  * Creates an Awilix container instance.
  *
  * @param {Function} options.require
@@ -245,7 +250,7 @@ export function createContainer<T extends object = any, U extends object = any>(
    */
   const cradle = new Proxy(
     {
-      [inspectCustom]: inspectCradle,
+      [inspectCustom]: toStringRepresentationFn,
     },
     {
       /**
@@ -401,11 +406,11 @@ export function createContainer<T extends object = any, U extends object = any>(
   }
 
   /**
-   * Returned to `util.inspect` when attempting to resolve
+   * Returned to `util.inspect` and Symbol.toStringTag when attempting to resolve
    * a custom inspector function on the cradle.
    */
-  function inspectCradle() {
-    return '[AwilixContainer.cradle]'
+  function toStringRepresentationFn() {
+    return Object.prototype.toString.call(cradle)
   }
 
   /**
@@ -455,7 +460,7 @@ export function createContainer<T extends object = any, U extends object = any>(
 
       // Used in JSON.stringify.
       if (name === 'toJSON') {
-        return inspectCradle
+        return toStringRepresentationFn
       }
 
       // Used in console.log.
@@ -470,7 +475,10 @@ export function createContainer<T extends object = any, U extends object = any>(
           // throw an error (issue #7).
           case inspectCustom:
           case 'inspect':
-            return inspectCradle
+          case 'toString':
+            return toStringRepresentationFn
+          case Symbol.toStringTag:
+            return CRADLE_STRING_TAG
           // Edge case: Promise unwrapping will look for a "then" property and attempt to call it.
           // Return undefined so that we won't cause a resolution error. (issue #109)
           case 'then':

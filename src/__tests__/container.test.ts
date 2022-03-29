@@ -504,7 +504,9 @@ describe('container', () => {
         c1: asClass(Repo),
       })
 
-      expect(util.inspect(container.cradle)).toBe('[AwilixContainer.cradle]')
+      expect(util.inspect(container.cradle)).toBe(
+        '[object AwilixContainerCradle]'
+      )
     })
   })
 
@@ -776,15 +778,22 @@ describe('memoizing registrations', () => {
     })
   })
 
-  describe('Safely stringify cradle', () => {
-    it('should have toJSON() return [AwilixContainer.cradle]', () => {
-      expect(createContainer().cradle.toJSON()).toBe('[AwilixContainer.cradle]')
+  describe('well-known names and symbols', () => {
+    it('should have toJSON() return [object AwilixContainerCradle]', () => {
+      expect(createContainer().cradle.toJSON()).toBe(
+        '[object AwilixContainerCradle]'
+      )
     })
 
-    it('JSON.stringify() should return [AwilixContainer.cradle]', () => {
+    it('JSON.stringify() should return [object AwilixContainerCradle]', () => {
       expect(JSON.stringify(createContainer().cradle)).toBe(
-        '"[AwilixContainer.cradle]"'
+        '"[object AwilixContainerCradle]"'
       )
+    })
+
+    it('Symbol.toStringTag', () => {
+      const result = Object.prototype.toString.call(createContainer().cradle)
+      expect(result).toBe('[object AwilixContainerCradle]')
     })
   })
 })

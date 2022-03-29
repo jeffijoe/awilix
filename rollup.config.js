@@ -25,7 +25,7 @@ export default [
   {
     input: 'src/awilix.ts',
     external: [
-      'glob',
+      'fast-glob',
       'path',
       'url',
       'util',
@@ -51,7 +51,7 @@ export default [
   // Build 2: ES modules for browser builds.
   {
     input: 'src/awilix.ts',
-    external: ['glob', 'path', 'util'],
+    external: ['fast-glob', 'path', 'url', 'util'],
     treeshake: { moduleSideEffects: 'no-external' },
     onwarn,
     output: [
@@ -74,7 +74,7 @@ export default [
         'loadModules,':
           'loadModules: () => { throw new Error("loadModules is not supported in the browser.") },',
         '[util.inspect.custom]: inspect,': comment,
-        '[util.inspect.custom]: inspectCradle,': comment,
+        '[util.inspect.custom]: toStringRepresentationFn,': comment,
         'case util.inspect.custom:': '',
         "import { camelCase } from 'camel-case'":
           'const camelCase = null as any',
