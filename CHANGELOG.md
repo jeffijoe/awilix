@@ -1,3 +1,8 @@
+# v7.0.2
+
+* [#291](https://github.com/jeffijoe/awilix/issues/291) Fix `listModules` regression on Windows
+* Update packages
+
 # v7.0.1
 
 * [#288](https://github.com/jeffijoe/awilix/issues/288) Don't use `Error.captureStackTrace` on unsupported platforms
