@@ -6,6 +6,11 @@ describe('listModules', () => {
     expect(result.some((x) => x.name === 'container')).toBeTruthy()
   })
 
+  it('replaces Windows path separators with Posix path separators', () => {
+    const result = listModules('..\\*.ts', { cwd: __dirname })
+    expect(result.some((x) => x.name === 'container')).toBeTruthy()
+  })
+
   it('can find the modules in src without cwd', () => {
     const result = listModules('src/*.ts')
     expect(result.some((x) => x.name === 'container')).toBeTruthy()

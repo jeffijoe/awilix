@@ -66,6 +66,9 @@ function _listModules(
     globPattern = globPattern[0]
   }
 
+  // Replace Windows path separators with Posix path
+  globPattern = globPattern.replace(/\\/g, '/')
+
   const result = opts.glob!(globPattern, { cwd: opts.cwd })
   const mapped = result.map((p) => ({
     name: nameExpr.exec(path.basename(p))![1],
