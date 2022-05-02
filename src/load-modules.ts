@@ -1,10 +1,5 @@
 import { pathToFileURL } from 'url'
-import {
-  ModuleDescriptor,
-  LoadedModuleDescriptor,
-  GlobWithOptions,
-  listModules,
-} from './list-modules'
+import { ModuleDescriptor, GlobWithOptions, listModules } from './list-modules'
 import { Lifetime } from './lifetime'
 import {
   RESOLVER,
@@ -16,6 +11,14 @@ import { AwilixContainer } from './container'
 import { isClass, isFunction } from './utils'
 import { BuildResolver } from './awilix'
 import { camelCase } from 'camel-case'
+
+/**
+ * Metadata of the module as well as the loaded module itself.
+ * @interface LoadedModuleDescriptor
+ */
+export interface LoadedModuleDescriptor extends ModuleDescriptor {
+  value: unknown
+}
 
 /**
  * The options when invoking loadModules().
@@ -44,7 +47,7 @@ export type BuiltInNameFormatters = 'camelCase'
  */
 export type NameFormatter = (
   name: string,
-  descriptor: ModuleDescriptor
+  descriptor: LoadedModuleDescriptor
 ) => string
 
 /**
@@ -256,7 +259,7 @@ function optsWithDefaults<ESM extends boolean = false>(
 function registerDescriptor<ESM extends boolean = false>(
   container: AwilixContainer,
   opts: LoadModulesOptions<ESM>,
-  moduleDescriptor: ModuleDescriptor & { value: any }
+  moduleDescriptor: LoadedModuleDescriptor & { value: any }
 ) {
   const inlineConfig = moduleDescriptor.value[RESOLVER]
   let name = inlineConfig && inlineConfig.name
