@@ -1,3 +1,8 @@
+# v7.0.3
+
+* Use `LoadedModuleDescriptor` in `NameFormatter` delegate parameter
+* Update packages
+
 # v7.0.2
 
 * [#291](https://github.com/jeffijoe/awilix/issues/291) Fix `listModules` regression on Windows
