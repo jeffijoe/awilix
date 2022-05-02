@@ -1,8 +1,10 @@
 language: node_js
+
+# Node 18 binaries require glibc >= 2.28
+dist: focal
+
 node_js:
-  # Disabling Stable for now since there's some breakage in tslib
-  # on Node 17.
-  # - 'stable'
+  - 'stable'
   - '16'
   - '14'
   - '12'
