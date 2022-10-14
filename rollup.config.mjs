@@ -1,4 +1,5 @@
 import typescript from 'rollup-plugin-typescript2'
+import typescriptCompiler from 'typescript'
 import replace from 'rollup-plugin-replace'
 import commonjs from 'rollup-plugin-commonjs'
 import resolve from 'rollup-plugin-node-resolve'
@@ -9,7 +10,7 @@ const ignoredWarnings = ['UNUSED_EXTERNAL_IMPORT']
 
 const tsOpts = {
   cacheRoot: './node_modules/.rpt2',
-  typescript: require('typescript'),
+  typescript: typescriptCompiler,
   tsconfig: 'tsconfig.build.json',
   tsconfigOverride: {
     compilerOptions: {
@@ -36,7 +37,7 @@ export default [
     onwarn,
     output: [
       {
-        file: 'lib/awilix.module.js',
+        file: 'lib/awilix.module.mjs',
         format: 'es',
       },
     ],

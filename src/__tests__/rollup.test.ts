@@ -1,6 +1,7 @@
 import * as path from 'path'
 const cjs = require('../../lib/awilix')
-const es = require('../../lib/awilix.module')
+// @ts-ignore
+import * as es from '../../lib/awilix.module.mjs'
 const umd = require('../../lib/awilix.umd')
 const browser = require('../../lib/awilix.browser')
 

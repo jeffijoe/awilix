@@ -1052,6 +1052,8 @@ Determines if the container has a registration with the given name. Also checks 
 
 Given an array of globs, registers the modules and returns the container.
 
+> 💡 When using `opts.esModules`, a `Promise` is returned due to using the asynchronous `import()`.
+
 Awilix will use `require` on the loaded modules, and register the
 default-exported function or class as the name of the file.
 
@@ -1068,8 +1070,10 @@ Args:
   pass the name through as-is. The 2nd parameter is a full module descriptor.
 - `opts.resolverOptions`: An `object` passed to the resolvers. Used to configure
   the lifetime, injection mode and more of the loaded modules.
-- `opts.esModules`: Loads modules using Node's native ES modules. This is only 
-  supported on Node 14.0+ and should only be used if you're using the [Native Node ES modules](https://nodejs.org/api/esm.html)
+- `opts.esModules`: Loads modules using Node's native ES modules. 
+  **This makes `container.loadModules` asynchronous, and will therefore return a `Promise`!** 
+  This is only  supported on Node 14.0+ and should only be used if you're using 
+  the [Native Node ES modules](https://nodejs.org/api/esm.html)
 
 Example:
 
@@ -1131,8 +1135,8 @@ container.cradle.emailService.sendEmail('test@test.com', 'waddup')
 The `['glob', Lifetime.SCOPED]` syntax is a shorthand for passing in resolver
 options like so: `['glob', { lifetime: Lifetime.SCOPED }]`
 
-**Important**: `loadModules` depends on `glob` and is therefore not supported in
-module bundlers like Webpack, Rollup and Browserify.
+**Important**: `loadModules` depends on `fast-glob` and is therefore not supported in
+module bundlers like Webpack, Rollup, esbuild and Browserify.
 
 ### `container.createScope()`
 
@@ -1321,7 +1325,7 @@ container.dispose().then(() => {
 The package includes 4 flavors.
 
 - CommonJS, the good ol' Node format - `lib/awilix.js`
-- ES Modules, for use with module bundlers **in Node** - `lib/awilix.module.js`
+- ES Modules, for use with module bundlers **in Node** - `lib/awilix.module.mjs`
 - ES Modules, for use with module bundlers **in the browser** -
   `lib/awilix.browser.js`
 - UMD, for dropping it into a script tag - `lib/awilix.umd.js`
