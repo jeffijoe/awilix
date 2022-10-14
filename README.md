@@ -1325,7 +1325,7 @@ container.dispose().then(() => {
 The package includes 4 flavors.
 
 - CommonJS, the good ol' Node format - `lib/awilix.js`
-- ES Modules, for use with module bundlers **in Node** - `lib/awilix.module.js`
+- ES Modules, for use with module bundlers **in Node** - `lib/awilix.module.mjs`
 - ES Modules, for use with module bundlers **in the browser** -
   `lib/awilix.browser.js`
 - UMD, for dropping it into a script tag - `lib/awilix.umd.js`

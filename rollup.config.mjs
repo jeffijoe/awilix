@@ -37,7 +37,7 @@ export default [
     onwarn,
     output: [
       {
-        file: 'lib/awilix.module.js',
+        file: 'lib/awilix.module.mjs',
         format: 'es',
       },
     ],

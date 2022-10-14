@@ -3,8 +3,8 @@
   "version": "7.0.3",
   "description": "Extremely powerful dependency injection container.",
   "main": "lib/awilix.js",
-  "module": "lib/awilix.module.js",
-  "jsnext:main": "lib/awilix.module.js",
+  "module": "lib/awilix.module.mjs",
+  "jsnext:main": "lib/awilix.module.mjs",
   "browser": "lib/awilix.browser.js",
   "umd:main": "lib/awilix.umd.js",
   "react-native": "lib/awilix.browser.js",
@@ -132,8 +132,13 @@
       "js"
     ],
     "transform": {
-      "^.+\\.tsx?$": "ts-jest",
-      "^.+\\.jsx?$": "babel-jest"
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "useESM": true
+        }
+      ],
+      "^.+\\.m?jsx?$": "babel-jest"
     }
   }
 }
