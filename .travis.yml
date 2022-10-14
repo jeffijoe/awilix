@@ -5,9 +5,9 @@ dist: focal
 
 node_js:
   - 'stable'
+  - '18'
   - '16'
   - '14'
-  - '12'
 
 cache:
   directories:

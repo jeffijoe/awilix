@@ -1,6 +1,19 @@
-# v7.0.3
+# v8.0.0
 
+* **BREAKING**: Drop Node 12 support, add Node 18 to build matrix
+* **BREAKING**: [#300](https://github.com/jeffijoe/awilix/issues/300) Rename `awilix.module.js` to `awilix.module.mjs`
 * [#293](https://github.com/jeffijoe/awilix/issues/293) Update packages, including `fast-glob`
+
+### BREAKING CHANGES
+
+#### Drop Node 12 support
+
+Node 12 is no longer officially supported, as it is not an active LTS anymore.
+
+#### Rename `awilix.module.js` to `awilix.module.mjs`
+
+I am not sure if this is actually a breaking change, but if someone is importing
+the module directly using the file name, then it would be.
 
 # v7.0.3
 
