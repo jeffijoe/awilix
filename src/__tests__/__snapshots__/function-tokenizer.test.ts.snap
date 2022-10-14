@@ -1,365 +1,365 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`tokenizer can skip function calls 1`] = `
-Array [
-  Object {
+[
+  {
     "type": "function",
   },
-  Object {
+  {
     "type": "ident",
     "value": "funcCalls",
   },
-  Object {
+  {
     "type": "(",
   },
-  Object {
+  {
     "type": "ident",
     "value": "first",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ",",
   },
-  Object {
+  {
     "type": "ident",
     "value": "other",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ")",
   },
-  Object {
+  {
     "type": "EOF",
   },
 ]
 `;
 
 exports[`tokenizer can skip interpolated strings 1`] = `
-Array [
-  Object {
+[
+  {
     "type": "function",
   },
-  Object {
+  {
     "type": "ident",
     "value": "intstring1",
   },
-  Object {
+  {
     "type": "(",
   },
-  Object {
+  {
     "type": "ident",
     "value": "p1",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ",",
   },
-  Object {
+  {
     "type": "ident",
     "value": "p2",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ")",
   },
-  Object {
+  {
     "type": "EOF",
   },
 ]
 `;
 
 exports[`tokenizer can skip interpolated strings 2`] = `
-Array [
-  Object {
+[
+  {
     "type": "function",
   },
-  Object {
+  {
     "type": "ident",
     "value": "intstring2",
   },
-  Object {
+  {
     "type": "(",
   },
-  Object {
+  {
     "type": "ident",
     "value": "deep",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ",",
   },
-  Object {
+  {
     "type": "ident",
     "value": "asFuck",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ")",
   },
-  Object {
+  {
     "type": "EOF",
   },
 ]
 `;
 
 exports[`tokenizer can skip object literals 1`] = `
-Array [
-  Object {
+[
+  {
     "type": "function",
   },
-  Object {
+  {
     "type": "ident",
     "value": "obj",
   },
-  Object {
+  {
     "type": "(",
   },
-  Object {
+  {
     "type": "ident",
     "value": "p1",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ",",
   },
-  Object {
+  {
     "type": "ident",
     "value": "p2",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ",",
   },
-  Object {
+  {
     "type": "ident",
     "value": "p3",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ")",
   },
-  Object {
+  {
     "type": "EOF",
   },
 ]
 `;
 
 exports[`tokenizer can skip strings with escape seqs in them 1`] = `
-Array [
-  Object {
+[
+  {
     "type": "function",
   },
-  Object {
+  {
     "type": "ident",
     "value": "rofl",
   },
-  Object {
+  {
     "type": "(",
   },
-  Object {
+  {
     "type": "ident",
     "value": "p1",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ",",
   },
-  Object {
+  {
     "type": "ident",
     "value": "p2",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ",",
   },
-  Object {
+  {
     "type": "ident",
     "value": "p3",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ")",
   },
-  Object {
+  {
     "type": "EOF",
   },
 ]
 `;
 
 exports[`tokenizer can tokenize arrow functions 1`] = `
-Array [
-  Object {
+[
+  {
     "type": "(",
   },
-  Object {
+  {
     "type": "ident",
     "value": "first",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ",",
   },
-  Object {
+  {
     "type": "ident",
     "value": "other",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ")",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": "EOF",
   },
 ]
 `;
 
 exports[`tokenizer does not require function name 1`] = `
-Array [
-  Object {
+[
+  {
     "type": "function",
   },
-  Object {
+  {
     "type": "(",
   },
-  Object {
+  {
     "type": "ident",
     "value": "first",
   },
-  Object {
+  {
     "type": ",",
   },
-  Object {
+  {
     "type": "ident",
     "value": "second",
   },
-  Object {
+  {
     "type": ")",
   },
-  Object {
+  {
     "type": "EOF",
   },
 ]
 `;
 
 exports[`tokenizer includes equals token but skips value correctly 1`] = `
-Array [
-  Object {
+[
+  {
     "type": "function",
   },
-  Object {
+  {
     "type": "ident",
     "value": "rofl",
   },
-  Object {
+  {
     "type": "(",
   },
-  Object {
+  {
     "type": "ident",
     "value": "p1",
   },
-  Object {
+  {
     "type": ",",
   },
-  Object {
+  {
     "type": "ident",
     "value": "p2",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ",",
   },
-  Object {
+  {
     "type": "ident",
     "value": "p3",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ")",
   },
-  Object {
+  {
     "type": "EOF",
   },
 ]
 `;
 
 exports[`tokenizer includes equals token but skips value correctly 2`] = `
-Array [
-  Object {
+[
+  {
     "type": "function",
   },
-  Object {
+  {
     "type": "ident",
     "value": "rofl",
   },
-  Object {
+  {
     "type": "(",
   },
-  Object {
+  {
     "type": "ident",
     "value": "p1",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ",",
   },
-  Object {
+  {
     "type": "ident",
     "value": "p2",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ",",
   },
-  Object {
+  {
     "type": "ident",
     "value": "p3",
   },
-  Object {
+  {
     "type": "=",
   },
-  Object {
+  {
     "type": ")",
   },
-  Object {
+  {
     "type": "EOF",
   },
 ]

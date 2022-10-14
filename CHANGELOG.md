@@ -1,5 +1,9 @@
 # v7.0.3
 
+* [#293](https://github.com/jeffijoe/awilix/issues/293) Update packages, including `fast-glob`
+
+# v7.0.3
+
 * Use `LoadedModuleDescriptor` in `NameFormatter` delegate parameter
 * Update packages
 
