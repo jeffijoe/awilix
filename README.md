@@ -546,7 +546,7 @@ container.loadModules([
     lifetime: Lifetime.SINGLETON,
     // We can tell Awilix what to register everything as,
     // instead of guessing. If omitted, will inspect the
-    // module to determinw what to register as.
+    // module to determine what to register as.
     register: awilix.asClass
   }
 )
