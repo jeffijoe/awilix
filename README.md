@@ -1,7 +1,7 @@
 # Awilix
 
 [![npm](https://img.shields.io/npm/v/awilix.svg?maxAge=1000)](https://www.npmjs.com/package/awilix)
-[![Build Status](https://img.shields.io/travis/com/jeffijoe/awilix.svg?maxAge=1000)](https://app.travis-ci.com/jeffijoe/awilix)
+[![CI](https://github.com/jeffijoe/awilix/actions/workflows/ci.yml/badge.svg)](https://github.com/jeffijoe/awilix/actions/workflows/ci.yml)
 [![Coveralls](https://img.shields.io/coveralls/jeffijoe/awilix.svg?maxAge=1000)](https://coveralls.io/github/jeffijoe/awilix)
 [![npm](https://img.shields.io/npm/dt/awilix.svg?maxAge=1000)](https://www.npmjs.com/package/awilix)
 [![npm](https://img.shields.io/npm/l/awilix.svg?maxAge=1000)](https://github.com/jeffijoe/awilix/blob/master/LICENSE.md)
