@@ -37,7 +37,7 @@ export class ExtendableError extends Error {
     } else {
       Object.defineProperty(this, 'stack', {
         enumerable: false,
-        value: Error(message).stack,
+        value: (Error as ErrorConstructor)(message).stack,
         writable: true,
         configurable: true,
       })
