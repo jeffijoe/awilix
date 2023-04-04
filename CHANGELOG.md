@@ -1,3 +1,8 @@
+# v8.0.1
+
+* Upgrade packages
+* Move CI from Travis to GitHub Actions
+
 # v8.0.0
 
 * **BREAKING**: Drop Node 12 support, add Node 18 to build matrix
