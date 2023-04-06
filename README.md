@@ -8,10 +8,12 @@
 [![node](https://img.shields.io/node/v/awilix.svg?maxAge=1000)](https://www.npmjs.com/package/awilix)
 [![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 
-Extremely powerful **Dependency Injection** (DI) container for JavaScript/Node,
-written in [TypeScript](http://typescriptlang.org). **Make IoC great again!**
+Extremely powerful, performant, & battle-tested **Dependency Injection** (DI) container for JavaScript/Node,
+written in [TypeScript](http://typescriptlang.org). 
 
-> Check out this
+Awilix enables you to write **composable, testable software** using dependency injection **without special annotations**, which in turn decouples your core application code from the intricacies of the DI mechanism.
+
+> 💡 Check out this
 > [intro to Dependency Injection with Awilix](https://medium.com/@Jeffijoe/dependency-injection-in-node-js-2016-edition-f2a88efdd427)
 
 # Table of Contents
