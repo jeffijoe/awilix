@@ -548,7 +548,7 @@ container.loadModules([
     // module to determine what to register as.
     register: awilix.asClass
   }
-)
+})
 
 // We are now ready! We now have a userService, userRepository and emailService!
 container.resolve('userService').getUser(1)
