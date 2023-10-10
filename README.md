@@ -15,7 +15,8 @@ Awilix enables you to write **composable, testable software** using dependency i
 
 > 💡 Check out this
 > [intro to Dependency Injection with Awilix](https://medium.com/@Jeffijoe/dependency-injection-in-node-js-2016-edition-f2a88efdd427)
-
+> 
+> 💡 For more complex use-cases, such as eager injection, asynchronous init methods and dependency lookup by tags, check out [awilix-manager](https://www.npmjs.com/package/awilix-manager)
 # Table of Contents
 
 - [Awilix](#awilix)
