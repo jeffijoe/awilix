@@ -15,8 +15,7 @@ Awilix enables you to write **composable, testable software** using dependency i
 
 > 💡 Check out this
 > [intro to Dependency Injection with Awilix](https://medium.com/@Jeffijoe/dependency-injection-in-node-js-2016-edition-f2a88efdd427)
-> 
-> 💡 For more complex use-cases, such as eager injection, asynchronous init methods and dependency lookup by tags, check out [awilix-manager](https://www.npmjs.com/package/awilix-manager)
+
 # Table of Contents
 
 - [Awilix](#awilix)
@@ -53,7 +52,8 @@ Awilix enables you to write **composable, testable software** using dependency i
     - [`container.build()`](#containerbuild)
     - [`container.dispose()`](#containerdispose)
 - [Universal Module (Browser Support)](#universal-module-browser-support)
-  - [Contributing](#contributing)
+- [Ecosystem](#ecosystem)
+- [Contributing](#contributing)
 - [What's in a name?](#whats-in-a-name)
 - [Author](#author)
 
@@ -1346,7 +1346,15 @@ because they depend on Node-specific packages.
 - Safari >= 10
 - Internet Explorer is not supported
 
-## Contributing
+# Ecosystem
+
+* [`awilix-manager`](https://github.com/kibertoad/awilix-manager): Wrapper that allows eager injection, asynchronous init methods and dependency lookup by tags.
+* [`awilix-express`](https://github.com/jeffijoe/awilix-express): Bindings for the Express HTTP library.
+* [`awilix-koa`](https://github.com/jeffijoe/awilix-koa): Bindings for the Koa HTTP library.
+* [`awilix-router-core`](https://github.com/jeffijoe/awilix-router-core): Library for building HTTP bindings for Awilix with routing.
+* [`fastify-awilix`](https://github.com/fastify/fastify-awilix): Bindings for the Fastify framework.
+
+# Contributing
 
 Please see our [contributing.md](./CONTRIBUTING.md)
 
