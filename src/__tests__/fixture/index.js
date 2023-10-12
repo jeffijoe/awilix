@@ -12,6 +12,6 @@ module.exports = function () {
         ['services/*.js', awilix.Lifetime.SCOPED],
         ['repositories/*.js', { injector: () => ({ timeout: 10 }) }],
       ],
-      opts
+      opts,
     )
 }

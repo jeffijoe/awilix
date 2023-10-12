@@ -19,7 +19,7 @@ container.loadModules(
     'services/*.js',
     'repositories/*.js',
   ],
-  opts
+  opts,
 )
 
 // 2 ways to resolve the same service.
@@ -28,14 +28,14 @@ const classicalService = container.resolve('classicalService')
 
 console.log(
   'Resolved to the same type:',
-  classicalService.constructor === classicalServiceFromCradle.constructor
+  classicalService.constructor === classicalServiceFromCradle.constructor,
 )
 
 // This will return false because the default is to return a new instance
 // when resolving.
 console.log(
   'Resolved to the same instance:',
-  classicalService === classicalServiceFromCradle
+  classicalService === classicalServiceFromCradle,
 )
 
 // Let's do something!

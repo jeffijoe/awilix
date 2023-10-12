@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import * as path from 'path'
 const cjs = require('../../lib/awilix')
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import * as es from '../../lib/awilix.module.mjs'
 const umd = require('../../lib/awilix.umd')
@@ -50,7 +52,7 @@ function runLoadModules(pkg: any) {
       ],
       {
         cwd: path.join(process.cwd(), 'src/__tests__/fixture'),
-      }
+      },
     )
     .resolve('mainService')
 }

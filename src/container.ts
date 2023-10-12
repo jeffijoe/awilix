@@ -44,7 +44,7 @@ export interface AwilixContainer<Cradle extends object = any> {
   /**
    * Creates a scoped container with this one as the parent.
    */
-  createScope<T extends object = {}>(): AwilixContainer<Cradle & T>
+  createScope<T extends object = object>(): AwilixContainer<Cradle & T>
   /**
    * Used by `util.inspect`.
    */
@@ -60,7 +60,7 @@ export interface AwilixContainer<Cradle extends object = any> {
    */
   loadModules<ESM extends boolean = false>(
     globPatterns: Array<string | GlobWithOptions>,
-    options?: LoadModulesOptions<ESM>
+    options?: LoadModulesOptions<ESM>,
   ): ESM extends false ? this : Promise<this>
 
   /**
@@ -82,7 +82,7 @@ export interface AwilixContainer<Cradle extends object = any> {
    */
   resolve<K extends keyof Cradle>(
     name: K,
-    resolveOptions?: ResolveOptions
+    resolveOptions?: ResolveOptions,
   ): Cradle[K]
   /**
    * Resolves the registration with the given name.
@@ -128,7 +128,7 @@ export interface AwilixContainer<Cradle extends object = any> {
    */
   build<T>(
     targetOrResolver: ClassOrFunctionReturning<T> | Resolver<T>,
-    opts?: BuildResolverOptions<T>
+    opts?: BuildResolverOptions<T>,
   ): T
   /**
    * Disposes this container and it's children, calling the disposer
@@ -228,7 +228,7 @@ const CRADLE_STRING_TAG = 'AwilixContainerCradle'
  */
 export function createContainer<T extends object = any, U extends object = any>(
   options?: ContainerOptions,
-  parentContainer?: AwilixContainer<U>
+  parentContainer?: AwilixContainer<U>,
 ): AwilixContainer<T> {
   options = {
     injectionMode: InjectionMode.PROXY,
@@ -278,7 +278,7 @@ export function createContainer<T extends object = any, U extends object = any>(
         throw new Error(
           `Attempted setting property "${
             name as any
-          }" on container cradle - this is not allowed.`
+          }" on container cradle - this is not allowed.`,
         )
       },
 
@@ -303,7 +303,7 @@ export function createContainer<T extends object = any, U extends object = any>(
 
         return undefined
       },
-    }
+    },
   ) as T
 
   // The container being exposed.
@@ -455,7 +455,7 @@ export function createContainer<T extends object = any, U extends object = any>(
         throw new AwilixResolutionError(
           name,
           resolutionStack,
-          'Cyclic dependencies detected.'
+          'Cyclic dependencies detected.',
         )
       }
 
@@ -538,7 +538,7 @@ export function createContainer<T extends object = any, U extends object = any>(
           throw new AwilixResolutionError(
             name,
             resolutionStack,
-            `Unknown lifetime "${resolver.lifetime}"`
+            `Unknown lifetime "${resolver.lifetime}"`,
           )
       }
       // Pop it from the stack again, ready for the next resolution
@@ -574,7 +574,7 @@ export function createContainer<T extends object = any, U extends object = any>(
    */
   function build<T>(
     targetOrResolver: Resolver<T> | ClassOrFunctionReturning<T>,
-    opts?: BuildResolverOptions<T>
+    opts?: BuildResolverOptions<T>,
   ): T {
     if (targetOrResolver && (targetOrResolver as Resolver<T>).resolve) {
       return (targetOrResolver as Resolver<T>).resolve(container)
@@ -587,14 +587,14 @@ export function createContainer<T extends object = any, U extends object = any>(
       funcName,
       paramName,
       'a registration, function or class',
-      targetOrResolver
+      targetOrResolver,
     )
     AwilixTypeError.assert(
       typeof targetOrResolver === 'function',
       funcName,
       paramName,
       'a function or class',
-      targetOrResolver
+      targetOrResolver,
     )
 
     const resolver = isClass(targetOrResolver as any)
@@ -605,7 +605,7 @@ export function createContainer<T extends object = any, U extends object = any>(
 
   function loadModules<ESM extends boolean = false>(
     globPatterns: Array<string | GlobWithOptions>,
-    opts: LoadModulesOptions<ESM>
+    opts: LoadModulesOptions<ESM>,
   ): ESM extends false ? AwilixContainer : Promise<AwilixContainer>
   /**
    * Binds `lib/loadModules` to this container, and provides
@@ -618,7 +618,7 @@ export function createContainer<T extends object = any, U extends object = any>(
    */
   function loadModules<ESM extends boolean = false>(
     globPatterns: Array<string | GlobWithOptions>,
-    opts: LoadModulesOptions<ESM>
+    opts: LoadModulesOptions<ESM>,
   ): Promise<AwilixContainer> | AwilixContainer {
     const _loadModulesDeps = {
       require:
@@ -635,7 +635,7 @@ export function createContainer<T extends object = any, U extends object = any>(
         realLoadModules(
           _loadModulesDeps,
           globPatterns,
-          opts
+          opts,
         ) as Promise<LoadModulesResult>
       ).then(() => container)
     } else {
@@ -652,14 +652,14 @@ export function createContainer<T extends object = any, U extends object = any>(
     const entries = Array.from(container.cache.entries())
     container.cache.clear()
     return Promise.all(
-      entries.map(([name, entry]) => {
+      entries.map(([, entry]) => {
         const { resolver, value } = entry
         const disposable = resolver as DisposableResolver<any>
         if (disposable.dispose) {
           return Promise.resolve().then(() => disposable.dispose!(value))
         }
         return Promise.resolve()
-      })
+      }),
     ).then(() => undefined)
   }
 }

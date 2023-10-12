@@ -1,8 +1,12 @@
 # Name of the pipeline
 name: CI
 
-# When pushing to any branch
-on: [push, pull_request]
+# When pushing to `master` or when there is a PR for the branch.
+on:
+  pull_request:
+  push:
+    branches:
+      - 'master'
 
 jobs:
   ci:
@@ -15,6 +19,7 @@ jobs:
           - 14
           - 16
           - 18
+          - 20
           - current
     steps:
       - name: Checkout
@@ -32,17 +37,16 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Lint
+      - if: ${{ matrix.version == 'current' }}
+        name: Lint
         run: npm run lint
 
       - name: Test
         run: npm run cover
 
-      - name: Coveralls
-        uses: coverallsapp/github-action@1.1.3
-        if: ${{ matrix.version == 'current' }}
-        with:
-          github-token: ${{ secrets.github_token }}
+      - if: ${{ matrix.version == 'current' }}
+        name: Coveralls
+        uses: coverallsapp/github-action@v2
 
 # Cancel running workflows for the same branch when a new one is started.
 concurrency:

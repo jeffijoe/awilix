@@ -23,7 +23,7 @@ module.exports = function makeMessageRepository({ DB_CONNECTION_STRING }) {
   // Imagine using the connection string for something useful..
   console.log(
     'Message repository constructed with connection string',
-    DB_CONNECTION_STRING
+    DB_CONNECTION_STRING,
   )
 
   function findMessagesForUser(userId) {

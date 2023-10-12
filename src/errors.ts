@@ -74,10 +74,10 @@ export class AwilixTypeError extends AwilixError {
     funcDescription: string,
     paramName: string,
     expectedType: string,
-    givenType: any
+    givenType: any,
   ) {
     super(
-      `${funcDescription}: expected ${paramName} to be ${expectedType}, but got ${givenType}.`
+      `${funcDescription}: expected ${paramName} to be ${expectedType}, but got ${givenType}.`,
     )
   }
 
@@ -104,14 +104,14 @@ export class AwilixTypeError extends AwilixError {
     funcDescription: string,
     paramName: string,
     expectedType: string,
-    givenType: any
+    givenType: any,
   ) {
     if (!condition) {
       throw new AwilixTypeError(
         funcDescription,
         paramName,
         expectedType,
-        givenType
+        givenType,
       )
     }
     return condition
@@ -135,13 +135,13 @@ export class AwilixResolutionError extends AwilixError {
   constructor(
     name: string | symbol,
     resolutionStack: ResolutionStack,
-    message?: string
+    message?: string,
   ) {
     if (typeof name === 'symbol') {
       name = (name as any).toString()
     }
     resolutionStack = resolutionStack.map((val) =>
-      typeof val === 'symbol' ? (val as any).toString() : val
+      typeof val === 'symbol' ? (val as any).toString() : val,
     )
     resolutionStack.push(name)
     const resolutionPathString = resolutionStack.join(' -> ')
