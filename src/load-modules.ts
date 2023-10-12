@@ -47,7 +47,7 @@ export type BuiltInNameFormatters = 'camelCase'
  */
 export type NameFormatter = (
   name: string,
-  descriptor: LoadedModuleDescriptor
+  descriptor: LoadedModuleDescriptor,
 ) => string
 
 /**
@@ -73,7 +73,7 @@ export interface LoadModulesResult {
 export function loadModules<ESM extends boolean = false>(
   dependencies: LoadModulesDeps,
   globPatterns: string | Array<string | GlobWithOptions>,
-  opts?: LoadModulesOptions<ESM>
+  opts?: LoadModulesOptions<ESM>,
 ): ESM extends true ? Promise<LoadModulesResult> : LoadModulesResult
 /**
  * Given an array of glob strings, will call `require`
@@ -107,11 +107,11 @@ export function loadModules<ESM extends boolean = false>(
 export function loadModules<ESM extends boolean>(
   dependencies: LoadModulesDeps,
   globPatterns: string | Array<string | GlobWithOptions>,
-  opts?: LoadModulesOptions<ESM>
+  opts?: LoadModulesOptions<ESM>,
 ): Promise<LoadModulesResult> | LoadModulesResult {
   opts ??= {}
   const container = dependencies.container
-  opts = optsWithDefaults(opts, container)
+  opts = optsWithDefaults(opts)
   const modules = dependencies.listModules(globPatterns, opts)
 
   if (opts.esModules) {
@@ -135,7 +135,7 @@ async function loadEsModules<ESM extends boolean>(
   dependencies: LoadModulesDeps,
   container: AwilixContainer,
   modules: ModuleDescriptor[],
-  opts: LoadModulesOptions<ESM>
+  opts: LoadModulesOptions<ESM>,
 ): Promise<LoadModulesResult> {
   const importPromises = []
   for (const m of modules) {
@@ -158,7 +158,7 @@ async function loadEsModules<ESM extends boolean>(
  */
 function parseLoadedModule(
   loaded: any,
-  m: ModuleDescriptor
+  m: ModuleDescriptor,
 ): Array<LoadedModuleDescriptor> {
   const items: Array<LoadedModuleDescriptor> = []
   // Meh, it happens.
@@ -221,7 +221,7 @@ function registerModules<ESM extends boolean>(
   modulesToRegister: LoadedModuleDescriptor[][],
   container: AwilixContainer,
   modules: ModuleDescriptor[],
-  opts: LoadModulesOptions<ESM>
+  opts: LoadModulesOptions<ESM>,
 ): LoadModulesResult {
   modulesToRegister
     .reduce((acc, cur) => acc.concat(cur), [])
@@ -237,7 +237,6 @@ function registerModules<ESM extends boolean>(
  */
 function optsWithDefaults<ESM extends boolean = false>(
   opts: Partial<LoadModulesOptions<ESM>> | undefined,
-  container: AwilixContainer
 ): LoadModulesOptions<ESM> {
   return {
     // Does a somewhat-deep merge on the registration options.
@@ -259,7 +258,7 @@ function optsWithDefaults<ESM extends boolean = false>(
 function registerDescriptor<ESM extends boolean = false>(
   container: AwilixContainer,
   opts: LoadModulesOptions<ESM>,
-  moduleDescriptor: LoadedModuleDescriptor & { value: any }
+  moduleDescriptor: LoadedModuleDescriptor & { value: any },
 ) {
   const inlineConfig = moduleDescriptor.value[RESOLVER]
   let name = inlineConfig && inlineConfig.name
@@ -289,6 +288,7 @@ function registerDescriptor<ESM extends boolean = false>(
     ...inlineConfig,
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   const reg: Function = regOpts.register
     ? regOpts.register
     : isClass(moduleDescriptor.value)

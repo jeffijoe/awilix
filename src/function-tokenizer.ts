@@ -67,12 +67,13 @@ export function createTokenizer(source: string) {
   function advance() {
     value = ''
     type = 'EOF'
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       if (pos >= end) {
         return (type = 'EOF')
       }
 
-      let ch = source.charAt(pos)
+      const ch = source.charAt(pos)
       // Whitespace is irrelevant
       if (isWhiteSpace(ch)) {
         pos++
@@ -103,7 +104,7 @@ export function createTokenizer(source: string) {
           // We need to know that there's a default value so we can
           // skip it if it does not exist when resolving.
           return (type = ch)
-        case '/':
+        case '/': {
           pos++
           const nextCh = source.charAt(pos)
           if (nextCh === '/') {
@@ -118,6 +119,7 @@ export function createTokenizer(source: string) {
             pos++
           }
           continue
+        }
         default:
           // Scans an identifier.
           if (isIdentifierStart(ch)) {
@@ -185,7 +187,7 @@ export function createTokenizer(source: string) {
    */
   function skipUntil(callback: (ch: string) => boolean, dumb = false) {
     while (pos < source.length) {
-      let ch = source.charAt(pos)
+      const ch = source.charAt(pos)
       if (callback(ch)) {
         return
       }

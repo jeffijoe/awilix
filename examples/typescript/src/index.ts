@@ -20,9 +20,9 @@ container.register({
 })
 
 // Resolve a dependency using the cradle.
-let dep1 = container.cradle.depService
+const dep1 = container.cradle.depService
 // Resolve a dependency using `resolve`
-let dep2 = container.resolve<DependentService>('depService')
+const dep2 = container.resolve<DependentService>('depService')
 
 // Test that all is well, should produce 'Hello world!'
 console.log(dep1.getInnerData())

@@ -17,7 +17,7 @@ interface TestFunc {
   destroy(): Promise<number>
 }
 
-function testFunc(notDisposer: {}): TestFunc {
+function testFunc(notDisposer: object): TestFunc {
   return {
     destroy() {
       return Promise.resolve(42)

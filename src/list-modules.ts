@@ -51,7 +51,7 @@ const nameExpr = /(.*)\..*/i
  */
 function _listModules(
   globPattern: string | GlobWithOptions,
-  opts?: ListModulesOptions
+  opts?: ListModulesOptions,
 ): Array<ModuleDescriptor> {
   opts = { cwd: process.cwd(), glob: glob.sync, ...opts }
   let patternOpts: ResolverOptions<any> | null = null
@@ -89,7 +89,7 @@ function _listModules(
  */
 export function listModules(
   globPatterns: string | Array<string | GlobWithOptions>,
-  opts?: ListModulesOptions
+  opts?: ListModulesOptions,
 ) {
   if (Array.isArray(globPatterns)) {
     return flatten(globPatterns.map((p) => _listModules(p, opts)))

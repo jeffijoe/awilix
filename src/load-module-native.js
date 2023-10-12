@@ -2,4 +2,6 @@
 function importModule(path) {
   return import(path)
 }
+
+// eslint-disable-next-line no-undef
 module.exports = { importModule }

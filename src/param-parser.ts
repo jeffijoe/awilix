@@ -42,13 +42,14 @@ export function parseParameterList(source: string): Array<Parameter> | null {
         // Next token is the constructor identifier.
         nextToken()
         break
-      case 'function':
+      case 'function': {
         const next = nextToken()
         if (next.type === 'ident' || next.type === '*') {
           // This is the function name or a generator star. Skip it.
           nextToken()
         }
         break
+      }
       case '(':
         // Start parsing parameter names.
         parseParams()
@@ -56,7 +57,7 @@ export function parseParameterList(source: string): Array<Parameter> | null {
       case ')':
         // We're now out of the parameter list.
         return params
-      case 'ident':
+      case 'ident': {
         // Likely a paren-less arrow function
         // which can have no default args.
         const param = { name: t.value!, optional: false }
@@ -71,6 +72,7 @@ export function parseParameterList(source: string): Array<Parameter> | null {
         }
         params.push(param)
         return params
+      }
       /* istanbul ignore next */
       default:
         throw unexpected()
@@ -144,7 +146,7 @@ export function parseParameterList(source: string): Array<Parameter> | null {
     return new SyntaxError(
       `Parsing parameter list, did not expect ${t.type} token${
         t.value ? ` (${t.value})` : ''
-      }`
+      }`,
     )
   }
 }

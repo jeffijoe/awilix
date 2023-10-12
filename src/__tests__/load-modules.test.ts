@@ -88,7 +88,7 @@ describe('loadModules', () => {
     expect(Object.keys(container.registrations).length).toBe(1)
     // Note the capital first letter because the export key name is used instead of the filename
     expect(container.resolve('SomeNonDefaultClass')).toBeInstanceOf(
-      SomeNonDefaultClass
+      SomeNonDefaultClass,
     )
   })
 
@@ -145,7 +145,7 @@ describe('loadModules', () => {
     expect(container.resolve('mixedFile')).toBeInstanceOf(SomeClass)
     expect(container.resolve('nonDefault')).toBeInstanceOf(SomeNonDefaultClass)
     expect(container.resolve('nameOverride')).toBeInstanceOf(
-      SomeNamedNonDefaultClass
+      SomeNamedNonDefaultClass,
     )
   })
 
@@ -186,10 +186,10 @@ describe('loadModules', () => {
     expect(result).toEqual({ loadedModules: moduleLookupResult })
     expect(Object.keys(container.registrations).length).toBe(2)
     expect(container.resolve('mixedFileOne')).toBeInstanceOf(
-      SomeNonDefaultClass
+      SomeNonDefaultClass,
     )
     expect(container.resolve('nameOverride')).toBeInstanceOf(
-      SomeNamedNonDefaultClass
+      SomeNamedNonDefaultClass,
     )
   })
 
@@ -382,10 +382,10 @@ describe('loadModules', () => {
     })
 
     expect(
-      (container.registrations.test as BuildResolver<any>).injectionMode
+      (container.registrations.test as BuildResolver<any>).injectionMode,
     ).toBe(InjectionMode.PROXY)
     expect(
-      (container.registrations.test2 as BuildResolver<any>).injectionMode
+      (container.registrations.test2 as BuildResolver<any>).injectionMode,
     ).toBe(InjectionMode.CLASSIC)
   })
 
@@ -433,11 +433,11 @@ describe('loadModules', () => {
 
       expect(container.registrations.test.lifetime).toBe(Lifetime.TRANSIENT)
       expect(
-        (container.registrations.test as BuildResolver<any>).injectionMode
+        (container.registrations.test as BuildResolver<any>).injectionMode,
       ).toBe(InjectionMode.PROXY)
       expect(container.registrations.test2.lifetime).toBe(Lifetime.SCOPED)
       expect(
-        (container.registrations.test2 as BuildResolver<any>).injectionMode
+        (container.registrations.test2 as BuildResolver<any>).injectionMode,
       ).toBe(InjectionMode.CLASSIC)
       expect(container.resolve('test3')).toBe(Test3Class)
     })
@@ -474,7 +474,7 @@ describe('loadModules', () => {
 
       expect(container.registrations.awesome.lifetime).toBe(Lifetime.SINGLETON)
       expect(container.registrations.formatNameCalled.lifetime).toBe(
-        Lifetime.SCOPED
+        Lifetime.SCOPED,
       )
     })
   })

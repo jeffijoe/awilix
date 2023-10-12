@@ -37,7 +37,7 @@ describe('local injections', () => {
     expect(container.cradle.testClassic.value).toBe(42)
 
     expect(() => container.cradle.test2.value).toThrowError(
-      /Could not resolve 'value'/
+      /Could not resolve 'value'/,
     )
   })
 
@@ -56,7 +56,7 @@ describe('local injections', () => {
     expect(container.cradle.testClassic.test).toBeInstanceOf(Test)
     expect(container.cradle.testClassic.value).toBe(42)
     expect(() => container.cradle.test2.value).toThrowError(
-      /Could not resolve 'value'/
+      /Could not resolve 'value'/,
     )
   })
 
@@ -75,7 +75,7 @@ describe('local injections', () => {
     expect(container.cradle.testClassic.test.isTest).toBe(true)
     expect(container.cradle.testClassic.value).toBe(42)
     expect(() => container.cradle.test2.value).toThrowError(
-      /Could not resolve 'value'/
+      /Could not resolve 'value'/,
     )
   })
 })

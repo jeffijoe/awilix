@@ -1,5 +1,6 @@
 import { Lifetime } from '../lifetime'
 
+/* eslint-disable @typescript-eslint/no-var-requires */
 const AnotherService =
   require('./fixture/services/anotherService').AnotherService
 const fixture = require('./fixture')
@@ -21,22 +22,22 @@ describe('integration tests', () => {
 
     expect(container.registrations.mainService.lifetime).toBe(Lifetime.SCOPED)
     expect(container.registrations.anotherService.lifetime).toBe(
-      Lifetime.SCOPED
+      Lifetime.SCOPED,
     )
     expect(container.registrations.answerRepository.lifetime).toBe(
-      Lifetime.TRANSIENT
+      Lifetime.TRANSIENT,
     )
 
     expect(scope1.resolve('mainService')).toBe(scope1.resolve('mainService'))
     expect(scope1.resolve('mainService')).not.toBe(
-      scope2.resolve('mainService')
+      scope2.resolve('mainService'),
     )
 
     expect(scope1.resolve('anotherService')).toBe(
-      scope1.resolve('anotherService')
+      scope1.resolve('anotherService'),
     )
     expect(scope1.resolve('anotherService')).not.toBe(
-      scope2.resolve('anotherService')
+      scope2.resolve('anotherService'),
     )
   })
 })

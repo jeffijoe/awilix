@@ -10,8 +10,8 @@ describe('parseParameterList', () => {
       parseParameterList(
         function hello(dep1: any, dep2: any) {
           /**/
-        }.toString()
-      )
+        }.toString(),
+      ),
     ).toEqual([
       { name: 'dep1', optional: false },
       { name: 'dep2', optional: false },
@@ -20,8 +20,8 @@ describe('parseParameterList', () => {
       parseParameterList(
         function (dep1: any, dep2: any) {
           /**/
-        }.toString()
-      )
+        }.toString(),
+      ),
     ).toEqual([
       { name: 'dep1', optional: false },
       { name: 'dep2', optional: false },
@@ -30,8 +30,8 @@ describe('parseParameterList', () => {
       parseParameterList(
         function (dep1: any, dep2: any, dep3: any) {
           /**/
-        }.toString()
-      )
+        }.toString(),
+      ),
     ).toEqual([
       { name: 'dep1', optional: false },
       { name: 'dep2', optional: false },
@@ -41,15 +41,15 @@ describe('parseParameterList', () => {
       parseParameterList(
         function hello() {
           /**/
-        }.toString()
-      )
+        }.toString(),
+      ),
     ).toEqual([])
     expect(
       parseParameterList(
         function () {
           /**/
-        }.toString()
-      )
+        }.toString(),
+      ),
     ).toEqual([])
   })
 
@@ -60,8 +60,8 @@ describe('parseParameterList', () => {
           dep1 = 'frick off ricky',
           dep2 = 'shut up randy, go eat some cheeseburgers'
         ) {
-        }`
-      )
+        }`,
+      ),
     ).toEqual([
       { name: 'dep1', optional: true },
       { name: 'dep2', optional: true },
@@ -73,14 +73,14 @@ describe('parseParameterList', () => {
       parseParameterList(
         ((dep1: any, dep2: any) => {
           /**/
-        }).toString()
-      )
+        }).toString(),
+      ),
     ).toEqual([
       { name: 'dep1', optional: false },
       { name: 'dep2', optional: false },
     ])
     expect(
-      parseParameterList(((dep1: any, dep2: any) => 42).toString())
+      parseParameterList(((dep1: any, dep2: any) => 42).toString()),
     ).toEqual([
       { name: 'dep1', optional: false },
       { name: 'dep2', optional: false },
@@ -89,8 +89,8 @@ describe('parseParameterList', () => {
       parseParameterList(
         ((dep1: any, dep2: any, dep3: any) => {
           /**/
-        }).toString()
-      )
+        }).toString(),
+      ),
     ).toEqual([
       { name: 'dep1', optional: false },
       { name: 'dep2', optional: false },
@@ -100,8 +100,8 @@ describe('parseParameterList', () => {
       parseParameterList(
         (() => {
           /**/
-        }).toString()
-      )
+        }).toString(),
+      ),
     ).toEqual([])
     expect(parseParameterList((() => 42).toString())).toEqual([])
     expect(parseParameterList(`dep1 => lol`)).toEqual([
@@ -114,14 +114,14 @@ describe('parseParameterList', () => {
       parseParameterList(
         ((dep1 = 123, dep2 = 456) => {
           /**/
-        }).toString()
-      )
+        }).toString(),
+      ),
     ).toEqual([
       { name: 'dep1', optional: true },
       { name: 'dep2', optional: true },
     ])
     expect(
-      parseParameterList(((dep1 = 123, dep2 = 456) => 789).toString())
+      parseParameterList(((dep1 = 123, dep2 = 456) => 789).toString()),
     ).toEqual([
       { name: 'dep1', optional: true },
       { name: 'dep2', optional: true },
@@ -192,7 +192,7 @@ describe('parseParameterList', () => {
 
   it('supports weird formatting', () => {
     expect(
-      parseParameterList(`function(  dep1    \n,\r\n  dep2 = 123 \r\n) {}`)
+      parseParameterList(`function(  dep1    \n,\r\n  dep2 = 123 \r\n) {}`),
     ).toEqual([
       { name: 'dep1', optional: false },
       { name: 'dep2', optional: true },

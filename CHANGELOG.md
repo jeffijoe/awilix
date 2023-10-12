@@ -1,3 +1,9 @@
+# v8.0.2
+
+* Upgrade packages
+* Fix `aliasTo` to allow passing `symbol` ([#342](https://github.com/jeffijoe/awilix/pull/342) by [@zb-sj](https://github.com/zb-sj))
+* Migrate from TSLint to ESLint
+
 # v8.0.1
 
 * Upgrade packages

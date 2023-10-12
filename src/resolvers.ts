@@ -5,6 +5,9 @@ import { parseParameterList, Parameter } from './param-parser'
 import { AwilixTypeError } from './errors'
 import { AwilixContainer, FunctionReturning, ResolveOptions } from './container'
 
+// We parse the signature of any `Function`, so we want to allow `Function` types.
+/* eslint-disable @typescript-eslint/ban-types */
+
 /**
  * RESOLVER symbol can be used by modules loaded by
  * `loadModules` to configure their lifetime, injection mode, etc.
@@ -19,7 +22,7 @@ export const RESOLVER = Symbol('Awilix Resolver Config')
  * @type {Function}
  */
 export type InjectorFunction = <T extends object>(
-  container: AwilixContainer<T>
+  container: AwilixContainer<T>,
 ) => object
 
 /**
@@ -147,7 +150,7 @@ export function asValue<T>(value: T): Resolver<T> {
  */
 export function asFunction<T>(
   fn: FunctionReturning<T>,
-  opts?: BuildResolverOptions<T>
+  opts?: BuildResolverOptions<T>,
 ): BuildResolver<T> & DisposableResolver<T> {
   if (!isFunction(fn)) {
     throw new AwilixTypeError('asFunction', 'fn', 'function', fn)
@@ -160,7 +163,7 @@ export function asFunction<T>(
   opts = makeOptions(defaults, opts, (fn as any)[RESOLVER])
 
   const resolve = generateResolve(fn)
-  let result = {
+  const result = {
     resolve,
     ...opts,
   }
@@ -183,9 +186,9 @@ export function asFunction<T>(
  * @return {object}
  * The resolver.
  */
-export function asClass<T = {}>(
+export function asClass<T = object>(
   Type: Constructor<T>,
-  opts?: BuildResolverOptions<T>
+  opts?: BuildResolverOptions<T>,
 ): BuildResolver<T> & DisposableResolver<T> {
   if (!isFunction(Type)) {
     throw new AwilixTypeError('asClass', 'Type', 'class', Type)
@@ -198,8 +201,8 @@ export function asClass<T = {}>(
   opts = makeOptions(defaults, opts, (Type as any)[RESOLVER])
 
   // A function to handle object construction for us, as to make the generateResolve more reusable
-  const newClass = function newClass() {
-    return Reflect.construct(Type, arguments)
+  const newClass = function newClass(...args: unknown[]) {
+    return Reflect.construct(Type, args)
   }
 
   const resolve = generateResolve(newClass, Type)
@@ -207,7 +210,7 @@ export function asClass<T = {}>(
     createBuildResolver({
       ...opts,
       resolve,
-    })
+    }),
   )
 }
 
@@ -215,7 +218,7 @@ export function asClass<T = {}>(
  * Resolves to the specified registration.
  */
 export function aliasTo<T>(
-  name: Parameters<AwilixContainer['resolve']>[0]
+  name: Parameters<AwilixContainer['resolve']>[0],
 ): Resolver<T> {
   return {
     resolve(container) {
@@ -235,7 +238,7 @@ export function aliasTo<T>(
  * The interface.
  */
 export function createBuildResolver<T, B extends Resolver<T>>(
-  obj: B
+  obj: B,
 ): BuildResolver<T> & B {
   function setLifetime(this: any, value: LifetimeType) {
     return createBuildResolver({
@@ -276,7 +279,7 @@ export function createBuildResolver<T, B extends Resolver<T>>(
  * @param obj
  */
 export function createDisposableResolver<T, B extends Resolver<T>>(
-  obj: B
+  obj: B,
 ): DisposableResolver<T> & B {
   function disposer(this: any, dispose: Disposer<T>) {
     return createDisposableResolver({
@@ -322,7 +325,7 @@ function makeOptions<T, O>(defaults: T, ...rest: Array<O | undefined>): T & O {
  */
 function updateResolver<T, A extends Resolver<T>, B>(
   source: A,
-  target: B
+  target: B,
 ): Resolver<T> & A & B {
   const result = {
     ...(source as any),
@@ -341,7 +344,7 @@ function updateResolver<T, A extends Resolver<T>, B>(
  */
 function wrapWithLocals<T extends object>(
   container: AwilixContainer<T>,
-  locals: any
+  locals: any,
 ) {
   return function wrappedResolve(name: string, resolveOpts: ResolveOptions) {
     if (name in locals) {
@@ -362,7 +365,7 @@ function wrapWithLocals<T extends object>(
  */
 function createInjectorProxy<T extends object>(
   container: AwilixContainer<T>,
-  injector: InjectorFunction
+  injector: InjectorFunction,
 ) {
   const locals = injector(container) as any
   const allKeys = uniq([
@@ -414,7 +417,7 @@ function createInjectorProxy<T extends object>(
 
         return undefined
       },
-    }
+    },
   )
 
   return proxy
@@ -453,7 +456,7 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
   // Use a regular function instead of an arrow function to facilitate binding to the resolver.
   return function resolve<T extends object>(
     this: BuildResolver<any>,
-    container: AwilixContainer<T>
+    container: AwilixContainer<T>,
   ) {
     // Because the container holds a global reolutionMode we need to determine it in the proper order of precedence:
     // resolver -> container -> default value
@@ -479,7 +482,7 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
         : container.resolve
 
       const children = dependencies.map((p) =>
-        resolve(p.name, { allowUnregistered: p.optional })
+        resolve(p.name, { allowUnregistered: p.optional }),
       )
       return fn(...children)
     }

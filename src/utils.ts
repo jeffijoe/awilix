@@ -34,9 +34,9 @@ export function flatten<T>(array: Array<Array<T>>): Array<T> {
  */
 export function nameValueToObject(
   name: string | symbol | object,
-  value?: any
+  value?: any,
 ): Record<string | symbol, any> {
-  let obj = name
+  const obj = name
   if (typeof obj === 'string' || typeof obj === 'symbol') {
     return { [name as any]: value }
   }
@@ -63,7 +63,10 @@ export function last<T>(arr: Array<T>): T {
  * @param  {Function} fn
  * @return {boolean}
  */
-export function isClass(fn: Function | Constructor<any>): boolean {
+export function isClass(
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  fn: Function | Constructor<any>,
+): boolean {
   /*tslint:disable-next-line*/
   if (typeof fn !== 'function') {
     return false
@@ -89,13 +92,13 @@ export function isClass(fn: Function | Constructor<any>): boolean {
 /**
  * Determines if the given value is a function.
  *
- * @param  {Any} val
+ * @param  {unknown} val
  * Any value to check if it's a function.
  *
  * @return {boolean}
  * true if the value is a function, false otherwise.
  */
-export function isFunction(val: any): boolean {
+export function isFunction(val: unknown): boolean {
   return typeof val === 'function'
 }
 

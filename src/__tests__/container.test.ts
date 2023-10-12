@@ -81,14 +81,14 @@ describe('container', () => {
           method: () => func(universe),
         })),
         func: asFunction(
-          () => (answer: any) => 'Hello world, the answer is ' + answer
+          () => (answer: any) => 'Hello world, the answer is ' + answer,
         ),
       })
 
       expect(Object.keys(container.registrations).length).toBe(4)
 
       expect(container.resolve<any>('service').method()).toBe(
-        'Hello world, the answer is 42'
+        'Hello world, the answer is 42',
       )
     })
 
@@ -354,7 +354,7 @@ describe('container', () => {
       })
 
       expect(() => container.cradle.scopedValue).toThrowError(
-        AwilixResolutionError
+        AwilixResolutionError,
       )
     })
 
@@ -389,7 +389,10 @@ describe('container', () => {
         }
 
         // tslint:disable-next-line:member-ordering
-        constructor(public val: any, public fn: any) {
+        constructor(
+          public val: any,
+          public fn: any,
+        ) {
           /**/
         }
       }
@@ -407,7 +410,7 @@ describe('container', () => {
 
       expect(container.resolve<ClassWithDefaults>('cls').val).toBe(123)
       expect(container.resolve<ClassWithDefaults>('cls').fn('yep')).toBe(
-        'yepnope123'
+        'yepnope123',
       )
     })
 
@@ -461,7 +464,7 @@ describe('container', () => {
 
     it('returns a Promise of the container if used with esModules true', async () => {
       expect(await container.loadModules([], { esModules: true })).toBe(
-        container
+        container,
       )
     })
   })
@@ -484,10 +487,10 @@ describe('container', () => {
       })
 
       expect(util.inspect(container)).toBe(
-        '[AwilixContainer (registrations: 4)]'
+        '[AwilixContainer (registrations: 4)]',
       )
       expect(
-        util.inspect(container.createScope().register({ val3: asValue(3) }))
+        util.inspect(container.createScope().register({ val3: asValue(3) })),
       ).toBe('[AwilixContainer (scoped, registrations: 5)]')
 
       expect(container.resolve('inspect')).toBeInstanceOf(Function)
@@ -505,7 +508,7 @@ describe('container', () => {
       })
 
       expect(util.inspect(container.cradle)).toBe(
-        '[object AwilixContainerCradle]'
+        '[object AwilixContainerCradle]',
       )
     })
   })
@@ -561,11 +564,11 @@ describe('container', () => {
         theAnswer: asFunction(
           ({ answer }: any) =>
             () =>
-              answer
+              answer,
         ),
       })
 
-      const theAnswer = container.resolve<Function>('theAnswer')
+      const theAnswer = container.resolve<() => number>('theAnswer')
       expect(theAnswer()).toBe(42)
     })
 
@@ -577,11 +580,11 @@ describe('container', () => {
         theAnswer: asFunction(
           ({ answer }: any) =>
             () =>
-              answer
+              answer,
         ),
       })
 
-      const theAnswer = container.resolve<Function>('theAnswer')
+      const theAnswer = container.resolve<() => number>('theAnswer')
       expect(theAnswer()).toBe(42)
     })
   })
@@ -662,7 +665,7 @@ describe('using Object.getOwnPropertyDescriptor with injector proxy', () => {
         this.testProp = Object.getOwnPropertyDescriptor(cradle, 'test')
         this.nonexistentProp = Object.getOwnPropertyDescriptor(
           cradle,
-          'nonexistent'
+          'nonexistent',
         )
       }
     }
@@ -687,7 +690,7 @@ describe('using Object.getOwnPropertyDescriptor with container cradle', () => {
         this.testProp = Object.getOwnPropertyDescriptor(cradle, 'test')
         this.nonexistentProp = Object.getOwnPropertyDescriptor(
           cradle,
-          'nonexistent'
+          'nonexistent',
         )
       }
     }
@@ -745,7 +748,7 @@ describe('memoizing registrations', () => {
     it('throws when the target is falsy', () => {
       expect(() => createContainer().build(null!)).toThrowError(/null/)
       expect(() => createContainer().build(undefined!)).toThrowError(
-        /undefined/
+        /undefined/,
       )
       expect(() => createContainer().build({} as any)).toThrowError(/object/)
     })
@@ -753,14 +756,14 @@ describe('memoizing registrations', () => {
     it('returns resolved value when passed a resolver', () => {
       expect(container.build(asFunction(fn).classic())).toBe(1337)
       expect(container.build(asClass(BuildTest).proxy())).toBeInstanceOf(
-        BuildTest
+        BuildTest,
       )
       expect(container.build(asClass(BuildTest).proxy()).val).toBe(1337)
     })
 
     it('returns resolved value when passed a function', () => {
       expect(
-        container.build(fn, { injectionMode: InjectionMode.CLASSIC })
+        container.build(fn, { injectionMode: InjectionMode.CLASSIC }),
       ).toBe(1337)
     })
 
@@ -781,13 +784,13 @@ describe('memoizing registrations', () => {
   describe('well-known names and symbols', () => {
     it('should have toJSON() return [object AwilixContainerCradle]', () => {
       expect(createContainer().cradle.toJSON()).toBe(
-        '[object AwilixContainerCradle]'
+        '[object AwilixContainerCradle]',
       )
     })
 
     it('JSON.stringify() should return [object AwilixContainerCradle]', () => {
       expect(JSON.stringify(createContainer().cradle)).toBe(
-        '"[object AwilixContainerCradle]"'
+        '"[object AwilixContainerCradle]"',
       )
     })
 

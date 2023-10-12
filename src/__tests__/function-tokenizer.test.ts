@@ -30,7 +30,7 @@ describe('tokenizer', () => {
 
   it('does not require the constructor to be first', () => {
     const tokens = getTokens(
-      'class Hah { wee = "propinit"; method(lol, haha = 123, p = "i shall constructor your jimmies") {} constructor(p1, p2) {}}'
+      'class Hah { wee = "propinit"; method(lol, haha = 123, p = "i shall constructor your jimmies") {} constructor(p1, p2) {}}',
     )
     expect(tokens).toContainEqual({ type: 'ident', value: 'constructor' })
     expect(tokens).toContainEqual({ type: 'ident', value: 'p1' })
@@ -39,56 +39,56 @@ describe('tokenizer', () => {
 
   it('includes equals token but skips value correctly', () => {
     expect(
-      getTokens('function rofl(p1, p2 = hah, p3 = 123.45)')
+      getTokens('function rofl(p1, p2 = hah, p3 = 123.45)'),
     ).toMatchSnapshot()
 
     expect(
       getTokens(
-        `function rofl(p1 = 'wee', p2 = "woo", p3 = \`haha "lol" 'dude'\`)`
-      )
+        `function rofl(p1 = 'wee', p2 = "woo", p3 = \`haha "lol" 'dude'\`)`,
+      ),
     ).toMatchSnapshot()
   })
 
   it('can skip strings with escape seqs in them', () => {
     expect(
       getTokens(
-        `function rofl(p1 = 'we\\'e', p2 = "wo\\"o", p3 = \`haha \\\`lol" 'dude'\`)`
-      )
+        `function rofl(p1 = 'we\\'e', p2 = "wo\\"o", p3 = \`haha \\\`lol" 'dude'\`)`,
+      ),
     ).toMatchSnapshot()
   })
 
   it('can skip interpolated strings', () => {
     expect(
-      getTokens(`function intstring1(p1 = \`Hello \${world}\`, p2 = 123)`)
+      getTokens(`function intstring1(p1 = \`Hello \${world}\`, p2 = 123)`),
     ).toMatchSnapshot()
     expect(
       getTokens(
-        `function intstring2(deep = \`Hello$ \${stuff && \`another $\{func(\`"haha"\`, man = 123)}\`}\`, asFuck = 123)`
-      )
+        `function intstring2(deep = \`Hello$ \${stuff && \`another $\{func(\`"haha"\`, man = 123)}\`}\`, asFuck = 123)`,
+      ),
     ).toMatchSnapshot()
   })
 
   it('can skip object literals', () => {
     expect(
       getTokens(
-        `function obj(p1 = {waddup: 'homie'}, p2 = ({ you: gotThis('dawg:)', \`$\{bruh("hah" && fn(1,2,3))}\`) }), p3 = 123)`
-      )
+        `function obj(p1 = {waddup: 'homie'}, p2 = ({ you: gotThis('dawg:)', \`$\{bruh("hah" && fn(1,2,3))}\`) }), p3 = 123)`,
+      ),
     ).toMatchSnapshot()
   })
 
   it('can skip function calls', () => {
     expect(
       getTokens(
-        `function funcCalls(first = require('path'), other = require(\`some-$\{module && "yeah"}\`))`
-      )
+        `function funcCalls(first = require('path'), other = require(\`some-$\{module && "yeah"}\`))`,
+      ),
     ).toMatchSnapshot()
   })
 
   it('can tokenize arrow functions', () => {
     expect(
       getTokens(
-        `(first = require('path'), other = require(\`some-$\{module && "yeah"}\`)) => {}`
-      )
+        `(first = require('path'), other = require(\`some-$\{module && "yeah"}\`)) => {}`,
+      ),
     ).toMatchSnapshot()
   })
 
