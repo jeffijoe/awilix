@@ -214,10 +214,12 @@ export function asClass<T = {}>(
 /**
  * Resolves to the specified registration.
  */
-export function aliasTo<T>(name: string): Resolver<T> {
+export function aliasTo<T>(
+  ...args: Parameters<AwilixContainer['resolve']>
+): Resolver<T> {
   return {
     resolve(container) {
-      return container.resolve(name)
+      return container.resolve(...args)
     },
   }
 }

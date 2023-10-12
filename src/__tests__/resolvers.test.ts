@@ -206,8 +206,14 @@ describe('registrations', () => {
   })
 
   describe('aliasTo', () => {
-    it('returns the aliased dependency', () => {
+    it('returns the string aliased dependency', () => {
       container.register({ val: asValue(123), aliasVal: aliasTo('val') })
+      expect(container.resolve('aliasVal')).toBe(123)
+    })
+
+    it('returns the symbol aliased dependency', () => {
+      const symbol = Symbol()
+      container.register({ [symbol]: asValue(123), aliasVal: aliasTo(symbol) })
       expect(container.resolve('aliasVal')).toBe(123)
     })
   })
