@@ -52,6 +52,7 @@ Awilix enables you to write **composable, testable software** using dependency i
     - [`container.build()`](#containerbuild)
     - [`container.dispose()`](#containerdispose)
 - [Universal Module (Browser Support)](#universal-module-browser-support)
+- [Typescript Declarations](#typescript-declarations)
 - [Ecosystem](#ecosystem)
 - [Contributing](#contributing)
 - [What's in a name?](#whats-in-a-name)
@@ -1345,6 +1346,26 @@ because they depend on Node-specific packages.
 - Opera >= 36
 - Safari >= 10
 - Internet Explorer is not supported
+
+# Typescript Declarations
+If you're utilizing [TypeScript](https://www.typescriptlang.org/) and want type information on your dependencies after retrieval, or if you simply want IntelliSense support, you can craft a declaration file as follows:
+```ts
+// awilix.d.ts
+import { AwilixContainer } from "awilix";
+import { MyServiceA } from "myServiceA.js";
+import { MyServiceB } from "myServiceB.js";
+
+interface DependencyMap {
+  serviceA: MyServiceA;
+  serviceB: MyServiceA;
+}
+
+declare module "awilix" {
+  function createContainer<T extends DependencyMap = DependencyMap>(
+    opts?: ContainerOptions<T>
+  ): AwilixContainer<T>;
+}
+```
 
 # Ecosystem
 
