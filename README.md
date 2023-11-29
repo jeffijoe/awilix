@@ -1352,8 +1352,8 @@ If you're utilizing [TypeScript](https://www.typescriptlang.org/) and want type 
 ```ts
 // awilix.d.ts
 import { AwilixContainer } from "awilix";
-import { MyServiceA } from "myServiceA.js";
-import { MyServiceB } from "myServiceB.js";
+import { MyServiceA } from "myServiceA";
+import { MyServiceB } from "myServiceB";
 
 interface DependencyMap {
   serviceA: MyServiceA;
