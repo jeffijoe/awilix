@@ -543,8 +543,9 @@ export function createContainer<T extends object = any, U extends object = any>(
         case Lifetime.SCOPED:
           // Scoped lifetime means that the container
           // that resolves the registration also caches it.
-          // When a registration is not found, we travel up
-          // the family tree until we find one that is cached.
+          // If this container cache does not have it,
+          // resolve and cache it rather than using the parent
+          // container's cache.
           cached = container.cache.get(name)
           if (cached !== undefined) {
             // We found one!
