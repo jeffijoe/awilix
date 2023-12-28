@@ -470,6 +470,19 @@ describe('container', () => {
       )
     })
 
+    it('does not throw an error when an injector proxy is used and errorOnShorterLivedDependencies is set', () => {
+      const container = createContainer({
+        errorOnShorterLivedDependencies: true,
+      })
+      container.register({
+        first: asFunction((cradle: any) => cradle.injected, {
+          lifetime: Lifetime.SCOPED,
+        }).inject(() => ({ injected: 'hah' })),
+      })
+
+      expect(container.resolve('first')).toBe('hah')
+    })
+
     it('behaves properly when the cradle is returned from an async function', async () => {
       const container = createContainer()
       container.register({ value: asValue(42) })
