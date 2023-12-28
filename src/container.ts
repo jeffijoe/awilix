@@ -15,7 +15,7 @@ import {
 } from './resolvers'
 import { last, nameValueToObject, isClass } from './utils'
 import { InjectionMode, InjectionModeType } from './injection-mode'
-import { Lifetime } from './lifetime'
+import { Lifetime, LifetimeType, isLifetimeLonger } from './lifetime'
 import { AwilixResolutionError, AwilixTypeError } from './errors'
 import { importModule } from './load-module-native.js'
 
@@ -187,6 +187,7 @@ export type ClassOrFunctionReturning<T> = FunctionReturning<T> | Constructor<T>
 export interface ContainerOptions {
   require?: (id: string) => any
   injectionMode?: InjectionModeType
+  errorOnShorterLivedDependencies?: boolean
 }
 
 /**
@@ -197,7 +198,8 @@ export type RegistrationHash = Record<string | symbol | number, Resolver<any>>
 /**
  * Resolution stack.
  */
-export interface ResolutionStack extends Array<string | symbol> {}
+export interface ResolutionStack
+  extends Array<{ name: string | symbol; lifetime: LifetimeType }> {}
 
 /**
  * Family tree symbol.
@@ -451,7 +453,7 @@ export function createContainer<T extends object = any, U extends object = any>(
     try {
       // Grab the registration by name.
       const resolver = getRegistration(name)
-      if (resolutionStack.indexOf(name) > -1) {
+      if (resolutionStack.some(({ name: parentName }) => parentName === name)) {
         throw new AwilixResolutionError(
           name,
           resolutionStack,
@@ -497,13 +499,33 @@ export function createContainer<T extends object = any, U extends object = any>(
         throw new AwilixResolutionError(name, resolutionStack)
       }
 
-      // Pushes the currently-resolving module name onto the stack
-      resolutionStack.push(name)
+      const lifetime = resolver.lifetime || Lifetime.TRANSIENT
+
+      // if any of the parents have a shorter lifetime than the one requested,
+      // and the container is configured to do so, throw an error.
+      if (options?.errorOnShorterLivedDependencies) {
+        const maybeLongerLifetimeParentIndex = resolutionStack.findIndex(
+          ({ lifetime: parentLifetime }) =>
+            isLifetimeLonger(parentLifetime, lifetime),
+        )
+        if (maybeLongerLifetimeParentIndex > -1) {
+          throw new AwilixResolutionError(
+            name,
+            resolutionStack,
+            `Dependency '${name.toString()}' has a shorter lifetime than its parent: '${resolutionStack[
+              maybeLongerLifetimeParentIndex
+            ].name.toString()}'`,
+          )
+        }
+      }
+
+      // Pushes the currently-resolving module information onto the stack
+      resolutionStack.push({ name, lifetime })
 
       // Do the thing
       let cached: CacheEntry | undefined
       let resolved
-      switch (resolver.lifetime || Lifetime.TRANSIENT) {
+      switch (lifetime) {
         case Lifetime.TRANSIENT:
           // Transient lifetime means resolve every time.
           resolved = resolver.resolve(container)

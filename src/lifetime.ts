@@ -25,3 +25,10 @@ export const Lifetime: Record<LifetimeType, LifetimeType> = {
    */
   SCOPED: 'SCOPED',
 }
+
+export function isLifetimeLonger(a: LifetimeType, b: LifetimeType): boolean {
+  return (
+    (a === Lifetime.SINGLETON && b !== Lifetime.SINGLETON) ||
+    (a === Lifetime.SCOPED && b === Lifetime.TRANSIENT)
+  )
+}

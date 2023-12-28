@@ -298,6 +298,8 @@ describe('container', () => {
       expect(scope2.cradle.counterValue === 2).toBe(true)
 
       expect(scope1Child.cradle.counterValue === 3).toBe(true)
+      // assert that the parent scope was not affected
+      expect(scope1.cradle.counterValue === 1).toBe(true)
     })
 
     it('supports nested scopes', () => {
@@ -436,6 +438,36 @@ describe('container', () => {
       const err = throws(() => container.resolve('first'))
       expect(err.message).toContain('first -> second')
       expect(err.message).toContain('lol')
+    })
+
+    it('allows longer lifetime modules to depend on shorter lifetime dependencies by default', () => {
+      const container = createContainer()
+      container.register({
+        first: asFunction((cradle: any) => cradle.second, {
+          lifetime: Lifetime.SCOPED,
+        }),
+        second: asFunction(() => 'hah'),
+      })
+
+      expect(container.resolve('first')).toBe('hah')
+    })
+
+    it('throws an AwilixResolutionError when longer lifetime modules depend on shorter lifetime dependencies and errorOnShorterLivedDependencies is set', () => {
+      const container = createContainer({
+        errorOnShorterLivedDependencies: true,
+      })
+      container.register({
+        first: asFunction((cradle: any) => cradle.second, {
+          lifetime: Lifetime.SCOPED,
+        }),
+        second: asFunction(() => 'hah'),
+      })
+
+      const err = throws(() => container.resolve('first'))
+      expect(err.message).toContain('first -> second')
+      expect(err.message).toContain(
+        "Dependency 'second' has a shorter lifetime than its parent: 'first'",
+      )
     })
 
     it('behaves properly when the cradle is returned from an async function', async () => {

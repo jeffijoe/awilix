@@ -289,7 +289,16 @@ app.get('/messages', (req, res) => {
 ```
 
 **IMPORTANT!** If a singleton is resolved, and it depends on a scoped or
-transient registration, those will remain in the singleton for it's lifetime!
+transient registration, those will remain in the singleton for its lifetime!
+Similarly, if a scoped module is resolved, and it depends on a transient
+registration, that remains in the scoped module for its lifetime.
+In the example above, if `messageService` was a singleton, it would be cached
+in the root container, and would always have the `currentUser` from the first
+request. Modules should generally not have a longer lifetime than their
+dependencies, as this can cause issues of stale data.
+
+If you want a mismatched configuration like the above to error, set
+`errorOnShorterLivedDependencies` in the container options.
 
 ```js
 const makePrintTime = ({ time }) => () => {
@@ -830,6 +839,10 @@ Args:
       **_must_** be named exactly like they are in the registration. For
       example, a dependency registered as `repository` cannot be referenced in a
       class constructor as `repo`.
+  - `options.errorOnShorterLivedDependencies`: If `true`, will throw an error if
+    a singleton depends on a scoped or transient registration, or if a scoped
+    registration depends on a transient registration. Defaults to
+    `false`.
 
 ## `asFunction()`
 
