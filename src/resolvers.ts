@@ -116,6 +116,7 @@ export type Constructor<T> = { new (...args: any[]): T }
 
 /**
  * Creates a simple value resolver where the given value will always be resolved.
+ * The lifetime of the resolved value defaults to `Lifetime.SCOPED`.
  *
  * @param  {string} name
  * The name to register the value as.
@@ -123,12 +124,16 @@ export type Constructor<T> = { new (...args: any[]): T }
  * @param  {*} value
  * The value to resolve.
  *
+ * @param {object} opts
+ * Additional options for this resolver.
+ *
  * @return {object}
  * The resolver.
  */
-export function asValue<T>(value: T): Resolver<T> {
+export function asValue<T>(value: T, opts?: ResolverOptions<T>): Resolver<T> {
   return {
     resolve: () => value,
+    ...{ lifetime: Lifetime.SCOPED, ...opts },
   }
 }
 

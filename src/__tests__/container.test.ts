@@ -483,6 +483,43 @@ describe('container', () => {
       expect(container.resolve('first')).toBe('hah')
     })
 
+    it('allows for asValue() to be used when errorOnShorterLivedDependencies is set', () => {
+      const container = createContainer({
+        errorOnShorterLivedDependencies: true,
+      })
+      container.register({
+        first: asFunction((cradle: any) => cradle.val, {
+          lifetime: Lifetime.SCOPED,
+        }),
+        second: asFunction((cradle: any) => cradle.secondVal, {
+          lifetime: Lifetime.SINGLETON,
+        }),
+        val: asValue('hah'),
+        secondVal: asValue('foobar', { lifetime: Lifetime.SINGLETON }),
+      })
+
+      expect(container.resolve('first')).toBe('hah')
+      expect(container.resolve('second')).toBe('foobar')
+    })
+
+    it('correctly errors when a singleton parent depends on a scoped value and errorOnShorterLivedDependencies is set', () => {
+      const container = createContainer({
+        errorOnShorterLivedDependencies: true,
+      })
+      container.register({
+        first: asFunction((cradle: any) => cradle.second, {
+          lifetime: Lifetime.SINGLETON,
+        }),
+        second: asValue('hah'),
+      })
+
+      const err = throws(() => container.resolve('first'))
+      expect(err.message).toContain('first -> second')
+      expect(err.message).toContain(
+        "Dependency 'second' has a shorter lifetime than its parent: 'first'",
+      )
+    })
+
     it('behaves properly when the cradle is returned from an async function', async () => {
       const container = createContainer()
       container.register({ value: asValue(42) })
