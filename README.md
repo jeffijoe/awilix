@@ -297,9 +297,6 @@ in the root container, and would always have the `currentUser` from the first
 request. Modules should generally not have a longer lifetime than their
 dependencies, as this can cause issues of stale data.
 
-If you want a mismatched configuration like the above to error, set
-`errorOnShorterLivedDependencies` in the container options.
-
 ```js
 const makePrintTime = ({ time }) => () => {
   console.log('Time:', time)
@@ -323,6 +320,11 @@ container.resolve('time')
 container.resolve('printTime')()
 container.resolve('printTime')()
 ```
+
+If you want a mismatched configuration like this to error, set
+`errorOnShorterLivedDependencies` in the container options. This will trigger
+the following error at runtime when the singleton `printTime` is resolved:
+`AwilixResolutionError: Could not resolve 'time'. Dependency 'time' has a shorter lifetime than its ancestor: 'printTime'`
 
 Read the documentation for [`container.createScope()`](#containercreatescope)
 for more examples.

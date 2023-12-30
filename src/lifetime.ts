@@ -26,6 +26,9 @@ export const Lifetime: Record<LifetimeType, LifetimeType> = {
   SCOPED: 'SCOPED',
 }
 
+/**
+ * Returns true if and only if the first lifetime is strictly longer than the second.
+ */
 export function isLifetimeLonger(a: LifetimeType, b: LifetimeType): boolean {
   return (
     (a === Lifetime.SINGLETON && b !== Lifetime.SINGLETON) ||

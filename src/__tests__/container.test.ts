@@ -466,7 +466,7 @@ describe('container', () => {
       const err = throws(() => container.resolve('first'))
       expect(err.message).toContain('first -> second')
       expect(err.message).toContain(
-        "Dependency 'second' has a shorter lifetime than its parent: 'first'",
+        "Dependency 'second' has a shorter lifetime than its ancestor: 'first'",
       )
     })
 
@@ -516,7 +516,7 @@ describe('container', () => {
       const err = throws(() => container.resolve('first'))
       expect(err.message).toContain('first -> second')
       expect(err.message).toContain(
-        "Dependency 'second' has a shorter lifetime than its parent: 'first'",
+        "Dependency 'second' has a shorter lifetime than its ancestor: 'first'",
       )
     })
 

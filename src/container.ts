@@ -512,7 +512,7 @@ export function createContainer<T extends object = any, U extends object = any>(
           throw new AwilixResolutionError(
             name,
             resolutionStack,
-            `Dependency '${name.toString()}' has a shorter lifetime than its parent: '${resolutionStack[
+            `Dependency '${name.toString()}' has a shorter lifetime than its ancestor: '${resolutionStack[
               maybeLongerLifetimeParentIndex
             ].name.toString()}'`,
           )

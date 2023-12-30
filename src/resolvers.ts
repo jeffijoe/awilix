@@ -133,7 +133,8 @@ export type Constructor<T> = { new (...args: any[]): T }
 export function asValue<T>(value: T, opts?: ResolverOptions<T>): Resolver<T> {
   return {
     resolve: () => value,
-    ...{ lifetime: Lifetime.SCOPED, ...opts },
+    lifetime: Lifetime.SCOPED,
+    ...opts,
   }
 }
 
