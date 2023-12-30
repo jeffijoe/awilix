@@ -2,7 +2,9 @@
 const awilix = require('../..')
 
 // Create a container.
-const container = awilix.createContainer()
+const container = awilix.createContainer({
+  errorOnShorterLivedDependencies: true,
+})
 
 // Register some value.. We depend on this in `Stuffs.js`
 container.register('database', awilix.asValue('stuffs_db'))

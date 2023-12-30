@@ -4,6 +4,7 @@ import { DependentService } from './services/dependentService'
 
 const container = createContainer({
   injectionMode: InjectionMode.CLASSIC,
+  errorOnShorterLivedDependencies: true,
 })
 
 container.register({

@@ -95,8 +95,10 @@ minimum, you need to do 3 things:
 const awilix = require('awilix')
 
 // Create the container and set the injectionMode to PROXY (which is also the default).
+// Enable detection and error on mismatched dependency lifetimes (highly recommended).
 const container = awilix.createContainer({
-  injectionMode: awilix.InjectionMode.PROXY
+  injectionMode: awilix.InjectionMode.PROXY,
+  errorOnShorterLivedDependencies: true
 })
 
 // This is our app code... We can use

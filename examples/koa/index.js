@@ -13,14 +13,16 @@ const app = new Koa()
 const router = new KoaRouter()
 
 // Create a container.
-const container = createContainer()
+const container = createContainer({ errorOnShorterLivedDependencies: true })
 
-// Register usefull stuff
+// Register useful stuff
 const MessageService = require('./services/MessageService')
 const makeMessageRepository = require('./repositories/messageRepository')
 container.register({
-  // used by the repository.
-  DB_CONNECTION_STRING: asValue('localhost:1234'),
+  // used by the repository; registered.
+  DB_CONNECTION_STRING: asValue('localhost:1234', {
+    lifetime: awilix.Lifetime.SINGLETON,
+  }),
   // resolved for each request.
   messageService: asClass(MessageService).scoped(),
   // only resolved once
