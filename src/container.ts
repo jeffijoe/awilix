@@ -16,7 +16,11 @@ import {
 import { last, nameValueToObject, isClass } from './utils'
 import { InjectionMode, InjectionModeType } from './injection-mode'
 import { Lifetime, LifetimeType, isLifetimeLonger } from './lifetime'
-import { AwilixResolutionError, AwilixTypeError } from './errors'
+import {
+  AwilixRegistrationError,
+  AwilixResolutionError,
+  AwilixTypeError,
+} from './errors'
 import { importModule } from './load-module-native.js'
 
 /**
@@ -403,8 +407,29 @@ export function createContainer<T extends object = any, U extends object = any>(
     const keys = [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)]
 
     for (const key of keys) {
-      const value = obj[key as any] as Resolver<any>
-      registrations[key as any] = value
+      const resolver = obj[key as any] as Resolver<any>
+      // If strict mode is enabled, check to ensure we are not registering a singleton on a non-root
+      // container.
+      if (options?.strict && resolver.lifetime === Lifetime.SINGLETON) {
+        if (parentContainer) {
+          throw new AwilixRegistrationError(
+            key,
+            'Cannot register a singleton on a scoped container.',
+          )
+        }
+      }
+
+      // If this is a value resolver, set the lifetime to `Lifetime.SCOPED` if this is a scoped
+      // container, or `Lifetime.SINGLETON` if this is the root container.
+      if (resolver.isValue) {
+        if (parentContainer != null) {
+          resolver.lifetime = Lifetime.SCOPED
+        } else {
+          resolver.lifetime = Lifetime.SINGLETON
+        }
+      }
+
+      registrations[key as any] = resolver
     }
 
     return container

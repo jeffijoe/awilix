@@ -151,3 +151,24 @@ export class AwilixResolutionError extends AwilixError {
     super(msg)
   }
 }
+
+/**
+ * A nice error class so we can do an instanceOf check.
+ */
+export class AwilixRegistrationError extends AwilixError {
+  /**
+   * Constructor, takes the registered modules and unresolved tokens
+   * to create a message.
+   *
+   * @param {string|symbol} name
+   * The name of the module that could not be registered.
+   */
+  constructor(name: string | symbol, message?: string) {
+    const stringName = name.toString()
+    let msg = `Could not register '${stringName}'.`
+    if (message) {
+      msg += ` ${message}`
+    }
+    super(msg)
+  }
+}

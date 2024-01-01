@@ -30,6 +30,7 @@ export type InjectorFunction = <T extends object>(
  */
 export interface Resolver<T> extends ResolverOptions<T> {
   resolve<U extends object>(container: AwilixContainer<U>): T
+  isValue: boolean
 }
 
 /**
@@ -115,26 +116,20 @@ export interface BuildResolverOptions<T>
 export type Constructor<T> = { new (...args: any[]): T }
 
 /**
- * Creates a simple value resolver where the given value will always be resolved.
- * The lifetime of the resolved value defaults to `Lifetime.SCOPED`.
+ * Creates a simple value resolver where the given value will always be resolved. The lifetime of
+ * the resolved value defaults to `Lifetime.SCOPED` if registered on a scoped container, and
+ * `Lifetime.SINGLETON` if registered on the root container.
  *
- * @param  {string} name
- * The name to register the value as.
+ * @param  {string} name The name to register the value as.
  *
- * @param  {*} value
- * The value to resolve.
+ * @param  {*} value The value to resolve.
  *
- * @param {object} opts
- * Additional options for this resolver.
- *
- * @return {object}
- * The resolver.
+ * @return {object} The resolver.
  */
-export function asValue<T>(value: T, opts?: ResolverOptions<T>): Resolver<T> {
+export function asValue<T>(value: T): Resolver<T> {
   return {
     resolve: () => value,
-    lifetime: Lifetime.SCOPED,
-    ...opts,
+    isValue: true,
   }
 }
 
@@ -171,6 +166,7 @@ export function asFunction<T>(
   const resolve = generateResolve(fn)
   const result = {
     resolve,
+    isValue: false,
     ...opts,
   }
 
@@ -215,6 +211,7 @@ export function asClass<T = object>(
   return createDisposableResolver(
     createBuildResolver({
       ...opts,
+      isValue: false,
       resolve,
     }),
   )
@@ -230,6 +227,7 @@ export function aliasTo<T>(
     resolve(container) {
       return container.resolve(name)
     },
+    isValue: false,
   }
 }
 

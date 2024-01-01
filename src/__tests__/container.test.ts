@@ -440,86 +440,6 @@ describe('container', () => {
       expect(err.message).toContain('lol')
     })
 
-    it('allows longer lifetime modules to depend on shorter lifetime dependencies by default', () => {
-      const container = createContainer()
-      container.register({
-        first: asFunction((cradle: any) => cradle.second, {
-          lifetime: Lifetime.SCOPED,
-        }),
-        second: asFunction(() => 'hah'),
-      })
-
-      expect(container.resolve('first')).toBe('hah')
-    })
-
-    it('throws an AwilixResolutionError when longer lifetime modules depend on shorter lifetime dependencies and strict is set', () => {
-      const container = createContainer({
-        strict: true,
-      })
-      container.register({
-        first: asFunction((cradle: any) => cradle.second, {
-          lifetime: Lifetime.SCOPED,
-        }),
-        second: asFunction(() => 'hah'),
-      })
-
-      const err = throws(() => container.resolve('first'))
-      expect(err.message).toContain('first -> second')
-      expect(err.message).toContain(
-        "Dependency 'second' has a shorter lifetime than its ancestor: 'first'",
-      )
-    })
-
-    it('does not throw an error when an injector proxy is used and strict is set', () => {
-      const container = createContainer({
-        strict: true,
-      })
-      container.register({
-        first: asFunction((cradle: any) => cradle.injected, {
-          lifetime: Lifetime.SCOPED,
-        }).inject(() => ({ injected: 'hah' })),
-      })
-
-      expect(container.resolve('first')).toBe('hah')
-    })
-
-    it('allows for asValue() to be used when strict is set', () => {
-      const container = createContainer({
-        strict: true,
-      })
-      container.register({
-        first: asFunction((cradle: any) => cradle.val, {
-          lifetime: Lifetime.SCOPED,
-        }),
-        second: asFunction((cradle: any) => cradle.secondVal, {
-          lifetime: Lifetime.SINGLETON,
-        }),
-        val: asValue('hah'),
-        secondVal: asValue('foobar', { lifetime: Lifetime.SINGLETON }),
-      })
-
-      expect(container.resolve('first')).toBe('hah')
-      expect(container.resolve('second')).toBe('foobar')
-    })
-
-    it('correctly errors when a singleton parent depends on a scoped value and strict is set', () => {
-      const container = createContainer({
-        strict: true,
-      })
-      container.register({
-        first: asFunction((cradle: any) => cradle.second, {
-          lifetime: Lifetime.SINGLETON,
-        }),
-        second: asValue('hah'),
-      })
-
-      const err = throws(() => container.resolve('first'))
-      expect(err.message).toContain('first -> second')
-      expect(err.message).toContain(
-        "Dependency 'second' has a shorter lifetime than its ancestor: 'first'",
-      )
-    })
-
     it('behaves properly when the cradle is returned from an async function', async () => {
       const container = createContainer()
       container.register({ value: asValue(42) })
@@ -668,6 +588,134 @@ describe('container', () => {
 
       const theAnswer = container.resolve<() => number>('theAnswer')
       expect(theAnswer()).toBe(42)
+    })
+  })
+
+  describe('automatic asValue lifetime handling', () => {
+    it('sets values to singleton lifetime when registered on the root container', () => {
+      const container = createContainer()
+      container.register({
+        val: asValue(42),
+      })
+      const registration = container.getRegistration('val')
+      expect(registration).toBeTruthy()
+      expect(registration!.lifetime).toBe(Lifetime.SINGLETON)
+    })
+    it('sets values to scoped lifetime when registered on a scope container', () => {
+      const container = createContainer()
+      const scope = container.createScope()
+      scope.register({
+        val: asValue(42),
+      })
+      const registration = scope.getRegistration('val')
+      expect(registration).toBeTruthy()
+      expect(registration!.lifetime).toBe(Lifetime.SCOPED)
+    })
+  })
+
+  describe('strict mode', () => {
+    describe('lifetime mismatch check', () => {
+      it('allows longer lifetime modules to depend on shorter lifetime dependencies by default', () => {
+        const container = createContainer()
+        container.register({
+          first: asFunction((cradle: any) => cradle.second, {
+            lifetime: Lifetime.SCOPED,
+          }),
+          second: asFunction(() => 'hah'),
+        })
+
+        expect(container.resolve('first')).toBe('hah')
+      })
+
+      it('throws an AwilixResolutionError when longer lifetime modules depend on shorter lifetime dependencies and strict is set', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          first: asFunction((cradle: any) => cradle.second, {
+            lifetime: Lifetime.SCOPED,
+          }),
+          second: asFunction(() => 'hah'),
+        })
+
+        const err = throws(() => container.resolve('first'))
+        expect(err.message).toContain('first -> second')
+        expect(err.message).toContain(
+          "Dependency 'second' has a shorter lifetime than its ancestor: 'first'",
+        )
+      })
+
+      it('does not throw an error when an injector proxy is used and strict is set', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          first: asFunction((cradle: any) => cradle.injected, {
+            lifetime: Lifetime.SCOPED,
+          }).inject(() => ({ injected: 'hah' })),
+        })
+
+        expect(container.resolve('first')).toBe('hah')
+      })
+
+      it('allows for asValue() to be used when strict is set', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          first: asFunction((cradle: any) => cradle.val, {
+            lifetime: Lifetime.SCOPED,
+          }),
+          second: asFunction((cradle: any) => cradle.secondVal, {
+            lifetime: Lifetime.SINGLETON,
+          }),
+          val: asValue('hah'),
+          secondVal: asValue('foobar'),
+        })
+
+        expect(container.resolve('first')).toBe('hah')
+        expect(container.resolve('second')).toBe('foobar')
+      })
+
+      it('correctly errors when a singleton parent depends on a scoped value and strict is set', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          first: asFunction((cradle: any) => cradle.second, {
+            lifetime: Lifetime.SINGLETON,
+          }),
+          second: asValue('hah'),
+        })
+        const scope = container.createScope()
+        scope.register({
+          second: asValue('foobar'),
+        })
+
+        const err = throws(() => scope.resolve('first'))
+        expect(err.message).toContain('first -> second')
+        expect(err.message).toContain(
+          "Dependency 'second' has a shorter lifetime than its ancestor: 'first'",
+        )
+      })
+    })
+
+    describe('singleton registration on scope check', () => {
+      it('detects and errors when a singleton is registered on a scope', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        const scope = container.createScope()
+        const err = throws(() =>
+          scope.register({
+            test: asFunction(() => 42, { lifetime: Lifetime.SINGLETON }),
+          }),
+        )
+        expect(err.message).toContain("Could not register 'test'")
+        expect(err.message).toContain(
+          'Cannot register a singleton on a scoped container',
+        )
+      })
     })
   })
 })
