@@ -13,7 +13,7 @@ const app = new Koa()
 const router = new KoaRouter()
 
 // Create a container.
-const container = createContainer({ errorOnShorterLivedDependencies: true })
+const container = createContainer({ strict: true })
 
 // Register useful stuff
 const MessageService = require('./services/MessageService')

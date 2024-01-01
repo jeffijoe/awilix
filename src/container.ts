@@ -187,7 +187,7 @@ export type ClassOrFunctionReturning<T> = FunctionReturning<T> | Constructor<T>
 export interface ContainerOptions {
   require?: (id: string) => any
   injectionMode?: InjectionModeType
-  errorOnShorterLivedDependencies?: boolean
+  strict?: boolean
 }
 
 /**
@@ -219,21 +219,23 @@ const CRADLE_STRING_TAG = 'AwilixContainerCradle'
 /**
  * Creates an Awilix container instance.
  *
- * @param {Function} options.require
- * The require function to use. Defaults to require.
+ * @param {Function} options.require The require function to use. Defaults to require.
  *
- * @param {string} options.injectionMode
- * The mode used by the container to resolve dependencies. Defaults to 'Proxy'.
+ * @param {string} options.injectionMode The mode used by the container to resolve dependencies.
+ * Defaults to 'Proxy'.
  *
- * @return {AwilixContainer<T>}
- * The container.
+ * @param {boolean} options.strict True if the container should run in strict mode with additional
+ * validation for resolver dependency correctness. Defaults to false.
+ *
+ * @return {AwilixContainer<T>} The container.
  */
 export function createContainer<T extends object = any, U extends object = any>(
-  options?: ContainerOptions,
+  options: ContainerOptions = {},
   parentContainer?: AwilixContainer<U>,
 ): AwilixContainer<T> {
   options = {
     injectionMode: InjectionMode.PROXY,
+    strict: false,
     ...options,
   }
 
@@ -503,7 +505,7 @@ export function createContainer<T extends object = any, U extends object = any>(
 
       // if any of the parents have a shorter lifetime than the one requested,
       // and the container is configured to do so, throw an error.
-      if (options?.errorOnShorterLivedDependencies) {
+      if (options?.strict) {
         const maybeLongerLifetimeParentIndex = resolutionStack.findIndex(
           ({ lifetime: parentLifetime }) =>
             isLifetimeLonger(parentLifetime, lifetime),

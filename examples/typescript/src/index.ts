@@ -11,7 +11,7 @@ interface ICradle {
 // Create the container
 const container = createContainer<ICradle>({
   injectionMode: InjectionMode.CLASSIC,
-  errorOnShorterLivedDependencies: true,
+  strict: true,
 })
 
 // Register the classes

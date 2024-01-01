@@ -3,7 +3,7 @@ const awilix = require('../..')
 
 // Create a container.
 const container = awilix.createContainer({
-  errorOnShorterLivedDependencies: true,
+  strict: true,
 })
 
 // Register some value.. We depend on this in `Stuffs.js`

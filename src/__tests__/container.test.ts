@@ -452,9 +452,9 @@ describe('container', () => {
       expect(container.resolve('first')).toBe('hah')
     })
 
-    it('throws an AwilixResolutionError when longer lifetime modules depend on shorter lifetime dependencies and errorOnShorterLivedDependencies is set', () => {
+    it('throws an AwilixResolutionError when longer lifetime modules depend on shorter lifetime dependencies and strict is set', () => {
       const container = createContainer({
-        errorOnShorterLivedDependencies: true,
+        strict: true,
       })
       container.register({
         first: asFunction((cradle: any) => cradle.second, {
@@ -470,9 +470,9 @@ describe('container', () => {
       )
     })
 
-    it('does not throw an error when an injector proxy is used and errorOnShorterLivedDependencies is set', () => {
+    it('does not throw an error when an injector proxy is used and strict is set', () => {
       const container = createContainer({
-        errorOnShorterLivedDependencies: true,
+        strict: true,
       })
       container.register({
         first: asFunction((cradle: any) => cradle.injected, {
@@ -483,9 +483,9 @@ describe('container', () => {
       expect(container.resolve('first')).toBe('hah')
     })
 
-    it('allows for asValue() to be used when errorOnShorterLivedDependencies is set', () => {
+    it('allows for asValue() to be used when strict is set', () => {
       const container = createContainer({
-        errorOnShorterLivedDependencies: true,
+        strict: true,
       })
       container.register({
         first: asFunction((cradle: any) => cradle.val, {
@@ -502,9 +502,9 @@ describe('container', () => {
       expect(container.resolve('second')).toBe('foobar')
     })
 
-    it('correctly errors when a singleton parent depends on a scoped value and errorOnShorterLivedDependencies is set', () => {
+    it('correctly errors when a singleton parent depends on a scoped value and strict is set', () => {
       const container = createContainer({
-        errorOnShorterLivedDependencies: true,
+        strict: true,
       })
       container.register({
         first: asFunction((cradle: any) => cradle.second, {
