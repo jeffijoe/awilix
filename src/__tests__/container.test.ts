@@ -3,7 +3,7 @@ import * as util from 'util'
 import { createContainer, AwilixContainer } from '../container'
 import { Lifetime } from '../lifetime'
 import { AwilixResolutionError } from '../errors'
-import { asClass, asFunction, asValue } from '../resolvers'
+import { aliasTo, asClass, asFunction, asValue } from '../resolvers'
 import { InjectionMode } from '../injection-mode'
 
 class Test {
@@ -696,6 +696,44 @@ describe('container', () => {
         expect(err.message).toContain('first -> second')
         expect(err.message).toContain(
           "Dependency 'second' has a shorter lifetime than its ancestor: 'first'",
+        )
+      })
+
+      it('allows aliasTo to be used when strict is set', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          first: asFunction((cradle: any) => cradle.second, {
+            lifetime: Lifetime.SINGLETON,
+          }),
+          second: aliasTo('val'),
+          val: asValue('hah'),
+        })
+
+        expect(container.resolve('first')).toBe('hah')
+      })
+
+      it('detects when an aliasTo resolution violates lifetime constraints', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          first: asFunction((cradle: any) => cradle.second, {
+            lifetime: Lifetime.SINGLETON,
+          }),
+          second: aliasTo('val'),
+          val: asValue('hah'),
+        })
+        const scope = container.createScope()
+        scope.register({
+          val: asValue('foobar'),
+        })
+
+        const err = throws(() => scope.resolve('first'))
+        expect(err.message).toContain('first -> second -> val')
+        expect(err.message).toContain(
+          "Dependency 'val' has a shorter lifetime than its ancestor: 'first'",
         )
       })
     })

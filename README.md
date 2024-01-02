@@ -868,11 +868,7 @@ Args:
       **_must_** be named exactly like they are in the registration. For
       example, a dependency registered as `repository` cannot be referenced in a
       class constructor as `repo`.
-  - `options.strict`: Defaults to `false`; if `true`, will enable the following additional
-    correctness checks:
-    - Will throw an error if a singleton depends on a scoped or transient registration, or if a
-      scoped registration depends on a transient registration.
-    - Will throw an error if a singleton is registered on a scope other than the root container.
+  - `options.strict`: Enables [strict mode](#strict-mode). Defaults to `false`.
 
 ## `asFunction()`
 

@@ -1,9 +1,10 @@
-import { Lifetime, LifetimeType } from './lifetime'
-import { InjectionMode, InjectionModeType } from './injection-mode'
-import { isFunction, uniq } from './utils'
-import { parseParameterList, Parameter } from './param-parser'
-import { AwilixTypeError } from './errors'
 import { AwilixContainer, FunctionReturning, ResolveOptions } from './container'
+import { AwilixTypeError } from './errors'
+import { InjectionMode, InjectionModeType } from './injection-mode'
+import { Lifetime, LifetimeType } from './lifetime'
+import { Parameter, parseParameterList } from './param-parser'
+import { ResolverInternal } from './types'
+import { isFunction, uniq } from './utils'
 
 // We parse the signature of any `Function`, so we want to allow `Function` types.
 /* eslint-disable @typescript-eslint/ban-types */
@@ -30,7 +31,6 @@ export type InjectorFunction = <T extends object>(
  */
 export interface Resolver<T> extends ResolverOptions<T> {
   resolve<U extends object>(container: AwilixContainer<U>): T
-  isValue: boolean
 }
 
 /**
@@ -126,7 +126,7 @@ export type Constructor<T> = { new (...args: any[]): T }
  *
  * @return {object} The resolver.
  */
-export function asValue<T>(value: T): Resolver<T> {
+export function asValue<T>(value: T): ResolverInternal<T> {
   return {
     resolve: () => value,
     isValue: true,
@@ -166,7 +166,6 @@ export function asFunction<T>(
   const resolve = generateResolve(fn)
   const result = {
     resolve,
-    isValue: false,
     ...opts,
   }
 
@@ -211,7 +210,6 @@ export function asClass<T = object>(
   return createDisposableResolver(
     createBuildResolver({
       ...opts,
-      isValue: false,
       resolve,
     }),
   )
@@ -222,12 +220,12 @@ export function asClass<T = object>(
  */
 export function aliasTo<T>(
   name: Parameters<AwilixContainer['resolve']>[0],
-): Resolver<T> {
+): ResolverInternal<T> {
   return {
     resolve(container) {
       return container.resolve(name)
     },
-    isValue: false,
+    isLeakSafe: true,
   }
 }
 

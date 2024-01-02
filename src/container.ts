@@ -1,27 +1,28 @@
 import * as util from 'util'
-import { GlobWithOptions, listModules } from './list-modules'
-import {
-  LoadModulesOptions,
-  loadModules as realLoadModules,
-  LoadModulesResult,
-} from './load-modules'
-import {
-  Resolver,
-  Constructor,
-  asClass,
-  asFunction,
-  DisposableResolver,
-  BuildResolverOptions,
-} from './resolvers'
-import { last, nameValueToObject, isClass } from './utils'
-import { InjectionMode, InjectionModeType } from './injection-mode'
-import { Lifetime, LifetimeType, isLifetimeLonger } from './lifetime'
 import {
   AwilixRegistrationError,
   AwilixResolutionError,
   AwilixTypeError,
 } from './errors'
+import { InjectionMode, InjectionModeType } from './injection-mode'
+import { Lifetime, LifetimeType, isLifetimeLonger } from './lifetime'
+import { GlobWithOptions, listModules } from './list-modules'
 import { importModule } from './load-module-native.js'
+import {
+  LoadModulesOptions,
+  LoadModulesResult,
+  loadModules as realLoadModules,
+} from './load-modules'
+import {
+  BuildResolverOptions,
+  Constructor,
+  DisposableResolver,
+  Resolver,
+  asClass,
+  asFunction,
+} from './resolvers'
+import { ResolverInternal } from './types'
+import { isClass, last, nameValueToObject } from './utils'
 
 /**
  * The container returned from createContainer has some methods and properties.
@@ -70,7 +71,7 @@ export interface AwilixContainer<Cradle extends object = any> {
   /**
    * Adds a single registration that using a pre-constructed resolver.
    */
-  register<T>(name: string | symbol, registration: Resolver<T>): this
+  register<T>(name: string | symbol, registration: ResolverInternal<T>): this
   /**
    * Pairs resolvers to registration names and registers them.
    */
@@ -114,14 +115,18 @@ export interface AwilixContainer<Cradle extends object = any> {
    *
    * @param name {string | symbol} The registration name.
    */
-  getRegistration<K extends keyof Cradle>(name: K): Resolver<Cradle[K]> | null
+  getRegistration<K extends keyof Cradle>(
+    name: K,
+  ): ResolverInternal<Cradle[K]> | null
   /**
    * Recursively gets a registration by name if it exists in the
    * current container or any of its' parents.
    *
    * @param name {string | symbol} The registration name.
    */
-  getRegistration<T = unknown>(name: string | symbol): Resolver<T> | null
+  getRegistration<T = unknown>(
+    name: string | symbol,
+  ): ResolverInternal<T> | null
   /**
    * Given a resolver, class or function, builds it up and returns it.
    * Does not cache it, this means that any lifetime configured in case of passing
@@ -160,7 +165,7 @@ export interface CacheEntry<T = any> {
   /**
    * The resolver that resolved the value.
    */
-  resolver: Resolver<T>
+  resolver: ResolverInternal<T>
   /**
    * The resolved value.
    */
@@ -172,7 +177,7 @@ export interface CacheEntry<T = any> {
  * @interface NameAndRegistrationPair
  */
 export type NameAndRegistrationPair<T> = {
-  [U in keyof T]?: Resolver<T[U]>
+  [U in keyof T]?: ResolverInternal<T[U]>
 }
 
 /**
@@ -197,7 +202,10 @@ export interface ContainerOptions {
 /**
  * Contains a hash of registrations where the name is the key.
  */
-export type RegistrationHash = Record<string | symbol | number, Resolver<any>>
+export type RegistrationHash = Record<
+  string | symbol | number,
+  ResolverInternal<any>
+>
 
 /**
  * Resolution stack.
@@ -407,7 +415,7 @@ export function createContainer<T extends object = any, U extends object = any>(
     const keys = [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)]
 
     for (const key of keys) {
-      const resolver = obj[key as any] as Resolver<any>
+      const resolver = obj[key as any] as ResolverInternal<any>
       // If strict mode is enabled, check to ensure we are not registering a singleton on a non-root
       // container.
       if (options?.strict && resolver.lifetime === Lifetime.SINGLETON) {
@@ -530,7 +538,7 @@ export function createContainer<T extends object = any, U extends object = any>(
 
       // if any of the parents have a shorter lifetime than the one requested,
       // and the container is configured to do so, throw an error.
-      if (options?.strict) {
+      if (options?.strict && !resolver.isLeakSafe) {
         const maybeLongerLifetimeParentIndex = resolutionStack.findIndex(
           ({ lifetime: parentLifetime }) =>
             isLifetimeLonger(parentLifetime, lifetime),
