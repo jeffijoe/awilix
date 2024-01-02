@@ -1,3 +1,4 @@
+import { LifetimeType } from './lifetime'
 import { Resolver } from './resolvers'
 
 export interface ResolverInternal<T> extends Resolver<T> {
@@ -14,3 +15,6 @@ export interface ResolverInternal<T> extends Resolver<T> {
    */
   isLeakSafe?: boolean
 }
+
+export interface ResolutionStack
+  extends Array<{ name: string | symbol; lifetime: LifetimeType }> {}

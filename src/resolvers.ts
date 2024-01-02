@@ -239,7 +239,7 @@ export function aliasTo<T>(
  * @return {object}
  * The interface.
  */
-export function createBuildResolver<T, B extends Resolver<T>>(
+function createBuildResolver<T, B extends Resolver<T>>(
   obj: B,
 ): BuildResolver<T> & B {
   function setLifetime(this: any, value: LifetimeType) {
@@ -280,7 +280,7 @@ export function createBuildResolver<T, B extends Resolver<T>>(
  * function.
  * @param obj
  */
-export function createDisposableResolver<T, B extends Resolver<T>>(
+function createDisposableResolver<T, B extends Resolver<T>>(
   obj: B,
 ): DisposableResolver<T> & B {
   function disposer(this: any, dispose: Disposer<T>) {

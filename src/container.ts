@@ -5,7 +5,7 @@ import {
   AwilixTypeError,
 } from './errors'
 import { InjectionMode, InjectionModeType } from './injection-mode'
-import { Lifetime, LifetimeType, isLifetimeLonger } from './lifetime'
+import { Lifetime, isLifetimeLonger } from './lifetime'
 import { GlobWithOptions, listModules } from './list-modules'
 import { importModule } from './load-module-native.js'
 import {
@@ -21,7 +21,7 @@ import {
   asClass,
   asFunction,
 } from './resolvers'
-import { ResolverInternal } from './types'
+import { ResolutionStack, ResolverInternal } from './types'
 import { isClass, last, nameValueToObject } from './utils'
 
 /**
@@ -208,12 +208,6 @@ export type RegistrationHash = Record<
 >
 
 /**
- * Resolution stack.
- */
-export interface ResolutionStack
-  extends Array<{ name: string | symbol; lifetime: LifetimeType }> {}
-
-/**
  * Family tree symbol.
  */
 const FAMILY_TREE = Symbol('familyTree')
@@ -251,10 +245,10 @@ export function createContainer<T extends object = any, U extends object = any>(
     ...options,
   }
 
-  // The resolution stack is used to keep track
-  // of what modules are being resolved, so when
-  // an error occurs, we have something to present
-  // to the poor developer who fucked up.
+  /**
+   * Tracks the names and lifetimes of the modules being resolved. Used to detect circular
+   * dependencies and, in strict mode, lifetime leakage issues.
+   */
   let resolutionStack: ResolutionStack = []
 
   // Internal registration store for this container.
@@ -627,7 +621,7 @@ export function createContainer<T extends object = any, U extends object = any>(
    * Does not cache it, this means that any lifetime configured in case of passing
    * a registration will not be used.
    *
-   * @param {Resolver|Class|Function} targetOrResolver
+   * @param {Resolver|Constructor|Function} targetOrResolver
    * @param {ResolverOptions} opts
    */
   function build<T>(
