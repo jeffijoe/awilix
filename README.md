@@ -346,12 +346,13 @@ checks that can help you catch bugs early.
 
 In particular, strict mode enables the following checks:
 
-- When a singleton depends on a scoped or transient registration, or when a scoped registration
-  depends on a transient registration, an error is thrown. This detects and prevents the issue where
-  a shorter lifetime dependency can leak outside its intended lifetime due to its preservation in a
-  longer lifetime module.
+- When a singleton or scoped registration depends on a transient non-value registration, an error is
+  thrown. This detects and prevents the issue where a shorter lifetime dependency can leak outside
+  its intended lifetime due to its preservation in a longer lifetime module.
 - Singleton registrations on any scopes are disabled. This prevents the issue where a singleton is
   registered on a scope other than the root container, which results in unpredictable behavior.
+- Singleton resolution is performed using registrations from the root container only, which prevents
+  potential leaks in which scoped registrations are preserved in singletons.
 
 # Injection modes
 
@@ -834,6 +835,8 @@ pass in an object with the following props:
   [Per-module local injections](#per-module-local-injections)
 - `register`: Only used in `loadModules`, determines how to register a loaded
   module explicitly
+- `isLeakSafe`: true if this resolver should be excluded from lifetime-leak checking performed in
+  [strict mode](#strict-mode). Defaults to false.
 
 **Examples of usage:**
 

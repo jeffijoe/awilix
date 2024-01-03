@@ -591,28 +591,6 @@ describe('container', () => {
     })
   })
 
-  describe('automatic asValue lifetime handling', () => {
-    it('sets values to singleton lifetime when registered on the root container', () => {
-      const container = createContainer()
-      container.register({
-        val: asValue(42),
-      })
-      const registration = container.getRegistration('val')
-      expect(registration).toBeTruthy()
-      expect(registration!.lifetime).toBe(Lifetime.SINGLETON)
-    })
-    it('sets values to scoped lifetime when registered on a scope container', () => {
-      const container = createContainer()
-      const scope = container.createScope()
-      scope.register({
-        val: asValue(42),
-      })
-      const registration = scope.getRegistration('val')
-      expect(registration).toBeTruthy()
-      expect(registration!.lifetime).toBe(Lifetime.SCOPED)
-    })
-  })
-
   describe('strict mode', () => {
     describe('lifetime mismatch check', () => {
       it('allows longer lifetime modules to depend on shorter lifetime dependencies by default', () => {
@@ -677,28 +655,6 @@ describe('container', () => {
         expect(container.resolve('second')).toBe('foobar')
       })
 
-      it('correctly errors when a singleton parent depends on a scoped value and strict is set', () => {
-        const container = createContainer({
-          strict: true,
-        })
-        container.register({
-          first: asFunction((cradle: any) => cradle.second, {
-            lifetime: Lifetime.SINGLETON,
-          }),
-          second: asValue('hah'),
-        })
-        const scope = container.createScope()
-        scope.register({
-          second: asValue('foobar'),
-        })
-
-        const err = throws(() => scope.resolve('first'))
-        expect(err.message).toContain('first -> second')
-        expect(err.message).toContain(
-          "Dependency 'second' has a shorter lifetime than its ancestor: 'first'",
-        )
-      })
-
       it('allows aliasTo to be used when strict is set', () => {
         const container = createContainer({
           strict: true,
@@ -720,14 +676,14 @@ describe('container', () => {
         })
         container.register({
           first: asFunction((cradle: any) => cradle.second, {
-            lifetime: Lifetime.SINGLETON,
+            lifetime: Lifetime.SCOPED,
           }),
           second: aliasTo('val'),
           val: asValue('hah'),
         })
         const scope = container.createScope()
         scope.register({
-          val: asValue('foobar'),
+          val: asFunction(() => 'foobar'),
         })
 
         const err = throws(() => scope.resolve('first'))
@@ -735,6 +691,43 @@ describe('container', () => {
         expect(err.message).toContain(
           "Dependency 'val' has a shorter lifetime than its ancestor: 'first'",
         )
+      })
+    })
+
+    describe('singleton resolution using only root container', () => {
+      it('resolves singletons using root container only, even if called from scope', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          scoped: asFunction((cradle: any) => cradle.val, {
+            lifetime: Lifetime.SCOPED,
+          }),
+          singleton: asFunction((cradle: any) => cradle.val, {
+            lifetime: Lifetime.SINGLETON,
+          }),
+        })
+        const scope = container.createScope()
+
+        let err = throws(() => scope.resolve('scoped'))
+        expect(err).toBeInstanceOf(AwilixResolutionError)
+        expect(err.message).toContain('scoped -> val')
+
+        scope.register({
+          val: asValue('foobar'),
+        })
+
+        expect(scope.resolve('scoped')).toBe('foobar')
+
+        err = throws(() => scope.resolve('singleton'))
+        expect(err).toBeInstanceOf(AwilixResolutionError)
+        expect(err.message).toContain('singleton -> val')
+
+        container.register({
+          val: asValue('hah'),
+        })
+
+        expect(scope.resolve('singleton')).toBe('hah')
       })
     })
 

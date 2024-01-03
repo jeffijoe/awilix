@@ -3,7 +3,6 @@ import { AwilixTypeError } from './errors'
 import { InjectionMode, InjectionModeType } from './injection-mode'
 import { Lifetime, LifetimeType } from './lifetime'
 import { Parameter, parseParameterList } from './param-parser'
-import { ResolverInternal } from './types'
 import { isFunction, uniq } from './utils'
 
 // We parse the signature of any `Function`, so we want to allow `Function` types.
@@ -87,6 +86,11 @@ export interface ResolverOptions<T> {
    * Registration function to use. Only used for inline configuration with `loadModules`.
    */
   register?: (...args: any[]) => Resolver<T>
+  /**
+   * True if this resolver should be excluded from lifetime leak checking. Used by resolvers that
+   * wish to uphold the anti-leakage contract themselves. Defaults to false.
+   */
+  isLeakSafe?: boolean
 }
 
 /**
@@ -116,9 +120,9 @@ export interface BuildResolverOptions<T>
 export type Constructor<T> = { new (...args: any[]): T }
 
 /**
- * Creates a simple value resolver where the given value will always be resolved. The lifetime of
- * the resolved value defaults to `Lifetime.SCOPED` if registered on a scoped container, and
- * `Lifetime.SINGLETON` if registered on the root container.
+ * Creates a simple value resolver where the given value will always be resolved. The value is
+ * marked as leak-safe since in strict mode, the value will only be resolved when it is not leaking
+ * upwards from a child scope to a parent singleton.
  *
  * @param  {string} name The name to register the value as.
  *
@@ -126,10 +130,10 @@ export type Constructor<T> = { new (...args: any[]): T }
  *
  * @return {object} The resolver.
  */
-export function asValue<T>(value: T): ResolverInternal<T> {
+export function asValue<T>(value: T): Resolver<T> {
   return {
     resolve: () => value,
-    isValue: true,
+    isLeakSafe: true,
   }
 }
 
@@ -216,11 +220,12 @@ export function asClass<T = object>(
 }
 
 /**
- * Resolves to the specified registration.
+ * Resolves to the specified registration. Marked as leak-safe since the alias target is what should
+ * be checked for lifetime leaks.
  */
 export function aliasTo<T>(
   name: Parameters<AwilixContainer['resolve']>[0],
-): ResolverInternal<T> {
+): Resolver<T> {
   return {
     resolve(container) {
       return container.resolve(name)

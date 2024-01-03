@@ -21,7 +21,7 @@ import {
   asClass,
   asFunction,
 } from './resolvers'
-import { ResolutionStack, ResolverInternal } from './types'
+import { ResolutionStack } from './types'
 import { isClass, last, nameValueToObject } from './utils'
 
 /**
@@ -71,7 +71,7 @@ export interface AwilixContainer<Cradle extends object = any> {
   /**
    * Adds a single registration that using a pre-constructed resolver.
    */
-  register<T>(name: string | symbol, registration: ResolverInternal<T>): this
+  register<T>(name: string | symbol, registration: Resolver<T>): this
   /**
    * Pairs resolvers to registration names and registers them.
    */
@@ -115,18 +115,14 @@ export interface AwilixContainer<Cradle extends object = any> {
    *
    * @param name {string | symbol} The registration name.
    */
-  getRegistration<K extends keyof Cradle>(
-    name: K,
-  ): ResolverInternal<Cradle[K]> | null
+  getRegistration<K extends keyof Cradle>(name: K): Resolver<Cradle[K]> | null
   /**
    * Recursively gets a registration by name if it exists in the
    * current container or any of its' parents.
    *
    * @param name {string | symbol} The registration name.
    */
-  getRegistration<T = unknown>(
-    name: string | symbol,
-  ): ResolverInternal<T> | null
+  getRegistration<T = unknown>(name: string | symbol): Resolver<T> | null
   /**
    * Given a resolver, class or function, builds it up and returns it.
    * Does not cache it, this means that any lifetime configured in case of passing
@@ -165,7 +161,7 @@ export interface CacheEntry<T = any> {
   /**
    * The resolver that resolved the value.
    */
-  resolver: ResolverInternal<T>
+  resolver: Resolver<T>
   /**
    * The resolved value.
    */
@@ -177,7 +173,7 @@ export interface CacheEntry<T = any> {
  * @interface NameAndRegistrationPair
  */
 export type NameAndRegistrationPair<T> = {
-  [U in keyof T]?: ResolverInternal<T[U]>
+  [U in keyof T]?: Resolver<T[U]>
 }
 
 /**
@@ -202,10 +198,7 @@ export interface ContainerOptions {
 /**
  * Contains a hash of registrations where the name is the key.
  */
-export type RegistrationHash = Record<
-  string | symbol | number,
-  ResolverInternal<any>
->
+export type RegistrationHash = Record<string | symbol | number, Resolver<any>>
 
 /**
  * Family tree symbol.
@@ -231,13 +224,24 @@ const CRADLE_STRING_TAG = 'AwilixContainerCradle'
  * Defaults to 'Proxy'.
  *
  * @param {boolean} options.strict True if the container should run in strict mode with additional
- * validation for resolver dependency correctness. Defaults to false.
+ * validation for resolver configuration correctness. Defaults to false.
  *
  * @return {AwilixContainer<T>} The container.
  */
 export function createContainer<T extends object = any, U extends object = any>(
   options: ContainerOptions = {},
   parentContainer?: AwilixContainer<U>,
+): AwilixContainer<T> {
+  return createContainerInternal(options, parentContainer)
+}
+
+function createContainerInternal<
+  T extends object = any,
+  U extends object = any,
+>(
+  options: ContainerOptions = {},
+  parentContainer?: AwilixContainer<U>,
+  parentResolutionStack?: ResolutionStack,
 ): AwilixContainer<T> {
   options = {
     injectionMode: InjectionMode.PROXY,
@@ -249,7 +253,7 @@ export function createContainer<T extends object = any, U extends object = any>(
    * Tracks the names and lifetimes of the modules being resolved. Used to detect circular
    * dependencies and, in strict mode, lifetime leakage issues.
    */
-  let resolutionStack: ResolutionStack = []
+  const resolutionStack: ResolutionStack = parentResolutionStack ?? []
 
   // Internal registration store for this container.
   const registrations: RegistrationHash = {}
@@ -398,7 +402,11 @@ export function createContainer<T extends object = any, U extends object = any>(
    * The scoped container.
    */
   function createScope<P extends object>(): AwilixContainer<P & T> {
-    return createContainer(options, container as AwilixContainer<T>)
+    return createContainerInternal(
+      options,
+      container as AwilixContainer<T>,
+      resolutionStack,
+    )
   }
 
   /**
@@ -409,7 +417,7 @@ export function createContainer<T extends object = any, U extends object = any>(
     const keys = [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)]
 
     for (const key of keys) {
-      const resolver = obj[key as any] as ResolverInternal<any>
+      const resolver = obj[key as any] as Resolver<any>
       // If strict mode is enabled, check to ensure we are not registering a singleton on a non-root
       // container.
       if (options?.strict && resolver.lifetime === Lifetime.SINGLETON) {
@@ -418,16 +426,6 @@ export function createContainer<T extends object = any, U extends object = any>(
             key,
             'Cannot register a singleton on a scoped container.',
           )
-        }
-      }
-
-      // If this is a value resolver, set the lifetime to `Lifetime.SCOPED` if this is a scoped
-      // container, or `Lifetime.SINGLETON` if this is the root container.
-      if (resolver.isValue) {
-        if (parentContainer != null) {
-          resolver.lifetime = Lifetime.SCOPED
-        } else {
-          resolver.lifetime = Lifetime.SINGLETON
         }
       }
 
@@ -530,8 +528,8 @@ export function createContainer<T extends object = any, U extends object = any>(
 
       const lifetime = resolver.lifetime || Lifetime.TRANSIENT
 
-      // if any of the parents have a shorter lifetime than the one requested,
-      // and the container is configured to do so, throw an error.
+      // if we are running in strict mode, this resolver is not explicitly marked leak-safe, and any
+      // of the parents have a shorter lifetime than the one requested, throw an error.
       if (options?.strict && !resolver.isLeakSafe) {
         const maybeLongerLifetimeParentIndex = resolutionStack.findIndex(
           ({ lifetime: parentLifetime }) =>
@@ -563,7 +561,11 @@ export function createContainer<T extends object = any, U extends object = any>(
           // Singleton lifetime means cache at all times, regardless of scope.
           cached = rootContainer.cache.get(name)
           if (!cached) {
-            resolved = resolver.resolve(container)
+            // if we are running in strict mode, perform singleton resolution using the root
+            // container only.
+            resolved = resolver.resolve(
+              options.strict ? rootContainer : container,
+            )
             rootContainer.cache.set(name, { resolver, value: resolved })
           } else {
             resolved = cached.value
@@ -597,8 +599,9 @@ export function createContainer<T extends object = any, U extends object = any>(
       resolutionStack.pop()
       return resolved
     } catch (err) {
-      // When we get an error we need to reset the stack.
-      resolutionStack = []
+      // When we get an error we need to reset the stack. Mutate the existing array rather than
+      // updating the reference to ensure all parent containers' stacks are also updated.
+      resolutionStack.length = 0
       throw err
     }
   }
