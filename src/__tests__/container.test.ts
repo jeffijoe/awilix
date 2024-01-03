@@ -729,6 +729,25 @@ describe('container', () => {
 
         expect(scope.resolve('singleton')).toBe('hah')
       })
+
+      it('preserves the resolution stack when resolving a singleton using a parent container, from a scope', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          scoped: asFunction((cradle: any) => cradle.singleton, {
+            lifetime: Lifetime.SCOPED,
+          }),
+          singleton: asFunction((cradle: any) => cradle.val, {
+            lifetime: Lifetime.SINGLETON,
+          }),
+        })
+        const scope = container.createScope()
+
+        const err = throws(() => scope.resolve('scoped'))
+        expect(err).toBeInstanceOf(AwilixResolutionError)
+        expect(err.message).toContain('scoped -> singleton -> val')
+      })
     })
 
     describe('singleton registration on scope check', () => {
