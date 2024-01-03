@@ -40,6 +40,7 @@ Awilix enables you to write **composable, testable software** using dependency i
   - [`aliasTo()`](#aliasto)
   - [`listModules()`](#listmodules)
   - [`AwilixResolutionError`](#awilixresolutionerror)
+  - [`AwilixRegistrationError`](#awilixregistrationerror)
   - [The `AwilixContainer` object](#the-awilixcontainer-object)
     - [`container.cradle`](#containercradle)
     - [`container.registrations`](#containerregistrations)
@@ -954,6 +955,11 @@ This is a special error thrown when Awilix is unable to resolve all dependencies
 (due to missing or cyclic dependencies). You can catch this error and use
 `err instanceof AwilixResolutionError` if you wish. It will tell you what
 dependencies it could not find or which ones caused a cycle.
+
+## `AwilixRegistrationError`
+
+This is a special error thrown when Awilix is unable to register a dependency due to a strict mode
+violation. You can catch this error and use `err instanceof AwilixRegistrationError` if you wish.
 
 ## The `AwilixContainer` object
 

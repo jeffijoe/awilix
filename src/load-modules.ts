@@ -1,16 +1,16 @@
+import { camelCase } from 'camel-case'
 import { pathToFileURL } from 'url'
-import { ModuleDescriptor, GlobWithOptions, listModules } from './list-modules'
+import { AwilixContainer } from './container'
 import { Lifetime } from './lifetime'
+import { GlobWithOptions, ModuleDescriptor, listModules } from './list-modules'
 import {
+  BuildResolver,
+  BuildResolverOptions,
   RESOLVER,
   asClass,
   asFunction,
-  BuildResolverOptions,
 } from './resolvers'
-import { AwilixContainer } from './container'
 import { isClass, isFunction } from './utils'
-import { BuildResolver } from './awilix'
-import { camelCase } from 'camel-case'
 
 /**
  * Metadata of the module as well as the loaded module itself.

@@ -1,4 +1,4 @@
-import { ResolutionStack } from './types'
+import { ResolutionStack } from './container'
 
 /**
  * Newline.

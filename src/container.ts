@@ -5,7 +5,7 @@ import {
   AwilixTypeError,
 } from './errors'
 import { InjectionMode, InjectionModeType } from './injection-mode'
-import { Lifetime, isLifetimeLonger } from './lifetime'
+import { Lifetime, LifetimeType, isLifetimeLonger } from './lifetime'
 import { GlobWithOptions, listModules } from './list-modules'
 import { importModule } from './load-module-native.js'
 import {
@@ -21,7 +21,6 @@ import {
   asClass,
   asFunction,
 } from './resolvers'
-import { ResolutionStack } from './types'
 import { isClass, last, nameValueToObject } from './utils'
 
 /**
@@ -200,6 +199,11 @@ export interface ContainerOptions {
  */
 export type RegistrationHash = Record<string | symbol | number, Resolver<any>>
 
+export type ResolutionStack = Array<{
+  name: string | symbol
+  lifetime: LifetimeType
+}>
+
 /**
  * Family tree symbol.
  */
@@ -228,11 +232,10 @@ const CRADLE_STRING_TAG = 'AwilixContainerCradle'
  *
  * @return {AwilixContainer<T>} The container.
  */
-export function createContainer<T extends object = any, U extends object = any>(
+export function createContainer<T extends object = any>(
   options: ContainerOptions = {},
-  parentContainer?: AwilixContainer<U>,
 ): AwilixContainer<T> {
-  return createContainerInternal(options, parentContainer)
+  return createContainerInternal(options)
 }
 
 function createContainerInternal<
