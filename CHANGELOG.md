@@ -1,3 +1,10 @@
+# v10.0.0
+
+* Add (optional, off by default) strict mode to enforce extra correctness checks in both resolution
+  and registration
+* Reduce the publicly accessible API surface to only that which is needed to use Awilix. This is
+  potentially a breaking change if you were using any of the internal type definitions.
+
 # v9.0.0
 
 * Upgrade packages
