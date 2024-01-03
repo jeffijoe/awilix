@@ -335,15 +335,15 @@ the following error at runtime when the singleton `printTime` is resolved:
 In addition, registering a singleton on a scope other than the root container results in
 unpredictable behavior. In particular, if two different singletons are registered on two different
 scopes, they will share a cache entry and collide with each other. To throw a runtime error when a
-singleton is registered on a scope other than the root container, set `strict` to true.
+singleton is registered on a scope other than the root container, enable [strict mode](#strict-mode).
 
 Read the documentation for [`container.createScope()`](#containercreatescope)
 for more examples.
 
 # Strict mode
 
-Strict mode is a new feature in Awilix 9.1. It enables additional correctness
-checks that can help you catch bugs early.
+Strict mode is a new feature in Awilix 10. It enables additional correctness checks that can help
+you catch bugs early.
 
 In particular, strict mode enables the following checks:
 
