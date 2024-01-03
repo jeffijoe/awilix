@@ -631,6 +631,7 @@ describe('container', () => {
           first: asFunction((cradle: any) => cradle.injected, {
             lifetime: Lifetime.SCOPED,
           }).inject(() => ({ injected: 'hah' })),
+          injected: asFunction(() => 'foobar'),
         })
 
         expect(container.resolve('first')).toBe('hah')
