@@ -1,23 +1,27 @@
 import * as util from 'util'
+import {
+  AwilixRegistrationError,
+  AwilixResolutionError,
+  AwilixTypeError,
+} from './errors'
+import { InjectionMode, InjectionModeType } from './injection-mode'
+import { Lifetime, LifetimeType, isLifetimeLonger } from './lifetime'
 import { GlobWithOptions, listModules } from './list-modules'
+import { importModule } from './load-module-native.js'
 import {
   LoadModulesOptions,
-  loadModules as realLoadModules,
   LoadModulesResult,
+  loadModules as realLoadModules,
 } from './load-modules'
 import {
-  Resolver,
+  BuildResolverOptions,
   Constructor,
+  DisposableResolver,
+  Resolver,
   asClass,
   asFunction,
-  DisposableResolver,
-  BuildResolverOptions,
 } from './resolvers'
-import { last, nameValueToObject, isClass } from './utils'
-import { InjectionMode, InjectionModeType } from './injection-mode'
-import { Lifetime } from './lifetime'
-import { AwilixResolutionError, AwilixTypeError } from './errors'
-import { importModule } from './load-module-native.js'
+import { isClass, last, nameValueToObject } from './utils'
 
 /**
  * The container returned from createContainer has some methods and properties.
@@ -187,6 +191,7 @@ export type ClassOrFunctionReturning<T> = FunctionReturning<T> | Constructor<T>
 export interface ContainerOptions {
   require?: (id: string) => any
   injectionMode?: InjectionModeType
+  strict?: boolean
 }
 
 /**
@@ -194,10 +199,10 @@ export interface ContainerOptions {
  */
 export type RegistrationHash = Record<string | symbol | number, Resolver<any>>
 
-/**
- * Resolution stack.
- */
-export interface ResolutionStack extends Array<string | symbol> {}
+export type ResolutionStack = Array<{
+  name: string | symbol
+  lifetime: LifetimeType
+}>
 
 /**
  * Family tree symbol.
@@ -217,29 +222,41 @@ const CRADLE_STRING_TAG = 'AwilixContainerCradle'
 /**
  * Creates an Awilix container instance.
  *
- * @param {Function} options.require
- * The require function to use. Defaults to require.
+ * @param {Function} options.require The require function to use. Defaults to require.
  *
- * @param {string} options.injectionMode
- * The mode used by the container to resolve dependencies. Defaults to 'Proxy'.
+ * @param {string} options.injectionMode The mode used by the container to resolve dependencies.
+ * Defaults to 'Proxy'.
  *
- * @return {AwilixContainer<T>}
- * The container.
+ * @param {boolean} options.strict True if the container should run in strict mode with additional
+ * validation for resolver configuration correctness. Defaults to false.
+ *
+ * @return {AwilixContainer<T>} The container.
  */
-export function createContainer<T extends object = any, U extends object = any>(
-  options?: ContainerOptions,
+export function createContainer<T extends object = any>(
+  options: ContainerOptions = {},
+): AwilixContainer<T> {
+  return createContainerInternal(options)
+}
+
+function createContainerInternal<
+  T extends object = any,
+  U extends object = any,
+>(
+  options: ContainerOptions = {},
   parentContainer?: AwilixContainer<U>,
+  parentResolutionStack?: ResolutionStack,
 ): AwilixContainer<T> {
   options = {
     injectionMode: InjectionMode.PROXY,
+    strict: false,
     ...options,
   }
 
-  // The resolution stack is used to keep track
-  // of what modules are being resolved, so when
-  // an error occurs, we have something to present
-  // to the poor developer who fucked up.
-  let resolutionStack: ResolutionStack = []
+  /**
+   * Tracks the names and lifetimes of the modules being resolved. Used to detect circular
+   * dependencies and, in strict mode, lifetime leakage issues.
+   */
+  const resolutionStack: ResolutionStack = parentResolutionStack ?? []
 
   // Internal registration store for this container.
   const registrations: RegistrationHash = {}
@@ -388,7 +405,11 @@ export function createContainer<T extends object = any, U extends object = any>(
    * The scoped container.
    */
   function createScope<P extends object>(): AwilixContainer<P & T> {
-    return createContainer(options, container as AwilixContainer<T>)
+    return createContainerInternal(
+      options,
+      container as AwilixContainer<T>,
+      resolutionStack,
+    )
   }
 
   /**
@@ -399,8 +420,19 @@ export function createContainer<T extends object = any, U extends object = any>(
     const keys = [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)]
 
     for (const key of keys) {
-      const value = obj[key as any] as Resolver<any>
-      registrations[key as any] = value
+      const resolver = obj[key as any] as Resolver<any>
+      // If strict mode is enabled, check to ensure we are not registering a singleton on a non-root
+      // container.
+      if (options?.strict && resolver.lifetime === Lifetime.SINGLETON) {
+        if (parentContainer) {
+          throw new AwilixRegistrationError(
+            key,
+            'Cannot register a singleton on a scoped container.',
+          )
+        }
+      }
+
+      registrations[key as any] = resolver
     }
 
     return container
@@ -451,7 +483,7 @@ export function createContainer<T extends object = any, U extends object = any>(
     try {
       // Grab the registration by name.
       const resolver = getRegistration(name)
-      if (resolutionStack.indexOf(name) > -1) {
+      if (resolutionStack.some(({ name: parentName }) => parentName === name)) {
         throw new AwilixResolutionError(
           name,
           resolutionStack,
@@ -497,13 +529,33 @@ export function createContainer<T extends object = any, U extends object = any>(
         throw new AwilixResolutionError(name, resolutionStack)
       }
 
-      // Pushes the currently-resolving module name onto the stack
-      resolutionStack.push(name)
+      const lifetime = resolver.lifetime || Lifetime.TRANSIENT
+
+      // if we are running in strict mode, this resolver is not explicitly marked leak-safe, and any
+      // of the parents have a shorter lifetime than the one requested, throw an error.
+      if (options?.strict && !resolver.isLeakSafe) {
+        const maybeLongerLifetimeParentIndex = resolutionStack.findIndex(
+          ({ lifetime: parentLifetime }) =>
+            isLifetimeLonger(parentLifetime, lifetime),
+        )
+        if (maybeLongerLifetimeParentIndex > -1) {
+          throw new AwilixResolutionError(
+            name,
+            resolutionStack,
+            `Dependency '${name.toString()}' has a shorter lifetime than its ancestor: '${resolutionStack[
+              maybeLongerLifetimeParentIndex
+            ].name.toString()}'`,
+          )
+        }
+      }
+
+      // Pushes the currently-resolving module information onto the stack
+      resolutionStack.push({ name, lifetime })
 
       // Do the thing
       let cached: CacheEntry | undefined
       let resolved
-      switch (resolver.lifetime || Lifetime.TRANSIENT) {
+      switch (lifetime) {
         case Lifetime.TRANSIENT:
           // Transient lifetime means resolve every time.
           resolved = resolver.resolve(container)
@@ -512,7 +564,11 @@ export function createContainer<T extends object = any, U extends object = any>(
           // Singleton lifetime means cache at all times, regardless of scope.
           cached = rootContainer.cache.get(name)
           if (!cached) {
-            resolved = resolver.resolve(container)
+            // if we are running in strict mode, perform singleton resolution using the root
+            // container only.
+            resolved = resolver.resolve(
+              options.strict ? rootContainer : container,
+            )
             rootContainer.cache.set(name, { resolver, value: resolved })
           } else {
             resolved = cached.value
@@ -521,8 +577,9 @@ export function createContainer<T extends object = any, U extends object = any>(
         case Lifetime.SCOPED:
           // Scoped lifetime means that the container
           // that resolves the registration also caches it.
-          // When a registration is not found, we travel up
-          // the family tree until we find one that is cached.
+          // If this container cache does not have it,
+          // resolve and cache it rather than using the parent
+          // container's cache.
           cached = container.cache.get(name)
           if (cached !== undefined) {
             // We found one!
@@ -545,8 +602,9 @@ export function createContainer<T extends object = any, U extends object = any>(
       resolutionStack.pop()
       return resolved
     } catch (err) {
-      // When we get an error we need to reset the stack.
-      resolutionStack = []
+      // When we get an error we need to reset the stack. Mutate the existing array rather than
+      // updating the reference to ensure all parent containers' stacks are also updated.
+      resolutionStack.length = 0
       throw err
     }
   }
@@ -569,7 +627,7 @@ export function createContainer<T extends object = any, U extends object = any>(
    * Does not cache it, this means that any lifetime configured in case of passing
    * a registration will not be used.
    *
-   * @param {Resolver|Class|Function} targetOrResolver
+   * @param {Resolver|Constructor|Function} targetOrResolver
    * @param {ResolverOptions} opts
    */
   function build<T>(

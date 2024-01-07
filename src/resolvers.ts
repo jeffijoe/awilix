@@ -1,9 +1,9 @@
-import { Lifetime, LifetimeType } from './lifetime'
-import { InjectionMode, InjectionModeType } from './injection-mode'
-import { isFunction, uniq } from './utils'
-import { parseParameterList, Parameter } from './param-parser'
-import { AwilixTypeError } from './errors'
 import { AwilixContainer, FunctionReturning, ResolveOptions } from './container'
+import { AwilixTypeError } from './errors'
+import { InjectionMode, InjectionModeType } from './injection-mode'
+import { Lifetime, LifetimeType } from './lifetime'
+import { Parameter, parseParameterList } from './param-parser'
+import { isFunction, uniq } from './utils'
 
 // We parse the signature of any `Function`, so we want to allow `Function` types.
 /* eslint-disable @typescript-eslint/ban-types */
@@ -86,6 +86,11 @@ export interface ResolverOptions<T> {
    * Registration function to use. Only used for inline configuration with `loadModules`.
    */
   register?: (...args: any[]) => Resolver<T>
+  /**
+   * True if this resolver should be excluded from lifetime leak checking. Used by resolvers that
+   * wish to uphold the anti-leakage contract themselves. Defaults to false.
+   */
+  isLeakSafe?: boolean
 }
 
 /**
@@ -115,20 +120,20 @@ export interface BuildResolverOptions<T>
 export type Constructor<T> = { new (...args: any[]): T }
 
 /**
- * Creates a simple value resolver where the given value will always be resolved.
+ * Creates a simple value resolver where the given value will always be resolved. The value is
+ * marked as leak-safe since in strict mode, the value will only be resolved when it is not leaking
+ * upwards from a child scope to a parent singleton.
  *
- * @param  {string} name
- * The name to register the value as.
+ * @param  {string} name The name to register the value as.
  *
- * @param  {*} value
- * The value to resolve.
+ * @param  {*} value The value to resolve.
  *
- * @return {object}
- * The resolver.
+ * @return {object} The resolver.
  */
 export function asValue<T>(value: T): Resolver<T> {
   return {
     resolve: () => value,
+    isLeakSafe: true,
   }
 }
 
@@ -215,7 +220,8 @@ export function asClass<T = object>(
 }
 
 /**
- * Resolves to the specified registration.
+ * Resolves to the specified registration. Marked as leak-safe since the alias target is what should
+ * be checked for lifetime leaks.
  */
 export function aliasTo<T>(
   name: Parameters<AwilixContainer['resolve']>[0],
@@ -224,6 +230,7 @@ export function aliasTo<T>(
     resolve(container) {
       return container.resolve(name)
     },
+    isLeakSafe: true,
   }
 }
 
@@ -237,7 +244,7 @@ export function aliasTo<T>(
  * @return {object}
  * The interface.
  */
-export function createBuildResolver<T, B extends Resolver<T>>(
+function createBuildResolver<T, B extends Resolver<T>>(
   obj: B,
 ): BuildResolver<T> & B {
   function setLifetime(this: any, value: LifetimeType) {
@@ -278,7 +285,7 @@ export function createBuildResolver<T, B extends Resolver<T>>(
  * function.
  * @param obj
  */
-export function createDisposableResolver<T, B extends Resolver<T>>(
+function createDisposableResolver<T, B extends Resolver<T>>(
   obj: B,
 ): DisposableResolver<T> & B {
   function disposer(this: any, dispose: Disposer<T>) {

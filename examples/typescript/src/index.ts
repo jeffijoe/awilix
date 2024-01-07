@@ -1,5 +1,5 @@
 // This is largely for testing, but import what we need
-import { createContainer, asClass, InjectionMode } from '../../../src/awilix'
+import { createContainer, asClass, InjectionMode } from '../../..'
 import TestService from './services/TestService'
 import DependentService from './services/DependentService'
 
@@ -11,6 +11,7 @@ interface ICradle {
 // Create the container
 const container = createContainer<ICradle>({
   injectionMode: InjectionMode.CLASSIC,
+  strict: true,
 })
 
 // Register the classes

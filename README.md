@@ -9,7 +9,7 @@
 [![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 
 Extremely powerful, performant, & battle-tested **Dependency Injection** (DI) container for JavaScript/Node,
-written in [TypeScript](http://typescriptlang.org). 
+written in [TypeScript](http://typescriptlang.org).
 
 Awilix enables you to write **composable, testable software** using dependency injection **without special annotations**, which in turn decouples your core application code from the intricacies of the DI mechanism.
 
@@ -24,6 +24,7 @@ Awilix enables you to write **composable, testable software** using dependency i
 - [Usage](#usage)
 - [Lifetime management](#lifetime-management)
   - [Scoped lifetime](#scoped-lifetime)
+- [Strict mode](#strict-mode)
 - [Injection modes](#injection-modes)
 - [Auto-loading modules](#auto-loading-modules)
 - [Per-module local injections](#per-module-local-injections)
@@ -39,6 +40,7 @@ Awilix enables you to write **composable, testable software** using dependency i
   - [`aliasTo()`](#aliasto)
   - [`listModules()`](#listmodules)
   - [`AwilixResolutionError`](#awilixresolutionerror)
+  - [`AwilixRegistrationError`](#awilixregistrationerror)
   - [The `AwilixContainer` object](#the-awilixcontainer-object)
     - [`container.cradle`](#containercradle)
     - [`container.registrations`](#containerregistrations)
@@ -74,9 +76,9 @@ yarn add awilix
 You can also use the [UMD](https://github.com/umdjs/umd) build from `unpkg`
 
 ```html
-<script src="https://unpkg.com/awilix/lib/awilix.umd.js"/>
+<script src="https://unpkg.com/awilix/lib/awilix.umd.js" />
 <script>
-const container = Awilix.createContainer()
+  const container = Awilix.createContainer()
 </script>
 ```
 
@@ -95,8 +97,10 @@ minimum, you need to do 3 things:
 const awilix = require('awilix')
 
 // Create the container and set the injectionMode to PROXY (which is also the default).
+// Enable strict mode for extra correctness checks (highly recommended).
 const container = awilix.createContainer({
-  injectionMode: awilix.InjectionMode.PROXY
+  injectionMode: awilix.InjectionMode.PROXY,
+  strict: true,
 })
 
 // This is our app code... We can use
@@ -118,7 +122,7 @@ class UserController {
 container.register({
   // Here we are telling Awilix how to resolve a
   // userController: by instantiating a class.
-  userController: awilix.asClass(UserController)
+  userController: awilix.asClass(UserController),
 })
 
 // Let's try with a factory function.
@@ -126,16 +130,16 @@ const makeUserService = ({ db }) => {
   // Notice how we can use destructuring
   // to access dependencies
   return {
-    getUser: id => {
+    getUser: (id) => {
       return db.query(`select * from users where id=${id}`)
-    }
+    },
   }
 }
 
 container.register({
   // the `userService` is resolved by
   // invoking the function.
-  userService: awilix.asFunction(makeUserService)
+  userService: awilix.asFunction(makeUserService),
 })
 
 // Alright, now we need a database.
@@ -149,7 +153,7 @@ function Database(connectionString, timeout) {
   this.conn = connectToYourDatabaseSomehow(connectionString, timeout)
 }
 
-Database.prototype.query = function(sql) {
+Database.prototype.query = function (sql) {
   // blah....
   return this.conn.rawSql(sql)
 }
@@ -159,7 +163,7 @@ Database.prototype.query = function(sql) {
 // We also want to use `CLASSIC` injection mode for this
 // registration. Read more about injection modes below.
 container.register({
-  db: awilix.asClass(Database).classic()
+  db: awilix.asClass(Database).classic(),
 })
 
 // Lastly we register the connection string and timeout values
@@ -169,7 +173,7 @@ container.register({
   // limited to strings and numbers, it can be anything,
   // really - they will be passed through directly.
   connectionString: awilix.asValue(process.env.CONN_STR),
-  timeout: awilix.asValue(1000)
+  timeout: awilix.asValue(1000),
 })
 
 // We have now wired everything up!
@@ -219,17 +223,17 @@ const { asClass, asFunction, asValue } = awilix
 class MailService {}
 
 container.register({
-  mailService: asClass(MailService, { lifetime: Lifetime.SINGLETON })
+  mailService: asClass(MailService, { lifetime: Lifetime.SINGLETON }),
 })
 
 // or using the chaining configuration API..
 container.register({
-  mailService: asClass(MailService).setLifetime(Lifetime.SINGLETON)
+  mailService: asClass(MailService).setLifetime(Lifetime.SINGLETON),
 })
 
 // or..
 container.register({
-  mailService: asClass(MailService).singleton()
+  mailService: asClass(MailService).singleton(),
 })
 
 // or.......
@@ -260,7 +264,7 @@ class MessageService {
 }
 
 container.register({
-  messageService: asClass(MessageService).scoped()
+  messageService: asClass(MessageService).scoped(),
 })
 
 // imagine middleware in some web framework..
@@ -270,7 +274,7 @@ app.use((req, res, next) => {
 
   // register some request-specific data..
   req.scope.register({
-    currentUser: asValue(req.user)
+    currentUser: asValue(req.user),
   })
 
   next()
@@ -279,7 +283,7 @@ app.use((req, res, next) => {
 app.get('/messages', (req, res) => {
   // for each request we get a new message service!
   const messageService = req.scope.resolve('messageService')
-  messageService.getMessages().then(messages => {
+  messageService.getMessages().then((messages) => {
     res.send(200, messages)
   })
 })
@@ -289,18 +293,26 @@ app.get('/messages', (req, res) => {
 ```
 
 **IMPORTANT!** If a singleton is resolved, and it depends on a scoped or
-transient registration, those will remain in the singleton for it's lifetime!
+transient registration, those will remain in the singleton for its lifetime!
+Similarly, if a scoped module is resolved, and it depends on a transient
+registration, that remains in the scoped module for its lifetime.
+In the example above, if `messageService` was a singleton, it would be cached
+in the root container, and would always have the `currentUser` from the first
+request. Modules should generally not have a longer lifetime than their
+dependencies, as this can cause issues of stale data.
 
 ```js
-const makePrintTime = ({ time }) => () => {
-  console.log('Time:', time)
-}
+const makePrintTime =
+  ({ time }) =>
+  () => {
+    console.log('Time:', time)
+  }
 
 const getTime = () => new Date().toString()
 
 container.register({
   printTime: asFunction(makePrintTime).singleton(),
-  time: asFunction(getTime).transient()
+  time: asFunction(getTime).transient(),
 })
 
 // Resolving `time` 2 times will
@@ -315,8 +327,33 @@ container.resolve('printTime')()
 container.resolve('printTime')()
 ```
 
+If you want a mismatched configuration like this to error, set
+`strict` in the container options. This will trigger
+the following error at runtime when the singleton `printTime` is resolved:
+`AwilixResolutionError: Could not resolve 'time'. Dependency 'time' has a shorter lifetime than its ancestor: 'printTime'`
+
+In addition, registering a singleton on a scope other than the root container results in
+unpredictable behavior. In particular, if two different singletons are registered on two different
+scopes, they will share a cache entry and collide with each other. To throw a runtime error when a
+singleton is registered on a scope other than the root container, enable [strict mode](#strict-mode).
+
 Read the documentation for [`container.createScope()`](#containercreatescope)
 for more examples.
+
+# Strict mode
+
+Strict mode is a new feature in Awilix 10. It enables additional correctness checks that can help
+you catch bugs early.
+
+In particular, strict mode enables the following checks:
+
+- When a singleton or scoped registration depends on a transient non-value registration, an error is
+  thrown. This detects and prevents the issue where a shorter lifetime dependency can leak outside
+  its intended lifetime due to its preservation in a longer lifetime module.
+- Singleton registrations on any scopes are disabled. This prevents the issue where a singleton is
+  registered on a scope other than the root container, which results in unpredictable behavior.
+- Singleton resolution is performed using registrations from the root container only, which prevents
+  potential leaks in which scoped registrations are preserved in singletons.
 
 # Injection modes
 
@@ -351,11 +388,11 @@ modes are available on `awilix.InjectionMode`
   ```
 
 - `InjectionMode.CLASSIC`: Parses the function/constructor parameters, and
-  matches them with registrations in the container. `CLASSIC` mode has a 
-  slightly higher initialization cost as it has to parse the function/class 
-  to figure out the dependencies at the time of registration, however resolving 
-  them will be **much faster** than when using `PROXY`. _Don't use `CLASSIC` if 
-  you minify your code!_ We recommend using `CLASSIC` in Node and `PROXY` in 
+  matches them with registrations in the container. `CLASSIC` mode has a
+  slightly higher initialization cost as it has to parse the function/class
+  to figure out the dependencies at the time of registration, however resolving
+  them will be **much faster** than when using `PROXY`. _Don't use `CLASSIC` if
+  you minify your code!_ We recommend using `CLASSIC` in Node and `PROXY` in
   environments where minification is needed.
 
   ```js
@@ -423,8 +460,8 @@ container.register({
 const container = createContainer()
 container.loadModules(['services/**/*.js', 'repositories/**/*.js'], {
   resolverOptions: {
-    injectionMode: InjectionMode.CLASSIC
-  }
+    injectionMode: InjectionMode.CLASSIC,
+  },
 })
 ```
 
@@ -464,7 +501,7 @@ function database({ connectionString, timeout, logger }) {
 const db = database({
   logger: new LoggerMock(),
   timeout: 4000,
-  connectionString: 'localhost:1337;user=123...'
+  connectionString: 'localhost:1337;user=123...',
 })
 ```
 
@@ -521,35 +558,38 @@ const awilix = require('awilix')
 const container = awilix.createContainer()
 
 // Load our modules!
-container.loadModules([
-  // Globs!
+container.loadModules(
   [
-    // To have different resolverOptions for specific modules.
-    'models/**/*.js',
-    {
-      register: awilix.asValue,
-      lifetime: Lifetime.SINGLETON
-    }
+    // Globs!
+    [
+      // To have different resolverOptions for specific modules.
+      'models/**/*.js',
+      {
+        register: awilix.asValue,
+        lifetime: Lifetime.SINGLETON,
+      },
+    ],
+    'services/**/*.js',
+    'repositories/**/*.js',
   ],
-  'services/**/*.js',
-  'repositories/**/*.js'
-], {
-  // We want to register `UserService` as `userService` -
-  // by default loaded modules are registered with the
-  // name of the file (minus the extension)
-  formatName: 'camelCase',
-  // Apply resolver options to all modules.
-  resolverOptions: {
-    // We can give these auto-loaded modules
-    // the deal of a lifetime! (see what I did there?)
-    // By default it's `TRANSIENT`.
-    lifetime: Lifetime.SINGLETON,
-    // We can tell Awilix what to register everything as,
-    // instead of guessing. If omitted, will inspect the
-    // module to determine what to register as.
-    register: awilix.asClass
-  }
-})
+  {
+    // We want to register `UserService` as `userService` -
+    // by default loaded modules are registered with the
+    // name of the file (minus the extension)
+    formatName: 'camelCase',
+    // Apply resolver options to all modules.
+    resolverOptions: {
+      // We can give these auto-loaded modules
+      // the deal of a lifetime! (see what I did there?)
+      // By default it's `TRANSIENT`.
+      lifetime: Lifetime.SINGLETON,
+      // We can tell Awilix what to register everything as,
+      // instead of guessing. If omitted, will inspect the
+      // module to determine what to register as.
+      register: awilix.asClass,
+    },
+  },
+)
 
 // We are now ready! We now have a userService, userRepository and emailService!
 container.resolve('userService').getUser(1)
@@ -575,10 +615,10 @@ export default function userRepository({ db, timeout }) {
       return Promise.race([
         db.query('select * from users'),
         Promise.delay(timeout).then(() =>
-          Promise.reject(new Error('Timed out'))
-        )
+          Promise.reject(new Error('Timed out')),
+        ),
       ])
-    }
+    },
   }
 }
 ```
@@ -597,22 +637,22 @@ const container = createContainer()
       // Provide an injection function that returns an object with locals.
       // The function is called once per resolve of the registration
       // it is attached to.
-      .inject(() => ({ timeout: 2000 }))
+      .inject(() => ({ timeout: 2000 })),
   })
 
   // Shorthand variants
   .register({
     userRepository: asFunction(createUserRepository, {
-      injector: () => ({ timeout: 2000 })
-    })
+      injector: () => ({ timeout: 2000 }),
+    }),
   })
 
   // Stringly-typed shorthand
   .register(
     'userRepository',
     asFunction(createUserRepository, {
-      injector: () => ({ timeout: 2000 })
-    })
+      injector: () => ({ timeout: 2000 }),
+    }),
   )
 
   // with `loadModules`
@@ -645,7 +685,7 @@ export default class AwesomeService {
 // `RESOLVER` is a Symbol.
 AwesomeService[RESOLVER] = {
   lifetime: Lifetime.SCOPED,
-  injectionMode: InjectionMode.CLASSIC
+  injectionMode: InjectionMode.CLASSIC,
 }
 ```
 
@@ -656,7 +696,7 @@ import { createContainer, asClass } from 'awilix'
 import AwesomeService from './services/awesome-service.js'
 
 const container = createContainer().register({
-  awesomeService: asClass(AwesomeService)
+  awesomeService: asClass(AwesomeService),
 })
 
 console.log(container.registrations.awesomeService.lifetime) // 'SCOPED'
@@ -720,7 +760,7 @@ function configureContainer() {
       .singleton()
       // This is called when the pool is going to be disposed.
       // If it returns a Promise, it will be awaited by `dispose`.
-      .disposer(pool => pool.end())
+      .disposer((pool) => pool.end()),
   })
 }
 
@@ -796,18 +836,20 @@ pass in an object with the following props:
   [Per-module local injections](#per-module-local-injections)
 - `register`: Only used in `loadModules`, determines how to register a loaded
   module explicitly
+- `isLeakSafe`: true if this resolver should be excluded from lifetime-leak checking performed in
+  [strict mode](#strict-mode). Defaults to false.
 
 **Examples of usage:**
 
 ```js
 container.register({
-  stuff: asClass(MyClass, { injectionMode: InjectionMode.CLASSIC })
+  stuff: asClass(MyClass, { injectionMode: InjectionMode.CLASSIC }),
 })
 
 container.loadModules([['some/path/to/*.js', { register: asClass }]], {
   resolverOptions: {
-    lifetime: Lifetime.SCOPED
-  }
+    lifetime: Lifetime.SCOPED,
+  },
 })
 ```
 
@@ -830,6 +872,7 @@ Args:
       **_must_** be named exactly like they are in the registration. For
       example, a dependency registered as `repository` cannot be referenced in a
       class constructor as `repo`.
+  - `options.strict`: Enables [strict mode](#strict-mode). Defaults to `false`.
 
 ## `asFunction()`
 
@@ -869,7 +912,7 @@ Resolves the dependency specified.
 ```js
 container.register({
   val: asValue(123),
-  aliasVal: aliasTo('val')
+  aliasVal: aliasTo('val'),
 })
 
 container.resolve('aliasVal') === container.resolve('val')
@@ -913,6 +956,11 @@ This is a special error thrown when Awilix is unable to resolve all dependencies
 `err instanceof AwilixResolutionError` if you wish. It will tell you what
 dependencies it could not find or which ones caused a cycle.
 
+## `AwilixRegistrationError`
+
+This is a special error thrown when Awilix is unable to register a dependency due to a strict mode
+violation. You can catch this error and use `err instanceof AwilixRegistrationError` if you wish.
+
 ## The `AwilixContainer` object
 
 The container returned from `createContainer` has some methods and properties.
@@ -942,7 +990,7 @@ Each scope has it's own cache, and checks the cache of it's ancestors.
 ```js
 let counter = 1
 container.register({
-  count: asFunction(() => counter++).singleton()
+  count: asFunction(() => counter++).singleton(),
 })
 
 container.cradle.count === 1
@@ -958,7 +1006,7 @@ Options passed to `createContainer` are stored here.
 
 ```js
 const container = createContainer({
-  injectionMode: InjectionMode.CLASSIC
+  injectionMode: InjectionMode.CLASSIC,
 })
 
 console.log(container.options.injectionMode) // 'CLASSIC'
@@ -974,7 +1022,7 @@ Resolves the registration with the given name. Used by the cradle.
 
 ```js
 container.register({
-  leet: asFunction(() => 1337)
+  leet: asFunction(() => 1337),
 })
 
 container.resolve('leet') === 1337
@@ -1022,14 +1070,14 @@ container.register('context', asClass(SessionContext))
 container.register({
   connectionString: asValue('localhost:1433;user=...'),
   mailService: asFunction(makeMailService, { lifetime: Lifetime.SINGLETON }),
-  context: asClass(SessionContext, { lifetime: Lifetime.SCOPED })
+  context: asClass(SessionContext, { lifetime: Lifetime.SCOPED }),
 })
 
 // `asClass` and `asFunction` also supports a fluid syntax.
 // This...
 container.register(
   'mailService',
-  asFunction(makeMailService).setLifetime(Lifetime.SINGLETON)
+  asFunction(makeMailService).setLifetime(Lifetime.SINGLETON),
 )
 // .. is the same as this:
 container.register('context', asClass(SessionContext).singleton())
@@ -1070,9 +1118,9 @@ Args:
   pass the name through as-is. The 2nd parameter is a full module descriptor.
 - `opts.resolverOptions`: An `object` passed to the resolvers. Used to configure
   the lifetime, injection mode and more of the loaded modules.
-- `opts.esModules`: Loads modules using Node's native ES modules. 
-  **This makes `container.loadModules` asynchronous, and will therefore return a `Promise`!** 
-  This is only  supported on Node 14.0+ and should only be used if you're using 
+- `opts.esModules`: Loads modules using Node's native ES modules.
+  **This makes `container.loadModules` asynchronous, and will therefore return a `Promise`!**
+  This is only supported on Node 14.0+ and should only be used if you're using
   the [Native Node ES modules](https://nodejs.org/api/esm.html)
 
 Example:
@@ -1149,7 +1197,7 @@ inside a scope. A scope is basically a "child" container.
 // Increments the counter every time it is resolved.
 let counter = 1
 container.register({
-  counterValue: asFunction(() => counter++).scoped()
+  counterValue: asFunction(() => counter++).scoped(),
 })
 const scope1 = container.createScope()
 const scope2 = container.createScope()
@@ -1169,7 +1217,7 @@ A _Scope_ maintains it's own cache of `Lifetime.SCOPED` registrations, meaning i
 ```js
 let counter = 1
 container.register({
-  counterValue: asFunction(() => counter++).scoped()
+  counterValue: asFunction(() => counter++).scoped(),
 })
 const scope1 = container.createScope()
 const scope2 = container.createScope()
@@ -1195,13 +1243,13 @@ that scope and it's children.
 // that returns the value of the scope-provided dependency.
 // For this example we could also use scoped lifetime.
 container.register({
-  scopedValue: asFunction(cradle => 'Hello ' + cradle.someValue)
+  scopedValue: asFunction((cradle) => 'Hello ' + cradle.someValue),
 })
 
 // Create a scope and register a value.
 const scope = container.createScope()
 scope.register({
-  someValue: asValue('scope')
+  someValue: asValue('scope'),
 })
 
 scope.cradle.scopedValue === 'Hello scope'
@@ -1211,26 +1259,35 @@ container.cradle.someValue
 // of the resolver.
 ```
 
-Things registered in the scope take precedence over it's parent.
+Things registered in the scope take precedence over registrations in the parent scope(s). This
+applies to both the registration directly requested from the scope container, and any dependencies
+that the registration uses.
 
 ```js
 // It does not matter when the scope is created,
 // it will still have anything that is registered
-// in it's parent.
+// in its parent.
 const scope = container.createScope()
 
 container.register({
   value: asValue('root'),
-  usedValue: asFunction(cradle => cradle.value)
+  usedValue: asFunction((cradle) => `hello from ${cradle.value}`),
 })
 
 scope.register({
-  value: asValue('scope')
+  value: asValue('scope'),
 })
 
-container.cradle.usedValue === 'root'
-scope.cradle.usedValue === 'scope'
+container.cradle.value === 'root'
+scope.cradle.value === 'scope'
+container.cradle.usedValue === 'hello from root'
+scope.cradle.usedValue === 'hello from scope'
 ```
+
+Registering singletons in a scope results in unpredictable behavior and should be avoided. Having
+more than one singleton with the same name in different scopes will result in them sharing a cache
+entry and colliding with each other. To disallow such registrations, enable
+[strict mode](#strict-mode) in the container options.
 
 ### `container.build()`
 
@@ -1266,11 +1323,11 @@ class MyClass {
 }
 
 const createMyFunc = ({ ping }) => ({
-  pong: () => ping
+  pong: () => ping,
 })
 
 container.register({
-  ping: asValue('pong')
+  ping: asValue('pong'),
 })
 
 // Shorthand
@@ -1304,9 +1361,9 @@ const pg = require('pg')
 
 container.register({
   pool: asFunction(() => new pg.Pool())
-    .disposer(pool => pool.end())
+    .disposer((pool) => pool.end())
     // IMPORTANT! Must be either singleton or scoped!
-    .singleton()
+    .singleton(),
 })
 
 const pool = container.resolve('pool')
@@ -1348,11 +1405,11 @@ because they depend on Node-specific packages.
 
 # Ecosystem
 
-* [`awilix-manager`](https://github.com/kibertoad/awilix-manager): Wrapper that allows eager injection, asynchronous init methods and dependency lookup by tags.
-* [`awilix-express`](https://github.com/jeffijoe/awilix-express): Bindings for the Express HTTP library.
-* [`awilix-koa`](https://github.com/jeffijoe/awilix-koa): Bindings for the Koa HTTP library.
-* [`awilix-router-core`](https://github.com/jeffijoe/awilix-router-core): Library for building HTTP bindings for Awilix with routing.
-* [`fastify-awilix`](https://github.com/fastify/fastify-awilix): Bindings for the Fastify framework.
+- [`awilix-manager`](https://github.com/kibertoad/awilix-manager): Wrapper that allows eager injection, asynchronous init methods and dependency lookup by tags.
+- [`awilix-express`](https://github.com/jeffijoe/awilix-express): Bindings for the Express HTTP library.
+- [`awilix-koa`](https://github.com/jeffijoe/awilix-koa): Bindings for the Koa HTTP library.
+- [`awilix-router-core`](https://github.com/jeffijoe/awilix-router-core): Library for building HTTP bindings for Awilix with routing.
+- [`fastify-awilix`](https://github.com/fastify/fastify-awilix): Bindings for the Fastify framework.
 
 # Contributing
 

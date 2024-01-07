@@ -137,21 +137,38 @@ export class AwilixResolutionError extends AwilixError {
     resolutionStack: ResolutionStack,
     message?: string,
   ) {
-    if (typeof name === 'symbol') {
-      name = (name as any).toString()
-    }
-    resolutionStack = resolutionStack.map((val) =>
-      typeof val === 'symbol' ? (val as any).toString() : val,
-    )
-    resolutionStack.push(name)
-    const resolutionPathString = resolutionStack.join(' -> ')
-    let msg = `Could not resolve '${name as any}'.`
+    const stringName = name.toString()
+    const nameStack = resolutionStack.map(({ name: val }) => val.toString())
+    nameStack.push(stringName)
+    const resolutionPathString = nameStack.join(' -> ')
+    let msg = `Could not resolve '${stringName}'.`
     if (message) {
       msg += ` ${message}`
     }
 
     msg += EOL + EOL
     msg += `Resolution path: ${resolutionPathString}`
+    super(msg)
+  }
+}
+
+/**
+ * A nice error class so we can do an instanceOf check.
+ */
+export class AwilixRegistrationError extends AwilixError {
+  /**
+   * Constructor, takes the registered modules and unresolved tokens
+   * to create a message.
+   *
+   * @param {string|symbol} name
+   * The name of the module that could not be registered.
+   */
+  constructor(name: string | symbol, message?: string) {
+    const stringName = name.toString()
+    let msg = `Could not register '${stringName}'.`
+    if (message) {
+      msg += ` ${message}`
+    }
     super(msg)
   }
 }

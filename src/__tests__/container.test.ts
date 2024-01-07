@@ -3,7 +3,7 @@ import * as util from 'util'
 import { createContainer, AwilixContainer } from '../container'
 import { Lifetime } from '../lifetime'
 import { AwilixResolutionError } from '../errors'
-import { asClass, asFunction, asValue } from '../resolvers'
+import { aliasTo, asClass, asFunction, asValue } from '../resolvers'
 import { InjectionMode } from '../injection-mode'
 
 class Test {
@@ -298,6 +298,8 @@ describe('container', () => {
       expect(scope2.cradle.counterValue === 2).toBe(true)
 
       expect(scope1Child.cradle.counterValue === 3).toBe(true)
+      // assert that the parent scope was not affected
+      expect(scope1.cradle.counterValue === 1).toBe(true)
     })
 
     it('supports nested scopes', () => {
@@ -586,6 +588,185 @@ describe('container', () => {
 
       const theAnswer = container.resolve<() => number>('theAnswer')
       expect(theAnswer()).toBe(42)
+    })
+  })
+
+  describe('strict mode', () => {
+    describe('lifetime mismatch check', () => {
+      it('allows longer lifetime modules to depend on shorter lifetime dependencies by default', () => {
+        const container = createContainer()
+        container.register({
+          first: asFunction((cradle: any) => cradle.second, {
+            lifetime: Lifetime.SCOPED,
+          }),
+          second: asFunction(() => 'hah'),
+        })
+
+        expect(container.resolve('first')).toBe('hah')
+      })
+
+      it('throws an AwilixResolutionError when longer lifetime modules depend on shorter lifetime dependencies and strict is set', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          first: asFunction((cradle: any) => cradle.second, {
+            lifetime: Lifetime.SCOPED,
+          }),
+          second: asFunction(() => 'hah'),
+        })
+
+        const err = throws(() => container.resolve('first'))
+        expect(err.message).toContain('first -> second')
+        expect(err.message).toContain(
+          "Dependency 'second' has a shorter lifetime than its ancestor: 'first'",
+        )
+      })
+
+      it('does not throw an error when an injector proxy is used and strict is set', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          first: asFunction((cradle: any) => cradle.injected, {
+            lifetime: Lifetime.SCOPED,
+          }).inject(() => ({ injected: 'hah' })),
+          injected: asFunction(() => 'foobar'),
+        })
+
+        expect(container.resolve('first')).toBe('hah')
+      })
+
+      it('allows for asValue() to be used when strict is set', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          first: asFunction((cradle: any) => cradle.val, {
+            lifetime: Lifetime.SCOPED,
+          }),
+          second: asFunction((cradle: any) => cradle.secondVal, {
+            lifetime: Lifetime.SINGLETON,
+          }),
+          val: asValue('hah'),
+          secondVal: asValue('foobar'),
+        })
+
+        expect(container.resolve('first')).toBe('hah')
+        expect(container.resolve('second')).toBe('foobar')
+      })
+
+      it('allows aliasTo to be used when strict is set', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          first: asFunction((cradle: any) => cradle.second, {
+            lifetime: Lifetime.SINGLETON,
+          }),
+          second: aliasTo('val'),
+          val: asValue('hah'),
+        })
+
+        expect(container.resolve('first')).toBe('hah')
+      })
+
+      it('detects when an aliasTo resolution violates lifetime constraints', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          first: asFunction((cradle: any) => cradle.second, {
+            lifetime: Lifetime.SCOPED,
+          }),
+          second: aliasTo('val'),
+          val: asValue('hah'),
+        })
+        const scope = container.createScope()
+        scope.register({
+          val: asFunction(() => 'foobar'),
+        })
+
+        const err = throws(() => scope.resolve('first'))
+        expect(err.message).toContain('first -> second -> val')
+        expect(err.message).toContain(
+          "Dependency 'val' has a shorter lifetime than its ancestor: 'first'",
+        )
+      })
+    })
+
+    describe('singleton resolution using only root container', () => {
+      it('resolves singletons using root container only, even if called from scope', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          scoped: asFunction((cradle: any) => cradle.val, {
+            lifetime: Lifetime.SCOPED,
+          }),
+          singleton: asFunction((cradle: any) => cradle.val, {
+            lifetime: Lifetime.SINGLETON,
+          }),
+        })
+        const scope = container.createScope()
+
+        let err = throws(() => scope.resolve('scoped'))
+        expect(err).toBeInstanceOf(AwilixResolutionError)
+        expect(err.message).toContain('scoped -> val')
+
+        scope.register({
+          val: asValue('foobar'),
+        })
+
+        expect(scope.resolve('scoped')).toBe('foobar')
+
+        err = throws(() => scope.resolve('singleton'))
+        expect(err).toBeInstanceOf(AwilixResolutionError)
+        expect(err.message).toContain('singleton -> val')
+
+        container.register({
+          val: asValue('hah'),
+        })
+
+        expect(scope.resolve('singleton')).toBe('hah')
+      })
+
+      it('preserves the resolution stack when resolving a singleton using a parent container, from a scope', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        container.register({
+          scoped: asFunction((cradle: any) => cradle.singleton, {
+            lifetime: Lifetime.SCOPED,
+          }),
+          singleton: asFunction((cradle: any) => cradle.val, {
+            lifetime: Lifetime.SINGLETON,
+          }),
+        })
+        const scope = container.createScope()
+
+        const err = throws(() => scope.resolve('scoped'))
+        expect(err).toBeInstanceOf(AwilixResolutionError)
+        expect(err.message).toContain('scoped -> singleton -> val')
+      })
+    })
+
+    describe('singleton registration on scope check', () => {
+      it('detects and errors when a singleton is registered on a scope', () => {
+        const container = createContainer({
+          strict: true,
+        })
+        const scope = container.createScope()
+        const err = throws(() =>
+          scope.register({
+            test: asFunction(() => 42, { lifetime: Lifetime.SINGLETON }),
+          }),
+        )
+        expect(err.message).toContain("Could not register 'test'")
+        expect(err.message).toContain(
+          'Cannot register a singleton on a scoped container',
+        )
+      })
     })
   })
 })
