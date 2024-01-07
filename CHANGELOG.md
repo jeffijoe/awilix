@@ -1,7 +1,6 @@
 # v10.0.0
 
-- Add (optional, off by default) strict mode to enforce extra correctness checks in both resolution ([#349](https://github.com/jeffijoe/awilix/pull/349) by [@fnimick](https://github.com/fnimick))
-  and registration
+- Add (optional, off by default) strict mode to enforce extra correctness checks in both resolution and registration ([#349](https://github.com/jeffijoe/awilix/pull/349) by [@fnimick](https://github.com/fnimick))
 - Reduce the publicly accessible API surface to only that which is needed to use Awilix. This is
   potentially a breaking change if you were using any of the internal type definitions ([#349](https://github.com/jeffijoe/awilix/pull/349) by [@fnimick](https://github.com/fnimick))
 
