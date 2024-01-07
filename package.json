@@ -123,7 +123,8 @@
       "/node_modules/",
       "__tests__",
       "lib",
-      "src/load-module-native.js"
+      "src/load-module-native.js",
+      "src/awilix.ts"
     ],
     "moduleFileExtensions": [
       "ts",

@@ -242,7 +242,7 @@ function createContainerInternal<
   T extends object = any,
   U extends object = any,
 >(
-  options: ContainerOptions = {},
+  options: ContainerOptions,
   parentContainer?: AwilixContainer<U>,
   parentResolutionStack?: ResolutionStack,
 ): AwilixContainer<T> {
@@ -423,7 +423,7 @@ function createContainerInternal<
       const resolver = obj[key as any] as Resolver<any>
       // If strict mode is enabled, check to ensure we are not registering a singleton on a non-root
       // container.
-      if (options?.strict && resolver.lifetime === Lifetime.SINGLETON) {
+      if (options.strict && resolver.lifetime === Lifetime.SINGLETON) {
         if (parentContainer) {
           throw new AwilixRegistrationError(
             key,
@@ -533,7 +533,7 @@ function createContainerInternal<
 
       // if we are running in strict mode, this resolver is not explicitly marked leak-safe, and any
       // of the parents have a shorter lifetime than the one requested, throw an error.
-      if (options?.strict && !resolver.isLeakSafe) {
+      if (options.strict && !resolver.isLeakSafe) {
         const maybeLongerLifetimeParentIndex = resolutionStack.findIndex(
           ({ lifetime: parentLifetime }) =>
             isLifetimeLonger(parentLifetime, lifetime),
