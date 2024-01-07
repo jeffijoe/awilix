@@ -79,7 +79,12 @@ export default [
         'case util.inspect.custom:': '',
         "import { camelCase } from 'camel-case'":
           'const camelCase = null as any',
-        "export * from './list-modules'": comment,
+        [`export {
+  GlobWithOptions,
+  ListModulesOptions,
+  ModuleDescriptor,
+  listModules,
+} from './list-modules'`]: comment,
         "import * as util from 'util'": '',
         delimiters: ['', ''],
       }),
@@ -93,7 +98,7 @@ export default [
               module: 'ESNext',
             },
           },
-        })
+        }),
       ),
       resolve({
         preferBuiltins: true,
