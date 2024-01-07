@@ -1,27 +1,27 @@
 # v10.0.0
 
-* Add (optional, off by default) strict mode to enforce extra correctness checks in both resolution
+- Add (optional, off by default) strict mode to enforce extra correctness checks in both resolution ([#349](https://github.com/jeffijoe/awilix/pull/349) by [@fnimick](https://github.com/fnimick))
   and registration
-* Reduce the publicly accessible API surface to only that which is needed to use Awilix. This is
-  potentially a breaking change if you were using any of the internal type definitions.
+- Reduce the publicly accessible API surface to only that which is needed to use Awilix. This is
+  potentially a breaking change if you were using any of the internal type definitions ([#349](https://github.com/jeffijoe/awilix/pull/349) by [@fnimick](https://github.com/fnimick))
 
 # v9.0.0
 
-* Upgrade packages
-* Fix `aliasTo` to allow passing `symbol` ([#342](https://github.com/jeffijoe/awilix/pull/342) by [@zb-sj](https://github.com/zb-sj))
-* Migrate from TSLint to ESLint
-* **BREAKING CHANGE**: Drop Node 12 support for real this time (updated the `engines` field)
+- Upgrade packages
+- Fix `aliasTo` to allow passing `symbol` ([#342](https://github.com/jeffijoe/awilix/pull/342) by [@zb-sj](https://github.com/zb-sj))
+- Migrate from TSLint to ESLint
+- **BREAKING CHANGE**: Drop Node 12 support for real this time (updated the `engines` field)
 
 # v8.0.1
 
-* Upgrade packages
-* Move CI from Travis to GitHub Actions
+- Upgrade packages
+- Move CI from Travis to GitHub Actions
 
 # v8.0.0
 
-* **BREAKING**: Drop Node 12 support, add Node 18 to build matrix
-* **BREAKING**: [#300](https://github.com/jeffijoe/awilix/issues/300) Rename `awilix.module.js` to `awilix.module.mjs`
-* [#293](https://github.com/jeffijoe/awilix/issues/293) Update packages, including `fast-glob`
+- **BREAKING**: Drop Node 12 support, add Node 18 to build matrix
+- **BREAKING**: [#300](https://github.com/jeffijoe/awilix/issues/300) Rename `awilix.module.js` to `awilix.module.mjs`
+- [#293](https://github.com/jeffijoe/awilix/issues/293) Update packages, including `fast-glob`
 
 ### BREAKING CHANGES
 
@@ -36,29 +36,29 @@ the module directly using the file name, then it would be.
 
 # v7.0.3
 
-* Use `LoadedModuleDescriptor` in `NameFormatter` delegate parameter
-* Update packages
+- Use `LoadedModuleDescriptor` in `NameFormatter` delegate parameter
+- Update packages
 
 # v7.0.2
 
-* [#291](https://github.com/jeffijoe/awilix/issues/291) Fix `listModules` regression on Windows
-* Update packages
+- [#291](https://github.com/jeffijoe/awilix/issues/291) Fix `listModules` regression on Windows
+- Update packages
 
 # v7.0.1
 
-* [#288](https://github.com/jeffijoe/awilix/issues/288) Don't use `Error.captureStackTrace` on unsupported platforms
+- [#288](https://github.com/jeffijoe/awilix/issues/288) Don't use `Error.captureStackTrace` on unsupported platforms
 
 # v7.0.0
 
-* **BREAKING**: [#286](https://github.com/jeffijoe/awilix/issues/286) Support `Symbol.toStringTag`. This should fix [es5-shim/480](https://github.com/es-shims/es5-shim/issues/480).
-* Update packages
+- **BREAKING**: [#286](https://github.com/jeffijoe/awilix/issues/286) Support `Symbol.toStringTag`. This should fix [es5-shim/480](https://github.com/es-shims/es5-shim/issues/480).
+- Update packages
 
-### BREAKING CHANGES 
+### BREAKING CHANGES
 
 #### Cradle JSON and `inspect` representation changed
 
- The Awilix Cradle's string representation when used by `util.inspect`, `.toJSON()` and others returned `[AwilixContainer.cradle]`. This has been
- changed to `[object AwilixContainerCradle]` to align with other common string representations in JavaScript.
+The Awilix Cradle's string representation when used by `util.inspect`, `.toJSON()` and others returned `[AwilixContainer.cradle]`. This has been
+changed to `[object AwilixContainerCradle]` to align with other common string representations in JavaScript.
 
 #### `Symbol.toStringTag` now implemented
 
@@ -66,8 +66,8 @@ When using `Object.prototype.toString.call(container.cradle)`, it would return `
 
 # v6.1.0
 
-* [#284](https://github.com/jeffijoe/awilix/pull/284) Use `fast-glob` instead of `glob` ([Sebastian Plaza](https://github.com/sebaplaza))
-* Update packages
+- [#284](https://github.com/jeffijoe/awilix/pull/284) Use `fast-glob` instead of `glob` ([Sebastian Plaza](https://github.com/sebaplaza))
+- Update packages
 
 # v6.0.0
 
@@ -81,14 +81,14 @@ Please see the list of breaking changes below.
     the `cradle` is not something one should be doing for anything besides debugging. Thanks to [@code-ape](https://github.com/code-ape)
     for the diagnosis and for coming up with a fix!
 
-### BREAKING CHANGES 
+### BREAKING CHANGES
 
-* The `container.registrations` getter on a scoped container no longer rolls up registrations from its' parent.
-* In `CLASSIC` mode, when parsing the constructor of a derived class, Awilix will no longer parse the base class' constructor in
+- The `container.registrations` getter on a scoped container no longer rolls up registrations from its' parent.
+- In `CLASSIC` mode, when parsing the constructor of a derived class, Awilix will no longer parse the base class' constructor in
   case the derived class' defined constructor does not define any arguments. However, if the derived class does _not_ define a constructor,
   then Awilix will parse the base class' constructor. Please keep in mind that this only works for native classes, as Awilix works on the
   `toString` representation of the class/function in order to determine when a class with no defined constructor is encountered.
-* Renamed `container.has` to `container.hasRegistration` to avoid ambiguity. _Does it have a registration? Does it have a cached module? Who knows? Let's gooo!_
+- Renamed `container.has` to `container.hasRegistration` to avoid ambiguity. _Does it have a registration? Does it have a cached module? Who knows? Let's gooo!_
 
 # v5.0.1
 
@@ -100,7 +100,7 @@ Please see the list of breaking changes below.
 - Improve resolve typing ([#247](https://github.com/jeffijoe/awilix/pull/247), [Goran Mržljak](https://github.com/mrzli))
 - Update packages
 
-### BREAKING CHANGES 
+### BREAKING CHANGES
 
 Dropped Node 10 support. Minimum supported Node version is now 12.
 
