@@ -1,4 +1,14 @@
-export { AwilixContainer, ContainerOptions, createContainer } from './container'
+export {
+  AwilixContainer,
+  ContainerOptions,
+  createContainer,
+  CacheEntry,
+  ClassOrFunctionReturning,
+  FunctionReturning,
+  NameAndRegistrationPair,
+  RegistrationHash,
+  ResolveOptions,
+} from './container'
 export {
   AwilixError,
   AwilixRegistrationError,
@@ -17,6 +27,13 @@ export {
   BuildResolverOptions,
   Disposer,
   InjectorFunction,
+  Resolver,
+  ResolverOptions,
+  BuildResolver,
+  Constructor,
+  DisposableResolver,
+  DisposableResolverOptions,
+  RESOLVER,
   aliasTo,
   asClass,
   asFunction,
