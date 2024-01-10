@@ -1,3 +1,7 @@
+# v10.0.1
+
+- Add back some type exports ([#351](https://github.com/jeffijoe/awilix/pull/351))
+
 # v10.0.0
 
 - Add (optional, off by default) strict mode to enforce extra correctness checks in both resolution and registration ([#349](https://github.com/jeffijoe/awilix/pull/349) by [@fnimick](https://github.com/fnimick))
