@@ -1,3 +1,7 @@
+# v10.0.2
+
+- Add back `createBuildResolver` and `createDisposableResolver` exports ([#358](https://github.com/jeffijoe/awilix/pull/358))
+
 # v10.0.1
 
 - Add back some type exports ([#351](https://github.com/jeffijoe/awilix/pull/351))

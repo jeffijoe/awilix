@@ -38,4 +38,6 @@ export {
   asClass,
   asFunction,
   asValue,
+  createBuildResolver,
+  createDisposableResolver,
 } from './resolvers'
