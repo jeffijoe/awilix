@@ -10,7 +10,7 @@
   "react-native": "lib/awilix.browser.js",
   "typings": "lib/awilix.d.ts",
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.3.0"
   },
   "scripts": {
     "build": "rimraf lib && tsc -p tsconfig.build.json && rollup -c",

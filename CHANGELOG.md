@@ -1,7 +1,14 @@
-# v10.0.3
+# v11.0.0
 
-- Migrate to ESLint v9.
-- Upgrade packages.
+- **BREAKING**: Drop Node 14 support, add Node 22 to build matrix.
+- Migrate to ESLint v9
+- Upgrade packages
+
+### BREAKING CHANGES
+
+#### Drop Node 14 support
+
+Node 14 is no longer officially supported, as it is not an active LTS anymore.
 
 # v10.0.2
 
