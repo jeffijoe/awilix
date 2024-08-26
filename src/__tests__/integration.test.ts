@@ -1,6 +1,5 @@
 import { Lifetime } from '../lifetime'
 
-/* eslint-disable @typescript-eslint/no-var-requires */
 const AnotherService =
   require('./fixture/services/anotherService').AnotherService
 const fixture = require('./fixture')

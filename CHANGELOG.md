@@ -1,3 +1,8 @@
+# v10.0.3
+
+- Migrate to ESLint v9.
+- Upgrade packages.
+
 # v10.0.2
 
 - Add back `createBuildResolver` and `createDisposableResolver` exports ([#358](https://github.com/jeffijoe/awilix/pull/358))

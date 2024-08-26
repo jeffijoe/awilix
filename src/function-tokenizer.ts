@@ -67,7 +67,7 @@ export function createTokenizer(source: string) {
   function advance() {
     value = ''
     type = 'EOF'
-    // eslint-disable-next-line no-constant-condition
+
     while (true) {
       if (pos >= end) {
         return (type = 'EOF')

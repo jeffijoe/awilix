@@ -6,7 +6,7 @@ import { Parameter, parseParameterList } from './param-parser'
 import { isFunction, uniq } from './utils'
 
 // We parse the signature of any `Function`, so we want to allow `Function` types.
-/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 
 /**
  * RESOLVER symbol can be used by modules loaded by

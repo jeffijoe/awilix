@@ -390,7 +390,6 @@ describe('container', () => {
           /**/
         }
 
-        // tslint:disable-next-line:member-ordering
         constructor(
           public val: any,
           public fn: any,
