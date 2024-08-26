@@ -338,7 +338,6 @@ function createContainerInternal<
     dispose,
     getRegistration,
     [util.inspect.custom]: inspect,
-    // tslint:disable-next-line
     [ROLL_UP_REGISTRATIONS!]: rollUpRegistrations,
     get registrations() {
       return rollUpRegistrations()
@@ -682,6 +681,7 @@ function createContainerInternal<
       require:
         options!.require ||
         function (uri) {
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           return require(uri)
         },
       listModules,

@@ -288,7 +288,7 @@ function registerDescriptor<ESM extends boolean = false>(
     ...inlineConfig,
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   const reg: Function = regOpts.register
     ? regOpts.register
     : isClass(moduleDescriptor.value)

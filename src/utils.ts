@@ -64,10 +64,9 @@ export function last<T>(arr: Array<T>): T {
  * @return {boolean}
  */
 export function isClass(
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   fn: Function | Constructor<any>,
 ): boolean {
-  /*tslint:disable-next-line*/
   if (typeof fn !== 'function') {
     return false
   }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import * as path from 'path'
 const cjs = require('../../lib/awilix')
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
