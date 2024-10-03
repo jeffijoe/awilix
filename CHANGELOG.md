@@ -1,6 +1,10 @@
+# v11.0.3
+
+- Add `lib` to exports lists
+
 # v11.0.2
 
-- Add `default` to exports lists
+- Add `default` entry in every export
 
 # v11.0.1
 

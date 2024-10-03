@@ -19,6 +19,10 @@
       "import": "./lib/awilix.browser.js",
       "types": "./lib/awilix.d.ts",
       "default": "./lib/awilix.browser.js"
+    },
+    "./lib/*.js": {
+      "types": "./lib/*.d.ts",
+      "default": "./lib/*.js"
     }
   },
   "engines": {
