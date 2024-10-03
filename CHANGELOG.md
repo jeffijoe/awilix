@@ -1,3 +1,7 @@
+# v11.0.1
+
+- Add "exports" field to package.json
+
 # v11.0.0
 
 - **BREAKING**: Drop Node 14 support, add Node 22 to build matrix.

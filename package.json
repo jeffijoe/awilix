@@ -9,6 +9,16 @@
   "umd:main": "lib/awilix.umd.js",
   "react-native": "lib/awilix.browser.js",
   "typings": "lib/awilix.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/awilix.module.mjs",
+      "types": "./lib/awilix.d.ts"
+    },
+    "./browser": {
+      "import": "./lib/awilix.browser.js",
+      "types": "./lib/awilix.d.ts"
+    }
+  },
   "engines": {
     "node": ">=16.3.0"
   },
