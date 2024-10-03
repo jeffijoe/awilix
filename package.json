@@ -12,11 +12,13 @@
   "exports": {
     ".": {
       "import": "./lib/awilix.module.mjs",
-      "types": "./lib/awilix.d.ts"
+      "types": "./lib/awilix.d.ts",
+      "default": "./lib/awilix.js"
     },
     "./browser": {
       "import": "./lib/awilix.browser.js",
-      "types": "./lib/awilix.d.ts"
+      "types": "./lib/awilix.d.ts",
+      "default": "./lib/awilix.browser.js"
     }
   },
   "engines": {

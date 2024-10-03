@@ -1,3 +1,7 @@
+# v11.0.2
+
+- Add `default` to exports lists
+
 # v11.0.1
 
 - Add "exports" field to package.json
