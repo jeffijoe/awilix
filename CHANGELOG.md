@@ -1,3 +1,7 @@
+# v11.0.4
+
+- Undo all `exports` changes as it broke downstream consumers
+
 # v11.0.3
 
 - Add `lib` to exports lists
