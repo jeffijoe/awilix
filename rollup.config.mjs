@@ -1,8 +1,8 @@
 import typescript from 'rollup-plugin-typescript2'
 import typescriptCompiler from 'typescript'
-import replace from 'rollup-plugin-replace'
-import commonjs from 'rollup-plugin-commonjs'
-import resolve from 'rollup-plugin-node-resolve'
+import replace from '@rollup/plugin-replace'
+import commonjs from '@rollup/plugin-commonjs'
+import resolve from '@rollup/plugin-node-resolve'
 import copy from 'rollup-plugin-copy'
 
 const comment = '/* removed in browser build */'
@@ -22,7 +22,7 @@ const tsOpts = {
 }
 
 export default [
-  // Build 1: ES6 modules for Node.
+  // Build 1: ES modules for Node.
   {
     input: 'src/awilix.ts',
     external: [
@@ -92,7 +92,7 @@ export default [
         Object.assign({}, tsOpts, {
           tsconfigOverride: {
             compilerOptions: {
-              target: 'es5',
+              target: 'ES2020',
               declaration: false,
               noUnusedLocals: false,
               module: 'ESNext',
