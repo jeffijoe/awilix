@@ -1,3 +1,9 @@
+# v12.0.0
+
+- **BREAKING**: Bump TypeScript transpilation target for browser build from `ES5` to `ES2020`
+- Update packages
+- Add `exports` field to `package.json`, allowing you to explicitly import the browser build using `import { createContainer } from 'awilix/browser'`
+
 # v11.0.4
 
 - Undo all `exports` changes as it broke downstream consumers
