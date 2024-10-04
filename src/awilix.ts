@@ -41,3 +41,4 @@ export {
   createBuildResolver,
   createDisposableResolver,
 } from './resolvers'
+export { isClass, isFunction } from './utils'

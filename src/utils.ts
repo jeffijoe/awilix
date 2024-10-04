@@ -97,7 +97,8 @@ export function isClass(
  * @return {boolean}
  * true if the value is a function, false otherwise.
  */
-export function isFunction(val: unknown): boolean {
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+export function isFunction(val: unknown): val is Function {
   return typeof val === 'function'
 }
 
