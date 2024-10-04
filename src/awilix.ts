@@ -1,13 +1,13 @@
 export {
-  AwilixContainer,
-  ContainerOptions,
+  type AwilixContainer,
+  type ContainerOptions,
+  type CacheEntry,
+  type ClassOrFunctionReturning,
+  type FunctionReturning,
+  type NameAndRegistrationPair,
+  type RegistrationHash,
+  type ResolveOptions,
   createContainer,
-  CacheEntry,
-  ClassOrFunctionReturning,
-  FunctionReturning,
-  NameAndRegistrationPair,
-  RegistrationHash,
-  ResolveOptions,
 } from './container'
 export {
   AwilixError,
@@ -15,24 +15,24 @@ export {
   AwilixResolutionError,
   AwilixTypeError,
 } from './errors'
-export { InjectionMode, InjectionModeType } from './injection-mode'
-export { Lifetime, LifetimeType } from './lifetime'
+export { InjectionMode, type InjectionModeType } from './injection-mode'
+export { Lifetime, type LifetimeType } from './lifetime'
 export {
-  GlobWithOptions,
-  ListModulesOptions,
-  ModuleDescriptor,
+  type GlobWithOptions,
+  type ListModulesOptions,
+  type ModuleDescriptor,
   listModules,
 } from './list-modules'
 export {
-  BuildResolverOptions,
-  Disposer,
-  InjectorFunction,
-  Resolver,
-  ResolverOptions,
-  BuildResolver,
-  Constructor,
-  DisposableResolver,
-  DisposableResolverOptions,
+  type BuildResolverOptions,
+  type Disposer,
+  type InjectorFunction,
+  type Resolver,
+  type ResolverOptions,
+  type BuildResolver,
+  type Constructor,
+  type DisposableResolver,
+  type DisposableResolverOptions,
   RESOLVER,
   aliasTo,
   asClass,
