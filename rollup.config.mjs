@@ -80,9 +80,9 @@ export default [
         "import { camelCase } from 'camel-case'":
           'const camelCase = null as any',
         [`export {
-  GlobWithOptions,
-  ListModulesOptions,
-  ModuleDescriptor,
+  type GlobWithOptions,
+  type ListModulesOptions,
+  type ModuleDescriptor,
   listModules,
 } from './list-modules'`]: comment,
         "import * as util from 'util'": '',
