@@ -1,3 +1,7 @@
+# v12.0.1
+
+- Fix browser build
+
 # v12.0.0
 
 - **BREAKING**: Bump TypeScript transpilation target for browser build from `ES5` to `ES2020`
