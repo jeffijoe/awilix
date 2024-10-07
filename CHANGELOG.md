@@ -1,3 +1,8 @@
+# v12.0.2
+
+- Rename `awilix.browser.js` to `awilix.browser.mjs`, most tools prefer this
+- More `exports` conditions
+
 # v12.0.1
 
 - Fix browser build
