@@ -4,7 +4,7 @@ const cjs = require('../../lib/awilix')
 // @ts-ignore
 import * as es from '../../lib/awilix.module.mjs'
 const umd = require('../../lib/awilix.umd')
-const browser = require('../../lib/awilix.browser')
+const browser = require('../../lib/awilix.browser.mjs')
 
 describe('rollup artifacts', () => {
   it('works', () => {

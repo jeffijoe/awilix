@@ -58,7 +58,7 @@ export default [
     output: [
       {
         name: 'Awilix',
-        file: 'lib/awilix.browser.js',
+        file: 'lib/awilix.browser.mjs',
         format: 'es',
       },
       {

@@ -5,9 +5,9 @@
   "main": "lib/awilix.js",
   "module": "lib/awilix.module.mjs",
   "jsnext:main": "lib/awilix.module.mjs",
-  "browser": "lib/awilix.browser.js",
+  "browser": "lib/awilix.browser.mjs",
   "umd:main": "lib/awilix.umd.js",
-  "react-native": "lib/awilix.browser.js",
+  "react-native": "lib/awilix.browser.mjs",
   "typings": "lib/awilix.d.ts",
   "engines": {
     "node": ">=16.3.0"
@@ -16,12 +16,19 @@
     ".": {
       "import": "./lib/awilix.module.mjs",
       "types": "./lib/awilix.d.ts",
+      "workerd": "./lib/awilix.browser.mjs",
+      "browser": {
+        "import": "./lib/awilix.browser.mjs",
+        "default": "./lib/awilix.umd.js"
+      },
       "default": "./lib/awilix.js"
     },
     "./browser": {
-      "import": "./lib/awilix.browser.js",
+      "import": "./lib/awilix.browser.mjs",
       "types": "./lib/awilix.d.ts",
-      "default": "./lib/awilix.browser.js"
+      "workerd": "./lib/awilix.browser.mjs",
+      "browser": "./lib/awilix.browser.mjs",
+      "default": "./lib/awilix.umd.js"
     },
     "./lib/*.js": {
       "types": "./lib/*.d.ts",
@@ -39,7 +46,7 @@
     "cover": "npm run test -- --coverage",
     "publish:pre": "npm run lint && npm run build && npm run cover",
     "publish:post": "npm publish && git push --follow-tags",
-    "release:prerelease": "npm run publish:pre && npm version prerelease && npm run publish:post",
+    "release:prerelease": "npm run publish:pre && npm version prerelease --preid alpha && npm run publish:post",
     "release:patch": "npm run publish:pre && npm version patch && npm run publish:post",
     "release:minor": "npm run publish:pre && npm version minor && npm run publish:post",
     "release:major": "npm run publish:pre && npm version major && npm run publish:post",
