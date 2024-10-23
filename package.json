@@ -49,8 +49,7 @@
     "release:prerelease": "npm run publish:pre && npm version prerelease --preid alpha && npm run publish:post",
     "release:patch": "npm run publish:pre && npm version patch && npm run publish:post",
     "release:minor": "npm run publish:pre && npm version minor && npm run publish:post",
-    "release:major": "npm run publish:pre && npm version major && npm run publish:post",
-    "prepare": "husky install"
+    "release:major": "npm run publish:pre && npm version major && npm run publish:post"
   },
   "files": [
     "lib",
