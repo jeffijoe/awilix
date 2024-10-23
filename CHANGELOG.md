@@ -1,3 +1,7 @@
+# v12.0.3
+
+- Use default import for `fast-glob`
+
 # v12.0.2
 
 - Rename `awilix.browser.js` to `awilix.browser.mjs`, most tools prefer this

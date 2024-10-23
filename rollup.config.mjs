@@ -69,9 +69,11 @@ export default [
     ],
     plugins: [
       // Removes stuff that won't work in the browser
-      // which also means node-only stuff like `path`, `util` and `glob`
+      // which also means node-only stuff like `path`, `util` and `fast-glob`
       // will be shaken off.
       replace({
+        delimiters: ['', ''],
+        preventAssignment: true,
         'loadModules,':
           'loadModules: () => { throw new Error("loadModules is not supported in the browser.") },',
         '[util.inspect.custom]: inspect,': comment,
@@ -86,7 +88,6 @@ export default [
   listModules,
 } from './list-modules'`]: comment,
         "import * as util from 'util'": '',
-        delimiters: ['', ''],
       }),
       typescript(
         Object.assign({}, tsOpts, {
