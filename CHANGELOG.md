@@ -1,3 +1,8 @@
+# v12.0.4
+
+- Add `react-native` export key, move up `browser` key
+- Update packages
+
 # v12.0.3
 
 - Use default import for `fast-glob`
