@@ -14,13 +14,14 @@
   },
   "exports": {
     ".": {
-      "import": "./lib/awilix.module.mjs",
-      "types": "./lib/awilix.d.ts",
-      "workerd": "./lib/awilix.browser.mjs",
       "browser": {
         "import": "./lib/awilix.browser.mjs",
         "default": "./lib/awilix.umd.js"
       },
+      "react-native": "./lib/awilix.browser.mjs",
+      "import": "./lib/awilix.module.mjs",
+      "types": "./lib/awilix.d.ts",
+      "workerd": "./lib/awilix.browser.mjs",
       "default": "./lib/awilix.js"
     },
     "./browser": {
