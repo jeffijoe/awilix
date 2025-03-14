@@ -1,3 +1,8 @@
+# v12.0.5
+
+- Fix parameter parsing for classes by improving `constructor` scanning heuristics 
+- Update packages
+
 # v12.0.4
 
 - Add `react-native` export key, move up `browser` key

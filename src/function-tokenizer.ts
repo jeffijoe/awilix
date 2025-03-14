@@ -118,7 +118,7 @@ export function createTokenizer(source: string) {
             }, true)
             pos++
           }
-          continue
+          break
         }
         default:
           // Scans an identifier.
@@ -179,7 +179,7 @@ export function createTokenizer(source: string) {
   }
 
   /**
-   * Skips strings and whilespace until the predicate is true.
+   * Skips strings and whitespace until the predicate is true.
    *
    * @param callback stops skipping when this returns `true`.
    * @param dumb if `true`, does not skip whitespace and strings;
@@ -290,11 +290,12 @@ function isStringQuote(ch: string): boolean {
   return false
 }
 
-// NOTE: I've added the `.` character so that member expression paths
-// are seen as identifiers. This is so we don't get a constructor token for
-// stuff like `MyClass.prototype.constructor()`
+// NOTE: I've added the `.` character, optionally prefixed by `?` so
+// that member expression paths are seen as identifiers.
+// This is so we don't get a constructor token for stuff
+// like `MyClass.prototype?.constructor()`
 const IDENT_START_EXPR = /^[_$a-zA-Z\xA0-\uFFFF]$/
-const IDENT_PART_EXPR = /^[._$a-zA-Z0-9\xA0-\uFFFF]$/
+const IDENT_PART_EXPR = /^[?._$a-zA-Z0-9\xA0-\uFFFF]$/
 
 /**
  * Determines if the character is a valid JS identifier start character.
