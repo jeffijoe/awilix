@@ -32,16 +32,16 @@ export function parseParameterList(source: string): Array<Parameter> | null {
   nextToken()
   while (!done()) {
     switch (t.type) {
-      case 'class':
-        skipUntilConstructor()
+      case 'class': {
+        const foundConstructor = advanceToConstructor()
         // If we didn't find a constructor token, then we know that there
         // are no dependencies in the defined class.
-        if (!isConstructorToken()) {
+        if (!foundConstructor) {
           return null
         }
-        // Next token is the constructor identifier.
-        nextToken()
+
         break
+      }
       case 'function': {
         const next = nextToken()
         if (next.type === 'ident' || next.type === '*') {
@@ -57,6 +57,11 @@ export function parseParameterList(source: string): Array<Parameter> | null {
       case ')':
         // We're now out of the parameter list.
         return params
+
+      // When we're encountering an identifier token
+      // at this level, it could be because it's an arrow function
+      // with a single parameter, e.g. `foo => ...`.
+      // This path won't be hit if we've already identified the `(` token.
       case 'ident': {
         // Likely a paren-less arrow function
         // which can have no default args.
@@ -114,12 +119,29 @@ export function parseParameterList(source: string): Array<Parameter> | null {
   }
 
   /**
-   * Skips until we reach the constructor identifier.
+   * Advances until we reach the constructor identifier followed by
+   * a `(` token.
+   *
+   * @returns `true` if a constructor was found, `false` otherwise.
    */
-  function skipUntilConstructor() {
-    while (!isConstructorToken() && !done()) {
+  function advanceToConstructor() {
+    while (!done()) {
+      if (isConstructorToken()) {
+        // Consume the token
+        nextToken(TokenizerFlags.Dumb)
+
+        // If the current token now isn't a `(`, then it wasn't the actual
+        // constructor.
+        if (t.type !== '(') {
+          continue
+        }
+
+        return true
+      }
       nextToken(TokenizerFlags.Dumb)
     }
+
+    return false
   }
 
   /**

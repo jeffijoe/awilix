@@ -60,3 +60,65 @@ test('#164', () => {
 
   expect(parseParameterList(funcCode)).toEqual([])
 })
+
+// https://github.com/jeffijoe/awilix/issues/390
+//
+// The paran-less arrow function path was being hit after having skipped all
+// tokens until finding the `constructor` token.
+// The problem was that the tokenizer is instructed to treat `foo.constructor`
+// as a single identifier to simplify looking for constructor tokens, but
+// it wasn't taking `foo?.constructor` into account since at the time optional
+// chaining was not part of the language at runtime.
+// The fix was to consider `?` as part of the identifier as well.
+// This would be problematic if TypeScript's optional parameter syntax `param?`
+// was visible in the stringified class code, but that gets transpiled away.
+describe('#390', () => {
+  test('without a constructor', () => {
+    const classCode = `
+class TestClass  {
+  // Fails because of the two questions marks occurring with the constructor keyword.
+  bar() {
+    return this?.constructor?.name
+  }
+
+  clone() {
+    return new this?.constructor()
+  }
+
+  clone2() {
+    const constructor = this?.constructor
+    return constructor.call(this)
+  }
+}`
+
+    expect(parseParameterList(classCode)).toEqual(null)
+  })
+
+  test('with a constructor', () => {
+    const classCode = `
+class TestClass  {
+  // Fails because of the two questions marks occurring with the constructor keyword.
+  bar() {
+    return this?.constructor?.name
+  }
+
+  clone() {
+    return new this?.constructor()
+  }
+
+  clone2() {
+    const constructor = this?.constructor
+    return constructor.call(this)
+  }
+
+  constructor(injectedService) {}
+}`
+
+    expect(parseParameterList(classCode)).toEqual([
+      {
+        name: 'injectedService',
+        optional: false,
+      },
+    ])
+  })
+})
