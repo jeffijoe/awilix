@@ -30,7 +30,6 @@ export default [
       'path',
       'url',
       'util',
-      'camel-case',
       './load-module-native.js',
     ],
     treeshake: { moduleSideEffects: 'no-external' },
@@ -79,9 +78,7 @@ export default [
         '[util.inspect.custom]: inspect,': comment,
         '[util.inspect.custom]: toStringRepresentationFn,': comment,
         'case util.inspect.custom:': '',
-        "import { camelCase } from 'camel-case'":
-          'const camelCase = null as any',
-        [`export {
+[`export {
   type GlobWithOptions,
   type ListModulesOptions,
   type ModuleDescriptor,
