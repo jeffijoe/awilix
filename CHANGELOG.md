@@ -1,3 +1,7 @@
+# v12.1.0
+
+- [#396](https://github.com/jeffijoe/awilix/issues/396) Use built-in `camelCase` implementation, removing the `camel-case` dependency ([#405](https://github.com/jeffijoe/awilix/pull/405) by [@kibertoad](https://github.com/kibertoad))
+
 # v12.0.5
 
 - Fix parameter parsing for classes by improving `constructor` scanning heuristics 
