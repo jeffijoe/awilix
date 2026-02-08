@@ -1,4 +1,4 @@
-import { camelCase } from 'camel-case'
+import { camelCase } from './camel-case'
 import { pathToFileURL } from 'url'
 import { AwilixContainer } from './container'
 import { Lifetime } from './lifetime'

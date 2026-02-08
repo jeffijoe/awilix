@@ -101,7 +101,6 @@
     "typescript-eslint": "^8.26.1"
   },
   "dependencies": {
-    "camel-case": "^4.1.2",
     "fast-glob": "^3.3.3"
   },
   "lint-staged": {
