@@ -1,3 +1,8 @@
+# v12.1.1
+
+- Performance optimizations: cache-first resolve for singleton/scoped, closure-free cycle detection, and injector proxy key deduplication ([#407](https://github.com/jeffijoe/awilix/pull/407) by [@kibertoad](https://github.com/kibertoad))
+- Fix symbol-keyed registrations being invisible to enumeration on the cradle and injector proxy ([#407](https://github.com/jeffijoe/awilix/pull/407) by [@kibertoad](https://github.com/kibertoad))
+
 # v12.1.0
 
 - [#396](https://github.com/jeffijoe/awilix/issues/396) Use built-in `camelCase` implementation, removing the `camel-case` dependency ([#405](https://github.com/jeffijoe/awilix/pull/405) by [@kibertoad](https://github.com/kibertoad))
