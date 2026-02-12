@@ -12,7 +12,9 @@
  */
 export function camelCase(input: string): string {
   const len = input.length
-  if (len === 0) return ''
+  if (len === 0) {
+    return ''
+  }
 
   let result = ''
   let wordIdx = 0

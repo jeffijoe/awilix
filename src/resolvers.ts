@@ -3,7 +3,7 @@ import { AwilixTypeError } from './errors'
 import { InjectionMode, InjectionModeType } from './injection-mode'
 import { Lifetime, LifetimeType } from './lifetime'
 import { Parameter, parseParameterList } from './param-parser'
-import { isFunction, uniq } from './utils'
+import { isFunction } from './utils'
 
 // We parse the signature of any `Function`, so we want to allow `Function` types.
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
@@ -375,10 +375,16 @@ function createInjectorProxy<T extends object>(
   injector: InjectorFunction,
 ) {
   const locals = injector(container) as any
-  const allKeys = uniq([
-    ...Reflect.ownKeys(container.cradle),
-    ...Reflect.ownKeys(locals),
-  ])
+  const keySet = new Set<string | symbol>(Object.keys(container.registrations))
+  for (const s of Object.getOwnPropertySymbols(container.registrations)) {
+    keySet.add(s)
+  }
+  for (const k of Object.keys(locals)) {
+    keySet.add(k)
+  }
+  for (const s of Object.getOwnPropertySymbols(locals)) {
+    keySet.add(s)
+  }
   // TODO: Lots of duplication here from the container proxy.
   // Need to refactor.
   const proxy = new Proxy(
@@ -408,14 +414,14 @@ function createInjectorProxy<T extends object>(
        * Used for `Object.keys`.
        */
       ownKeys() {
-        return allKeys
+        return [...keySet]
       },
 
       /**
        * Used for `Object.keys`.
        */
-      getOwnPropertyDescriptor(target: any, key: string) {
-        if (allKeys.indexOf(key) > -1) {
+      getOwnPropertyDescriptor(_target: any, key: string | symbol) {
+        if (keySet.has(key)) {
           return {
             enumerable: true,
             configurable: true,
