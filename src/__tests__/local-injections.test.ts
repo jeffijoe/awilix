@@ -1,5 +1,5 @@
 import { createContainer } from '../container'
-import { asClass, asFunction } from '../resolvers'
+import { asClass, asFunction, asValue } from '../resolvers'
 import { InjectionMode } from '../injection-mode'
 
 class Test {
@@ -77,5 +77,48 @@ describe('local injections', () => {
     expect(() => container.cradle.test2.value).toThrowError(
       /Could not resolve 'value'/,
     )
+  })
+
+  describe('injector proxy keys', () => {
+    it('injector local overrides container registration', () => {
+      const container = createContainer().register({
+        val: asValue('from-container'),
+        consumer: asFunction((cradle: any) => cradle.val).inject(() => ({
+          val: 'from-injector',
+        })),
+      })
+
+      expect(container.resolve('consumer')).toBe('from-injector')
+    })
+
+    it('supports symbol keys in both container registrations and injector locals', () => {
+      const symContainer = Symbol('containerSym')
+      const symLocal = Symbol('localSym')
+      const symShared = Symbol('sharedSym')
+
+      const container = createContainer()
+        .register({
+          [symContainer]: asValue('from-container'),
+          [symShared]: asValue('original'),
+        })
+        .register({
+          consumer: asFunction((cradle: any) => ({
+            containerSym: cradle[symContainer],
+            localSym: cradle[symLocal],
+            sharedSym: cradle[symShared],
+          })).inject(() => ({
+            [symLocal]: 'from-local',
+            [symShared]: 'overridden',
+          })),
+        })
+
+      const result = container.resolve<any>('consumer')
+      // Symbol registered on the container is accessible
+      expect(result.containerSym).toBe('from-container')
+      // Symbol from the injector locals is accessible
+      expect(result.localSym).toBe('from-local')
+      // Injector local overrides container registration for symbols
+      expect(result.sharedSym).toBe('overridden')
+    })
   })
 })

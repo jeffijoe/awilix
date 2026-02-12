@@ -482,12 +482,16 @@ function createContainerInternal<
     try {
       // Grab the registration by name.
       const resolver = getRegistration(name)
-      if (resolutionStack.some(({ name: parentName }) => parentName === name)) {
-        throw new AwilixResolutionError(
-          name,
-          resolutionStack,
-          'Cyclic dependencies detected.',
-        )
+
+      // Cycle detection: scan the resolution stack.
+      for (let i = 0; i < resolutionStack.length; i++) {
+        if (resolutionStack[i].name === name) {
+          throw new AwilixResolutionError(
+            name,
+            resolutionStack,
+            'Cyclic dependencies detected.',
+          )
+        }
       }
 
       // Used in JSON.stringify.
@@ -530,63 +534,62 @@ function createContainerInternal<
 
       const lifetime = resolver.lifetime || Lifetime.TRANSIENT
 
-      // if we are running in strict mode, this resolver is not explicitly marked leak-safe, and any
-      // of the parents have a shorter lifetime than the one requested, throw an error.
-      if (options.strict && !resolver.isLeakSafe) {
-        const maybeLongerLifetimeParentIndex = resolutionStack.findIndex(
-          ({ lifetime: parentLifetime }) =>
-            isLifetimeLonger(parentLifetime, lifetime),
-        )
-        if (maybeLongerLifetimeParentIndex > -1) {
-          throw new AwilixResolutionError(
-            name,
-            resolutionStack,
-            `Dependency '${name.toString()}' has a shorter lifetime than its ancestor: '${resolutionStack[
-              maybeLongerLifetimeParentIndex
-            ].name.toString()}'`,
-          )
+      // Throws if a shorter-lived dependency is resolved through a longer-lived ancestor.
+      function throwIfLifetimeLeakage(
+        depName: string | symbol,
+        depLifetime: LifetimeType,
+        dep: Resolver<any>,
+      ) {
+        if (!options.strict || dep.isLeakSafe) return
+        for (let i = 0; i < resolutionStack.length; i++) {
+          if (isLifetimeLonger(resolutionStack[i].lifetime, depLifetime)) {
+            throw new AwilixResolutionError(
+              depName,
+              resolutionStack,
+              `Dependency '${depName.toString()}' has a shorter lifetime than its ancestor: '${resolutionStack[i].name.toString()}'`,
+            )
+          }
         }
       }
 
-      // Pushes the currently-resolving module information onto the stack
+      // Fast path: cached singletons can always be returned immediately
+      // since nothing has a longer lifetime.
+      if (lifetime === Lifetime.SINGLETON) {
+        const cached = rootContainer.cache.get(name)
+        if (cached) {
+          return cached.value
+        }
+      }
+
+      // Fast path: cached scoped values can be returned immediately,
+      // but in strict mode we still need to verify lifetime constraints.
+      if (lifetime === Lifetime.SCOPED) {
+        const cached = container.cache.get(name)
+        if (cached !== undefined) {
+          throwIfLifetimeLeakage(name, lifetime, resolver)
+          return cached.value
+        }
+      }
+
+      // Slow path: need to invoke the factory.
+      throwIfLifetimeLeakage(name, lifetime, resolver)
+
       resolutionStack.push({ name, lifetime })
 
-      // Do the thing
-      let cached: CacheEntry | undefined
       let resolved
       switch (lifetime) {
         case Lifetime.TRANSIENT:
-          // Transient lifetime means resolve every time.
           resolved = resolver.resolve(container)
           break
         case Lifetime.SINGLETON:
-          // Singleton lifetime means cache at all times, regardless of scope.
-          cached = rootContainer.cache.get(name)
-          if (!cached) {
-            // if we are running in strict mode, perform singleton resolution using the root
-            // container only.
-            resolved = resolver.resolve(
-              options.strict ? rootContainer : container,
-            )
-            rootContainer.cache.set(name, { resolver, value: resolved })
-          } else {
-            resolved = cached.value
-          }
+          // Cache was already checked above, so this is always a miss.
+          resolved = resolver.resolve(
+            options.strict ? rootContainer : container,
+          )
+          rootContainer.cache.set(name, { resolver, value: resolved })
           break
         case Lifetime.SCOPED:
-          // Scoped lifetime means that the container
-          // that resolves the registration also caches it.
-          // If this container cache does not have it,
-          // resolve and cache it rather than using the parent
-          // container's cache.
-          cached = container.cache.get(name)
-          if (cached !== undefined) {
-            // We found one!
-            resolved = cached.value
-            break
-          }
-
-          // If we still have not found one, we need to resolve and cache it.
+          // Cache was already checked above, so this is always a miss.
           resolved = resolver.resolve(container)
           container.cache.set(name, { resolver, value: resolved })
           break
@@ -597,8 +600,8 @@ function createContainerInternal<
             `Unknown lifetime "${resolver.lifetime}"`,
           )
       }
-      // Pop it from the stack again, ready for the next resolution
       resolutionStack.pop()
+
       return resolved
     } catch (err) {
       // When we get an error we need to reset the stack. Mutate the existing array rather than

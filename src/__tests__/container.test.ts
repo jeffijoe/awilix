@@ -980,3 +980,152 @@ describe('memoizing registrations', () => {
     })
   })
 })
+
+describe('cycle detection edge cases', () => {
+  it('detects a self-referencing dependency (A -> A)', () => {
+    const container = createContainer()
+    container.register({
+      selfRef: asFunction((cradle: any) => cradle.selfRef),
+    })
+
+    const err = throws(() => container.resolve('selfRef'))
+    expect(err).toBeInstanceOf(AwilixResolutionError)
+    expect(err.message).toContain('selfRef -> selfRef')
+  })
+
+  it('detects a cycle across scopes', () => {
+    const parent = createContainer()
+    parent.register({
+      a: asFunction((cradle: any) => cradle.b),
+    })
+    const child = parent.createScope()
+    child.register({
+      b: asFunction((cradle: any) => cradle.a),
+    })
+
+    const err = throws(() => child.resolve('a'))
+    expect(err).toBeInstanceOf(AwilixResolutionError)
+    expect(err.message).toContain('a -> b -> a')
+  })
+
+  it('detects a cycle with Symbol keys', () => {
+    const SA = Symbol('symA')
+    const SB = Symbol('symB')
+    const container = createContainer()
+    container.register({
+      [SA]: asFunction((cradle: any) => cradle[SB]),
+      [SB]: asFunction((cradle: any) => cradle[SA]),
+    })
+
+    const err = throws(() => container.resolve(SA))
+    expect(err).toBeInstanceOf(AwilixResolutionError)
+    expect(err.message).toContain('Symbol(symA)')
+    expect(err.message).toContain('Symbol(symB)')
+  })
+})
+
+describe('resolution stack integrity', () => {
+  it('successful resolve then failing resolve in same factory has correct stack', () => {
+    const container = createContainer()
+    container.register({
+      good: asValue('ok'),
+      faulty: asFunction((cradle: any) => {
+        // Resolve a valid dependency first to verify the resolution stack
+        // only contains the failing path, not this successful one.
+        void cradle.good
+        return cradle.missing // fails
+      }),
+    })
+
+    const err = throws(() => container.resolve('faulty'))
+    expect(err).toBeInstanceOf(AwilixResolutionError)
+    expect(err.message).toContain('faulty -> missing')
+    expect(err.message).not.toContain('good')
+  })
+})
+
+describe('strict mode deep chains', () => {
+  it('resolves a 5-level deep all-SCOPED chain without error', () => {
+    const container = createContainer({ strict: true })
+    container.register({
+      s1: asFunction((cradle: any) => cradle.s2, {
+        lifetime: Lifetime.SCOPED,
+      }),
+      s2: asFunction((cradle: any) => cradle.s3, {
+        lifetime: Lifetime.SCOPED,
+      }),
+      s3: asFunction((cradle: any) => cradle.s4, {
+        lifetime: Lifetime.SCOPED,
+      }),
+      s4: asFunction((cradle: any) => cradle.s5, {
+        lifetime: Lifetime.SCOPED,
+      }),
+      s5: asFunction(() => 'deep-scoped-value', {
+        lifetime: Lifetime.SCOPED,
+      }),
+    })
+
+    const scope = container.createScope()
+    expect(scope.resolve('s1')).toBe('deep-scoped-value')
+  })
+
+  it('detects lifetime violation on cached scoped value resolved through a longer-lived ancestor', () => {
+    const container = createContainer({ strict: true })
+    container.register({
+      singletonDep: asFunction((cradle: any) => cradle.scopedVal, {
+        lifetime: Lifetime.SINGLETON,
+      }),
+      scopedVal: asFunction(() => 'scoped-result', {
+        lifetime: Lifetime.SCOPED,
+      }),
+    })
+
+    // First: resolve the scoped value so it gets cached on the root container.
+    expect(container.resolve('scopedVal')).toBe('scoped-result')
+    // Now resolve a singleton that depends on it — the cached scoped value
+    // must still be checked for lifetime leakage.
+    const err = throws(() => container.resolve('singletonDep'))
+    expect(err).toBeInstanceOf(AwilixResolutionError)
+    expect(err.message).toContain(
+      "Dependency 'scopedVal' has a shorter lifetime than its ancestor: 'singletonDep'",
+    )
+  })
+})
+
+describe('registration lookup and cache invalidation', () => {
+  it('resolves root registration from deeply nested scope (6+ levels)', () => {
+    const root = createContainer()
+    root.register({ deepVal: asValue('from-root') })
+
+    let current = root.createScope()
+    for (let i = 0; i < 5; i++) {
+      current = current.createScope()
+    }
+
+    expect(current.resolve('deepVal')).toBe('from-root')
+  })
+
+  it('child resolves updated parent registration (transient)', () => {
+    const parent = createContainer()
+    parent.register({ val: asFunction(() => 'original') })
+
+    const child = parent.createScope()
+    expect(child.resolve('val')).toBe('original')
+
+    parent.register({ val: asFunction(() => 'updated') })
+    expect(child.resolve('val')).toBe('updated')
+  })
+
+  it('local registration shadows parent even after parent re-registers', () => {
+    const parent = createContainer()
+    parent.register({ val: asFunction(() => 'parent-v1') })
+
+    const child = parent.createScope()
+    child.register({ val: asFunction(() => 'child-local') })
+
+    expect(child.resolve('val')).toBe('child-local')
+
+    parent.register({ val: asFunction(() => 'parent-v2') })
+    expect(child.resolve('val')).toBe('child-local')
+  })
+})
