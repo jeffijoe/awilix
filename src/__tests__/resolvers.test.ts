@@ -1,6 +1,7 @@
 import { throws } from 'smid'
 import { asValue, asFunction, asClass } from '../resolvers'
-import { createContainer, AwilixContainer } from '../container'
+import type { AwilixContainer } from '../container'
+import { createContainer } from '../container'
 import { Lifetime } from '../lifetime'
 import { InjectionMode } from '../injection-mode'
 import { AwilixTypeError } from '../errors'

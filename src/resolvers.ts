@@ -1,8 +1,12 @@
-import { AwilixContainer, FunctionReturning, ResolveOptions } from './container'
+import type {
+  AwilixContainer,
+  FunctionReturning,
+  ResolveOptions,
+} from './container'
 import { AwilixTypeError } from './errors'
-import { InjectionMode, InjectionModeType } from './injection-mode'
-import { Lifetime, LifetimeType } from './lifetime'
-import { Parameter, parseParameterList } from './param-parser'
+import { type InjectionModeType, InjectionMode } from './injection-mode'
+import { type LifetimeType, Lifetime } from './lifetime'
+import { type Parameter, parseParameterList } from './param-parser'
 import { isFunction } from './utils'
 
 // We parse the signature of any `Function`, so we want to allow `Function` types.
@@ -130,7 +134,7 @@ export type Constructor<T> = { new (...args: any[]): T }
  *
  * @return {object} The resolver.
  */
-export function asValue<T>(value: T): Resolver<T> {
+export function asValue<const T>(value: T): Resolver<T> {
   return {
     resolve: () => value,
     isLeakSafe: true,

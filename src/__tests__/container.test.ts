@@ -1,10 +1,19 @@
 import { throws } from 'smid'
 import * as util from 'util'
-import { createContainer, AwilixContainer } from '../container'
+import type { AwilixContainer } from '../container'
+import { createContainer as _createContainer } from '../container'
 import { Lifetime } from '../lifetime'
 import { AwilixResolutionError } from '../errors'
 import { aliasTo, asClass, asFunction, asValue } from '../resolvers'
 import { InjectionMode } from '../injection-mode'
+
+// This file tests runtime behavior; type inference is tested in type-inference.test.ts.
+// Use `any` cradle to avoid type errors on untyped property access.
+function createContainer(
+  ...args: Parameters<typeof _createContainer>
+): AwilixContainer<any> {
+  return _createContainer<any>(...args)
+}
 
 class Test {
   repo: Repo
@@ -517,7 +526,7 @@ describe('container', () => {
   describe('resolving reserved names', () => {
     it('returns the createContainer function for constructor', () => {
       const container = createContainer()
-      expect(container.resolve('constructor')).toBe(createContainer)
+      expect(container.resolve('constructor')).toBe(_createContainer)
     })
   })
 
