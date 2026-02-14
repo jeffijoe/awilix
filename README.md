@@ -13,6 +13,8 @@ written in [TypeScript](http://typescriptlang.org).
 
 Awilix enables you to write **composable, testable software** using dependency injection **without special annotations**, which in turn decouples your core application code from the intricacies of the DI mechanism.
 
+Node.js versions 20+ are officially supported, although it may also work on older versions.
+
 > 💡 Check out this
 > [intro to Dependency Injection with Awilix](https://medium.com/@Jeffijoe/dependency-injection-in-node-js-2016-edition-f2a88efdd427)
 

@@ -16,10 +16,9 @@ jobs:
       fail-fast: true
       matrix:
         version:
-          - 16
-          - 18
           - 20
           - 22
+          - 24
           - current
     steps:
       - name: Checkout
