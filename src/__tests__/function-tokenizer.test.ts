@@ -1,4 +1,4 @@
-import { createTokenizer, Token } from '../function-tokenizer'
+import { type Token, createTokenizer } from '../function-tokenizer'
 
 describe('tokenizer', () => {
   it('returns the expected tokens for a function', () => {

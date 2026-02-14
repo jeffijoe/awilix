@@ -1,15 +1,14 @@
 import { camelCase } from './camel-case'
 import { pathToFileURL } from 'url'
-import { AwilixContainer } from './container'
+import type { AwilixContainer } from './container'
 import { Lifetime } from './lifetime'
-import { GlobWithOptions, ModuleDescriptor, listModules } from './list-modules'
-import {
-  BuildResolver,
-  BuildResolverOptions,
-  RESOLVER,
-  asClass,
-  asFunction,
-} from './resolvers'
+import type {
+  GlobWithOptions,
+  ModuleDescriptor,
+  listModules,
+} from './list-modules'
+import type { BuildResolver, BuildResolverOptions } from './resolvers'
+import { RESOLVER, asClass, asFunction } from './resolvers'
 import { isClass, isFunction } from './utils'
 
 /**

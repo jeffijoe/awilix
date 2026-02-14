@@ -1,4 +1,4 @@
-import TestService from './TestService'
+import type TestService from './TestService'
 
 export default class DependentService {
   testService: TestService

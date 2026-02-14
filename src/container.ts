@@ -4,20 +4,20 @@ import {
   AwilixResolutionError,
   AwilixTypeError,
 } from './errors'
-import { InjectionMode, InjectionModeType } from './injection-mode'
-import { Lifetime, LifetimeType, isLifetimeLonger } from './lifetime'
-import { GlobWithOptions, listModules } from './list-modules'
+import { type InjectionModeType, InjectionMode } from './injection-mode'
+import { type LifetimeType, Lifetime, isLifetimeLonger } from './lifetime'
+import { type GlobWithOptions, listModules } from './list-modules'
 import { importModule } from './load-module-native.js'
 import {
-  LoadModulesOptions,
-  LoadModulesResult,
+  type LoadModulesOptions,
+  type LoadModulesResult,
   loadModules as realLoadModules,
 } from './load-modules'
 import {
-  BuildResolverOptions,
-  Constructor,
-  DisposableResolver,
-  Resolver,
+  type BuildResolverOptions,
+  type Constructor,
+  type DisposableResolver,
+  type Resolver,
   asClass,
   asFunction,
 } from './resolvers'
@@ -27,7 +27,7 @@ import { isClass, last, nameValueToObject } from './utils'
  * The container returned from createContainer has some methods and properties.
  * @interface AwilixContainer
  */
-export interface AwilixContainer<Cradle extends object = any> {
+export interface AwilixContainer<Cradle extends object = {}> {
   /**
    * Options the container was configured with.
    */
@@ -70,11 +70,19 @@ export interface AwilixContainer<Cradle extends object = any> {
   /**
    * Adds a single registration that using a pre-constructed resolver.
    */
-  register<T>(name: string | symbol, registration: Resolver<T>): this
+  register<N extends string | symbol, T>(
+    name: N,
+    registration: Resolver<T>,
+  ): AwilixContainer<Cradle & Record<N, T>>
   /**
    * Pairs resolvers to registration names and registers them.
+   * Mutates and returns the same container, but with an expanded type
+   * that includes the newly registered types, enabling incremental
+   * type building via chaining.
    */
-  register(nameAndRegistrationPair: NameAndRegistrationPair<Cradle>): this
+  register<R extends Record<string, Resolver<any>>>(
+    nameAndRegistrationPair: R,
+  ): AwilixContainer<Cradle & InferCradleFromResolvers<R>>
   /**
    * Resolves the registration with the given name.
    *
@@ -176,6 +184,43 @@ export type NameAndRegistrationPair<T> = {
 }
 
 /**
+ * Extracts the resolved type from a Resolver.
+ */
+export type InferResolverType<T> = T extends Resolver<infer U> ? U : never
+
+/**
+ * Extracts the Cradle type from an AwilixContainer type.
+ *
+ * @example
+ * const container = createContainer()
+ *   .register({
+ *     userService: asClass(UserService),
+ *     logger: asValue(new Logger()),
+ *   })
+ * type MyCradle = InferCradleFromContainer<typeof container>
+ * // => { userService: UserService; logger: Logger }
+ */
+export type InferCradleFromContainer<T extends AwilixContainer<any>> =
+  T extends AwilixContainer<infer C> ? C : never
+
+/**
+ * Given an object whose values are Resolvers, produces the corresponding
+ * cradle type by extracting the resolved type from each resolver.
+ *
+ * @example
+ * const resolvers = {
+ *   userService: asClass(UserService),
+ *   logger: asValue(new Logger()),
+ * }
+ * type MyCradle = InferCradleFromResolvers<typeof resolvers>
+ * // => { userService: UserService; logger: Logger }
+ */
+export type InferCradleFromResolvers<T extends Record<string, Resolver<any>>> =
+  {
+    [K in keyof T]: InferResolverType<T[K]>
+  }
+
+/**
  * Function that returns T.
  */
 export type FunctionReturning<T> = (...args: Array<any>) => T
@@ -232,16 +277,13 @@ const CRADLE_STRING_TAG = 'AwilixContainerCradle'
  *
  * @return {AwilixContainer<T>} The container.
  */
-export function createContainer<T extends object = any>(
+export function createContainer<T extends object = {}>(
   options: ContainerOptions = {},
 ): AwilixContainer<T> {
   return createContainerInternal(options)
 }
 
-function createContainerInternal<
-  T extends object = any,
-  U extends object = any,
->(
+function createContainerInternal<T extends object = {}, U extends object = {}>(
   options: ContainerOptions,
   parentContainer?: AwilixContainer<U>,
   parentResolutionStack?: ResolutionStack,
@@ -666,7 +708,7 @@ function createContainerInternal<
   function loadModules<ESM extends boolean = false>(
     globPatterns: Array<string | GlobWithOptions>,
     opts: LoadModulesOptions<ESM>,
-  ): ESM extends false ? AwilixContainer : Promise<AwilixContainer>
+  ): ESM extends false ? AwilixContainer<T> : Promise<AwilixContainer<T>>
   /**
    * Binds `lib/loadModules` to this container, and provides
    * real implementations of it's dependencies.
@@ -679,7 +721,7 @@ function createContainerInternal<
   function loadModules<ESM extends boolean = false>(
     globPatterns: Array<string | GlobWithOptions>,
     opts: LoadModulesOptions<ESM>,
-  ): Promise<AwilixContainer> | AwilixContainer {
+  ): Promise<AwilixContainer<T>> | AwilixContainer<T> {
     const _loadModulesDeps = {
       require:
         options!.require ||

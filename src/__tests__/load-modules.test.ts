@@ -1,9 +1,9 @@
 import * as path from 'path'
-import { loadModules, LoadModulesOptions } from '../load-modules'
+import { type LoadModulesOptions, loadModules } from '../load-modules'
 import { createContainer } from '../container'
 import { Lifetime } from '../lifetime'
 import { InjectionMode } from '../injection-mode'
-import { asFunction, RESOLVER, BuildResolver, asValue } from '../resolvers'
+import { type BuildResolver, asFunction, RESOLVER, asValue } from '../resolvers'
 
 const lookupResultFor = (modules: any) =>
   Object.keys(modules).map((key) => ({

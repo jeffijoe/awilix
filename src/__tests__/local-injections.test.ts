@@ -1,4 +1,8 @@
-import { createContainer } from '../container'
+import { createContainer as _createContainer } from '../container'
+
+// Runtime behavior tests — use `any` cradle.
+const createContainer = (...args: Parameters<typeof _createContainer>) =>
+  _createContainer<any>(...args)
 import { asClass, asFunction, asValue } from '../resolvers'
 import { InjectionMode } from '../injection-mode'
 

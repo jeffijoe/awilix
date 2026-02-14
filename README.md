@@ -34,6 +34,8 @@ Awilix enables you to write **composable, testable software** using dependency i
   - [The `awilix` object](#the-awilix-object)
   - [Resolver options](#resolver-options)
   - [`createContainer()`](#createcontainer)
+  - [`InferCradleFromResolvers`](#infercradlefromresolvers)
+  - [`InferCradleFromContainer`](#infercradlefromcontainer)
   - [`asFunction()`](#asfunction)
   - [`asClass()`](#asclass)
   - [`asValue()`](#asvalue)
@@ -58,6 +60,7 @@ Awilix enables you to write **composable, testable software** using dependency i
 - [Contributing](#contributing)
 - [What's in a name?](#whats-in-a-name)
 - [Author](#author)
+- [Migrating from older versions](#migrating-from-older-versions)
 
 # Installation
 
@@ -821,6 +824,9 @@ When importing `awilix`, you get the following top-level API:
 - `aliasTo`
 - `Lifetime` - documented above.
 - `InjectionMode` - documented above.
+- `InferCradleFromResolvers` (TypeScript utility type)
+- `InferCradleFromContainer` (TypeScript utility type)
+- `InferResolverType` (TypeScript utility type)
 
 These are documented below.
 
@@ -873,6 +879,68 @@ Args:
       example, a dependency registered as `repository` cannot be referenced in a
       class constructor as `repo`.
   - `options.strict`: Enables [strict mode](#strict-mode). Defaults to `false`.
+
+## `InferCradleFromResolvers`
+
+A TypeScript utility type that extracts the cradle type from an object of
+resolvers. Useful when you want to type a module's dependencies from a resolvers
+object without having access to the container itself — for example, when the
+container is assembled in one module but consumed in another:
+
+```typescript
+import { type InferCradleFromResolvers, asClass, asValue } from 'awilix'
+
+const resolvers = {
+  userService: asClass(UserService),
+  logger: asValue(new Logger()),
+}
+
+type MyCradle = InferCradleFromResolvers<typeof resolvers>
+// => { userService: UserService; logger: Logger }
+```
+
+`InferResolverType` is also exported for extracting the resolved type from a
+single resolver:
+
+```typescript
+import { type InferResolverType, asClass } from 'awilix'
+
+const resolver = asClass(UserService).singleton()
+type T = InferResolverType<typeof resolver>
+// => UserService
+```
+
+## `InferCradleFromContainer`
+
+A TypeScript utility type that extracts the Cradle type from an
+`AwilixContainer` type. This is useful when you need to reference the cradle type
+of an existing container without manually redeclaring it.
+
+> **Important:** One of the core principles of Awilix is that it should be
+> transparent to your application code. The recommended approach is to define
+> standalone options types for your services (e.g. `MyServiceOptions`) that
+> declare only the dependencies they need, without any reference to Awilix or
+> the container's cradle type. This keeps your application code fully
+> decoupled from the DI container and preserves true inversion of control.
+>
+> That said, if you want a fully type-safe container and are aware of the
+> trade-offs involved (coupling to a "god type", losing transparency, and
+> difficulty mixing singleton and scoped registrations), the inference
+> utilities below make that possible.
+
+```typescript
+import { createContainer, type InferCradleFromContainer, asClass, asValue } from 'awilix'
+
+const container = createContainer()
+  .register({
+    userService: asClass(UserService),
+    logger: asValue(new Logger()),
+  })
+
+// Extract the cradle type from the container
+type MyCradle = InferCradleFromContainer<typeof container>
+// => { userService: UserService; logger: Logger }
+```
 
 ## `asFunction()`
 
@@ -1038,8 +1106,23 @@ The optional `resolveOpts` has the following fields:
 
 **Signatures**
 
-- `register(name: string, resolver: Resolver): AwilixContainer`
-- `register(nameAndResolverPair: NameAndResolverPair): AwilixContainer`
+- `register(name: string | symbol, resolver: Resolver): this`
+- `register(nameAndResolverPair): AwilixContainer<Cradle & InferCradleFromResolvers<R>>`
+
+The object overload returns a container whose cradle type includes the newly
+registered types. This means **the cradle type accumulates automatically** when
+you chain `.register()` calls — no manual interface needed:
+
+```typescript
+const container = createContainer()
+  .register({
+    userService: asClass(UserService),
+    logger: asValue(new Logger()),
+  })
+
+container.cradle.userService // => UserService ✓
+container.cradle.logger      // => Logger ✓
+```
 
 Awilix needs to know how to resolve the modules, so let's pull out the resolver
 functions:
@@ -1058,7 +1141,7 @@ Now we need to use them. There are multiple syntaxes for the `register`
 function, pick the one you like the most - or use all of them, I don't really
 care! :sunglasses:
 
-**Both styles supports chaining! `register` returns the container!**
+**Both styles support chaining! `register` returns the container!**
 
 ```js
 // name-resolver

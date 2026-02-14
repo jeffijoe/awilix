@@ -1,3 +1,75 @@
+# v13.0.0
+
+No runtime changes — all breaking changes are TypeScript-only.
+
+- **BREAKING (types)**: Default cradle type changed from `any` to `{}`
+- **BREAKING (types)**: `register()` returns a new container type that includes the registered resolvers
+- **BREAKING (types)**: `asValue()` now preserves literal types and deep readonly for objects
+
+### BREAKING CHANGES
+
+#### Default cradle type changed from `any` to `{}`
+
+`createContainer()` without an explicit generic now returns `AwilixContainer<{}>` instead of `AwilixContainer<any>`. This enables type accumulation via `register()` chaining (`any & T` collapses to `any`, while `{} & T` produces `T`).
+
+If you have existing code that relies on the `any` default (e.g. accessing `container.cradle.something` without type annotations), pass `any` explicitly:
+
+```typescript
+// Before (v12) — implicit any
+const container = createContainer()
+container.cradle.anything // OK
+
+// After (v13) — explicit any to preserve old behavior
+const container = createContainer<any>()
+container.cradle.anything // OK
+
+// After (v13) — recommended: use register() for type inference
+const container = createContainer().register({
+  anything: asValue('hello'),
+})
+container.cradle.anything // OK, typed as 'hello'
+```
+
+#### `register()` returns a new container type
+
+`register()` now returns `AwilixContainer<Cradle & InferCradleFromResolvers<R>>` instead of `this`. Types accumulate across chained calls:
+
+```typescript
+const container = createContainer()
+  .register({ port: asValue(3000) })       // AwilixContainer<{ port: 3000 }>
+  .register({ host: asValue('localhost') }) // AwilixContainer<{ port: 3000; host: 'localhost' }>
+
+container.resolve('port') // 3000
+container.resolve('host') // 'localhost'
+```
+
+#### `asValue()` preserves literal types and deep readonly
+
+`asValue()` now uses a `const` type parameter, which means it preserves literal types for primitives and infers deep `readonly` for objects:
+
+```typescript
+// Before (v12)
+asValue(3000)              // Resolver<number>
+asValue('localhost')       // Resolver<string>
+asValue({ debug: true })   // Resolver<{ debug: boolean }>
+
+// After (v13)
+asValue(3000)              // Resolver<3000>
+asValue('localhost')       // Resolver<'localhost'>
+asValue({ debug: true })   // Resolver<{ readonly debug: true }>
+```
+
+Resolved object values are now correctly typed as `readonly`, reflecting the fact that mutating container-owned values was never a safe practice:
+
+```typescript
+const container = createContainer().register({
+  config: asValue({ debug: true }),
+})
+
+const config = container.resolve('config')
+config.debug = false // Error: Cannot assign to 'debug' because it is a read-only property
+```
+
 # v12.1.1
 
 - Performance optimizations: cache-first resolve for singleton/scoped, closure-free cycle detection, and injector proxy key deduplication ([#407](https://github.com/jeffijoe/awilix/pull/407) by [@kibertoad](https://github.com/kibertoad))
