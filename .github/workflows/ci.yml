@@ -43,9 +43,10 @@ jobs:
       - name: Test
         run: npm run cover
 
-      - if: ${{ matrix.version == 'current' }}
-        name: Coveralls
-        uses: coverallsapp/github-action@v2
+      # Disabled due to Coveralls extended outage
+      # - if: ${{ matrix.version == 'current' }}
+      #   name: Coveralls
+      #   uses: coverallsapp/github-action@v2
 
 # Cancel running workflows for the same branch when a new one is started.
 concurrency:
