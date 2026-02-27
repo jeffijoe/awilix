@@ -63,8 +63,7 @@ export interface DisposableResolverOptions<T> extends ResolverOptions<T> {
  * Disposable resolver.
  */
 export interface DisposableResolver<T>
-  extends Resolver<T>,
-    DisposableResolverOptions<T> {
+  extends Resolver<T>, DisposableResolverOptions<T> {
   disposer(dispose: Disposer<T>): this
 }
 
@@ -101,8 +100,7 @@ export interface ResolverOptions<T> {
  * Builder resolver options.
  */
 export interface BuildResolverOptions<T>
-  extends ResolverOptions<T>,
-    DisposableResolverOptions<T> {
+  extends ResolverOptions<T>, DisposableResolverOptions<T> {
   /**
    * Resolution mode.
    */

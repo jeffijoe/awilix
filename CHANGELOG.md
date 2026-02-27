@@ -1,3 +1,9 @@
+# v13.0.1
+
+- Fix `importModule` export by migrating from `module.exports` to `export` (reported & fix suggested in [#413](https://github.com/jeffijoe/awilix/pull/413) by [Vinícius Oliveira](https://github.com/vinniciusolliveiracostaa), fixed in [#414](https://github.com/jeffijoe/awilix/pull/414))
+- Update packages
+- Bump supported Node version to 20 (this should have been done in the latest major)
+
 # v13.0.0
 
 No runtime changes — all breaking changes are TypeScript-only.
@@ -36,7 +42,7 @@ container.cradle.anything // OK, typed as 'hello'
 
 ```typescript
 const container = createContainer()
-  .register({ port: asValue(3000) })       // AwilixContainer<{ port: 3000 }>
+  .register({ port: asValue(3000) }) // AwilixContainer<{ port: 3000 }>
   .register({ host: asValue('localhost') }) // AwilixContainer<{ port: 3000; host: 'localhost' }>
 
 container.resolve('port') // 3000
@@ -49,14 +55,14 @@ container.resolve('host') // 'localhost'
 
 ```typescript
 // Before (v12)
-asValue(3000)              // Resolver<number>
-asValue('localhost')       // Resolver<string>
-asValue({ debug: true })   // Resolver<{ debug: boolean }>
+asValue(3000) // Resolver<number>
+asValue('localhost') // Resolver<string>
+asValue({ debug: true }) // Resolver<{ debug: boolean }>
 
 // After (v13)
-asValue(3000)              // Resolver<3000>
-asValue('localhost')       // Resolver<'localhost'>
-asValue({ debug: true })   // Resolver<{ readonly debug: true }>
+asValue(3000) // Resolver<3000>
+asValue('localhost') // Resolver<'localhost'>
+asValue({ debug: true }) // Resolver<{ readonly debug: true }>
 ```
 
 Resolved object values are now correctly typed as `readonly`, reflecting the fact that mutating container-owned values was never a safe practice:
@@ -81,7 +87,7 @@ config.debug = false // Error: Cannot assign to 'debug' because it is a read-onl
 
 # v12.0.5
 
-- Fix parameter parsing for classes by improving `constructor` scanning heuristics 
+- Fix parameter parsing for classes by improving `constructor` scanning heuristics
 - Update packages
 
 # v12.0.4
