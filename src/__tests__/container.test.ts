@@ -364,9 +364,7 @@ describe('container', () => {
         someValue: asValue('scope'),
       })
 
-      expect(() => container.cradle.scopedValue).toThrowError(
-        AwilixResolutionError,
-      )
+      expect(() => container.cradle.scopedValue).toThrow(AwilixResolutionError)
     })
 
     it('supports overwriting values in a scope', () => {
@@ -483,7 +481,7 @@ describe('container', () => {
     it('should fail', () => {
       expect(() => {
         createContainer().cradle.lol = 'nope'
-      }).toThrowError(Error)
+      }).toThrow(Error)
     })
   })
 
@@ -935,11 +933,9 @@ describe('memoizing registrations', () => {
     }
 
     it('throws when the target is falsy', () => {
-      expect(() => createContainer().build(null!)).toThrowError(/null/)
-      expect(() => createContainer().build(undefined!)).toThrowError(
-        /undefined/,
-      )
-      expect(() => createContainer().build({} as any)).toThrowError(/object/)
+      expect(() => createContainer().build(null!)).toThrow(/null/)
+      expect(() => createContainer().build(undefined!)).toThrow(/undefined/)
+      expect(() => createContainer().build({} as any)).toThrow(/object/)
     })
 
     it('returns resolved value when passed a resolver', () => {
