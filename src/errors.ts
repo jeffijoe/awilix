@@ -166,6 +166,8 @@ export class AwilixRegistrationError extends AwilixError {
   constructor(name: string | symbol, message?: string) {
     const stringName = name.toString()
     let msg = `Could not register '${stringName}'.`
+
+    /* istanbul ignore else */
     if (message) {
       msg += ` ${message}`
     }
