@@ -7,7 +7,7 @@ import {
 import { type InjectionModeType, InjectionMode } from './injection-mode'
 import { type LifetimeType, Lifetime, isLifetimeLonger } from './lifetime'
 import { type GlobWithOptions, listModules } from './list-modules'
-import { importModule } from './load-module-native.js'
+import { importModule } from './load-module-native.mjs'
 import {
   type LoadModulesOptions,
   type LoadModulesResult,

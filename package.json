@@ -147,7 +147,7 @@
       "/node_modules/",
       "__tests__",
       "lib",
-      "src/load-module-native.js",
+      "src/load-module-native.mjs",
       "src/awilix.ts"
     ],
     "moduleFileExtensions": [
