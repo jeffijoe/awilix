@@ -30,7 +30,7 @@ export default [
       'path',
       'url',
       'util',
-      './load-module-native.js',
+      './load-module-native.mjs',
     ],
     treeshake: { moduleSideEffects: 'no-external' },
     onwarn,
@@ -43,7 +43,7 @@ export default [
     plugins: [
       // Copy the native module loader
       copy({
-        targets: [{ src: 'src/load-module-native.js', dest: 'lib' }],
+        targets: [{ src: 'src/load-module-native.mjs', dest: 'lib' }],
       }),
       typescript(tsOpts),
     ],
