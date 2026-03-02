@@ -1,3 +1,7 @@
+# v13.0.2
+
+- Fix ESM interop by renaming `load-module-native.js` to `load-module-native.mjs` so Node.js treats it as ESM regardless of the package `type` field ([#416](https://github.com/jeffijoe/awilix/issues/416), [#417](https://github.com/jeffijoe/awilix/pull/417))
+
 # v13.0.1
 
 - Fix `importModule` export by migrating from `module.exports` to `export` (reported & fix suggested in [#413](https://github.com/jeffijoe/awilix/pull/413) by [Vinícius Oliveira](https://github.com/vinniciusolliveiracostaa), fixed in [#414](https://github.com/jeffijoe/awilix/pull/414))
