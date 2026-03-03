@@ -48,7 +48,7 @@
     "cover": "npm run test -- --coverage",
     "publish:pre": "npm run lint && npm run build && npm run cover",
     "publish:post": "npm publish && git push --follow-tags",
-    "release:prerelease": "npm run publish:pre && npm version prerelease --preid alpha && npm run publish:post",
+    "release:prerelease": "npm run publish:pre && npm version prerelease --preid alpha && npm publish --tag alpha && git push --follow-tags",
     "release:patch": "npm run publish:pre && npm version patch && npm run publish:post",
     "release:minor": "npm run publish:pre && npm version minor && npm run publish:post",
     "release:major": "npm run publish:pre && npm version major && npm run publish:post"
