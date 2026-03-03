@@ -1,3 +1,7 @@
+# v13.0.3
+
+- Fix CJS environments (e.g. Jest + esbuild) failing to `require()` the `.mjs` native loader by providing separate CJS and ESM versions of `load-module-native` ([#418](https://github.com/jeffijoe/awilix/issues/418), [#419](https://github.com/jeffijoe/awilix/pull/419))
+
 # v13.0.2
 
 - Fix ESM interop by renaming `load-module-native.js` to `load-module-native.mjs` so Node.js treats it as ESM regardless of the package `type` field ([#416](https://github.com/jeffijoe/awilix/issues/416), [#417](https://github.com/jeffijoe/awilix/pull/417))
