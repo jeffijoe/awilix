@@ -148,6 +148,7 @@
       "__tests__",
       "lib",
       "src/load-module-native.mjs",
+      "src/load-module-native.js",
       "src/awilix.ts"
     ],
     "moduleFileExtensions": [
