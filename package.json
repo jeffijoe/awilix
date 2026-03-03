@@ -1,6 +1,6 @@
 {
   "name": "awilix",
-  "version": "13.0.2",
+  "version": "13.0.3-alpha.0",
   "description": "Extremely powerful dependency injection container.",
   "main": "lib/awilix.js",
   "module": "lib/awilix.module.mjs",
@@ -48,7 +48,7 @@
     "cover": "npm run test -- --coverage",
     "publish:pre": "npm run lint && npm run build && npm run cover",
     "publish:post": "npm publish && git push --follow-tags",
-    "release:prerelease": "npm run publish:pre && npm version prerelease --preid alpha && npm run publish:post",
+    "release:prerelease": "npm run publish:pre && npm version prerelease --preid alpha && npm publish --tag alpha && git push --follow-tags",
     "release:patch": "npm run publish:pre && npm version patch && npm run publish:post",
     "release:minor": "npm run publish:pre && npm version minor && npm run publish:post",
     "release:major": "npm run publish:pre && npm version major && npm run publish:post"
@@ -148,6 +148,7 @@
       "__tests__",
       "lib",
       "src/load-module-native.mjs",
+      "src/load-module-native.js",
       "src/awilix.ts"
     ],
     "moduleFileExtensions": [

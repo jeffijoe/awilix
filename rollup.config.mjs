@@ -25,13 +25,7 @@ export default [
   // Build 1: ES modules for Node.
   {
     input: 'src/awilix.ts',
-    external: [
-      'fast-glob',
-      'path',
-      'url',
-      'util',
-      './load-module-native.mjs',
-    ],
+    external: ['fast-glob', 'path', 'url', 'util'],
     treeshake: { moduleSideEffects: 'no-external' },
     onwarn,
     output: [
@@ -41,9 +35,23 @@ export default [
       },
     ],
     plugins: [
-      // Copy the native module loader
+      // The source imports ./load-module-native.js (the CJS version) so that
+      // tsc emits require("./load-module-native.js") in the CJS build.
+      // For this ESM bundle we remap it to the .mjs version.
+      // Returning a relative id with external: true tells rollup to preserve
+      // the path as-is in the output (see https://rollupjs.org/plugin-development/#resolveid).
+      {
+        name: 'rewrite-native-loader',
+        resolveId(source) {
+          if (source === './load-module-native.js') {
+            return { id: './load-module-native.mjs', external: true }
+          }
+          return null
+        },
+      },
+      // Copy the native module loaders and their type declarations to lib/
       copy({
-        targets: [{ src: 'src/load-module-native.mjs', dest: 'lib' }],
+        targets: [{ src: 'src/load-module-native.*', dest: 'lib' }],
       }),
       typescript(tsOpts),
     ],
