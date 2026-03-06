@@ -1494,6 +1494,7 @@ because they depend on Node-specific packages.
 - [`awilix-router-core`](https://github.com/jeffijoe/awilix-router-core): Library for building HTTP bindings for Awilix with routing.
 - [`fastify-awilix`](https://github.com/fastify/fastify-awilix): Bindings for the Fastify framework.
 - [`awilix-vite`](https://github.com/kvist-no/awilix-vite): Use Awilix in Vite projects.
+- [`awilix-modular`](https://github.com/wildstyles/awilix-modular): Modular DI library for Awilix that brings NestJS-like module architecture to any Node.js application.
 
 # Contributing
 
