@@ -122,3 +122,32 @@ class TestClass  {
     ])
   })
 })
+
+// When a string default value ends with an even number of backslashes, the closing
+// quote is NOT escaped (each backslash pair is a single literal backslash).
+// The previous implementation only checked the immediately preceding character,
+// so `'\\'` (source: backslash backslash quote) was incorrectly treated as an
+// escaped quote, causing the parser to run past the end of the string and throw.
+test('string default ending with even backslashes', () => {
+  // 'test\\' in source = string value: test\  (one literal backslash)
+  const doubleBackslash = 'class Foo { constructor(a = \'test\\\\\', b) {} }'
+  expect(parseParameterList(doubleBackslash)).toEqual([
+    { name: 'a', optional: true },
+    { name: 'b', optional: false },
+  ])
+
+  // 'test\\\\' in source = string value: test\\  (two literal backslashes)
+  const quadBackslash = 'class Foo { constructor(a = \'test\\\\\\\\\', b) {} }'
+  expect(parseParameterList(quadBackslash)).toEqual([
+    { name: 'a', optional: true },
+    { name: 'b', optional: false },
+  ])
+
+  // Single backslash before quote still correctly treated as escaped quote
+  // 'don\'t' in source = string value: don't (apostrophe, backslash escapes the middle quote)
+  const singleBackslashEscape = 'function foo(a = \'don\\\'t\', b) {}'
+  expect(parseParameterList(singleBackslashEscape)).toEqual([
+    { name: 'a', optional: true },
+    { name: 'b', optional: false },
+  ])
+})

@@ -57,6 +57,18 @@ describe('tokenizer', () => {
     ).toMatchSnapshot()
   })
 
+  it('can skip strings ending with an even number of backslashes', () => {
+    // An even number of backslashes before the closing quote means the backslashes
+    // escape each other (e.g. `\\` = one literal backslash), so the quote is NOT escaped.
+    // The previous implementation only checked the immediately preceding character,
+    // causing it to incorrectly treat the closing quote as escaped.
+    expect(
+      getTokens(
+        `function rofl(p1 = 'test\\\\', p2 = "test\\\\\\\\", p3)`,
+      ),
+    ).toMatchSnapshot()
+  })
+
   it('can skip interpolated strings', () => {
     expect(
       getTokens(`function intstring1(p1 = \`Hello \${world}\`, p2 = 123)`),
