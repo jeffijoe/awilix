@@ -215,21 +215,16 @@ export function createTokenizer(source: string) {
     pos++
     while (pos < source.length) {
       const ch = source.charAt(pos)
-      // Checks if the quote was escaped by counting consecutive preceding backslashes.
-      // An even number of backslashes means they cancel each other out (e.g. `\\` is a
-      // literal backslash), so the quote is NOT escaped. An odd number means the quote
-      // IS escaped (e.g. `\'`).
+      // Consume escape sequences entirely (e.g. `\'`, `\\`) so neither an
+      // escaped quote nor a literal backslash can affect string termination.
+      if (ch === '\\') {
+        pos += 2
+        continue
+      }
+
       if (ch === quote) {
-        let backslashCount = 0
-        let i = pos - 1
-        while (i >= 0 && source.charAt(i) === '\\') {
-          backslashCount++
-          i--
-        }
-        if (backslashCount % 2 === 0) {
-          pos++
-          return
-        }
+        pos++
+        return
       }
 
       // Template strings are a bit tougher, we want to skip the interpolated values.
