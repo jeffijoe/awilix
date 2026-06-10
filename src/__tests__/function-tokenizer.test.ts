@@ -63,6 +63,14 @@ describe('tokenizer', () => {
     ).toMatchSnapshot()
   })
 
+  it('terminates when the last character is a backslash', () => {
+    expect(getTokens(`function rofl(p1 = 'test\\`)).toMatchSnapshot()
+  })
+
+  it('terminates when an escape sequence dangles at the end', () => {
+    expect(getTokens(`function rofl(p1 = 'test\\\\`)).toMatchSnapshot()
+  })
+
   it('can skip interpolated strings', () => {
     expect(
       getTokens(`function intstring1(p1 = \`Hello \${world}\`, p2 = 123)`),
