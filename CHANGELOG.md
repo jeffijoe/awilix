@@ -1,3 +1,7 @@
+# v13.0.4
+
+- Update packages and simplify build ([#428](https://github.com/jeffijoe/awilix/pull/428)))
+
 # v13.0.3
 
 - Fix CJS environments (e.g. Jest + esbuild) failing to `require()` the `.mjs` native loader by providing separate CJS and ESM versions of `load-module-native` ([#418](https://github.com/jeffijoe/awilix/issues/418), [#419](https://github.com/jeffijoe/awilix/pull/419))

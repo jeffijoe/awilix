@@ -1,9 +1,6 @@
 import typescript from 'rollup-plugin-typescript2'
 import typescriptCompiler from 'typescript'
 import replace from '@rollup/plugin-replace'
-import commonjs from '@rollup/plugin-commonjs'
-import resolve from '@rollup/plugin-node-resolve'
-import copy from 'rollup-plugin-copy'
 
 const comment = '/* removed in browser build */'
 const ignoredWarnings = ['UNUSED_EXTERNAL_IMPORT']
@@ -17,6 +14,7 @@ const tsOpts = {
       // Don't emit declarations, that's done by the regular build.
       declaration: false,
       module: 'ESNext',
+      moduleResolution: 'bundler',
     },
   },
 }
@@ -34,27 +32,7 @@ export default [
         format: 'es',
       },
     ],
-    plugins: [
-      // The source imports ./load-module-native.js (the CJS version) so that
-      // tsc emits require("./load-module-native.js") in the CJS build.
-      // For this ESM bundle we remap it to the .mjs version.
-      // Returning a relative id with external: true tells rollup to preserve
-      // the path as-is in the output (see https://rollupjs.org/plugin-development/#resolveid).
-      {
-        name: 'rewrite-native-loader',
-        resolveId(source) {
-          if (source === './load-module-native.js') {
-            return { id: './load-module-native.mjs', external: true }
-          }
-          return null
-        },
-      },
-      // Copy the native module loaders and their type declarations to lib/
-      copy({
-        targets: [{ src: 'src/load-module-native.*', dest: 'lib' }],
-      }),
-      typescript(tsOpts),
-    ],
+    plugins: [typescript(tsOpts)],
   },
   // Build 2: ES modules for browser builds.
   {
@@ -86,7 +64,7 @@ export default [
         '[util.inspect.custom]: inspect,': comment,
         '[util.inspect.custom]: toStringRepresentationFn,': comment,
         'case util.inspect.custom:': '',
-[`export {
+        [`export {
   type GlobWithOptions,
   type ListModulesOptions,
   type ModuleDescriptor,
@@ -102,14 +80,11 @@ export default [
               declaration: false,
               noUnusedLocals: false,
               module: 'ESNext',
+              moduleResolution: 'bundler',
             },
           },
         }),
       ),
-      resolve({
-        preferBuiltins: true,
-      }),
-      commonjs(),
     ],
   },
 ]

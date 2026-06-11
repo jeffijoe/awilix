@@ -3,6 +3,9 @@
   "exclude": ["__tests__", "**/__tests__/*", "node_modules/*", "examples", "benchmarks"],
   "compilerOptions": {
     "forceConsistentCasingInFileNames": false,
-    "baseUrl": "src"
+    "rootDir": "src",
+    // The base config enables this for ts-jest, but the build keeps it off
+    // so `const enum` values (e.g. TokenizerFlags) are inlined in the output.
+    "isolatedModules": false
   }
 }
