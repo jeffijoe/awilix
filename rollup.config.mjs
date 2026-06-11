@@ -17,6 +17,7 @@ const tsOpts = {
       // Don't emit declarations, that's done by the regular build.
       declaration: false,
       module: 'ESNext',
+      moduleResolution: 'bundler',
     },
   },
 }
@@ -86,7 +87,7 @@ export default [
         '[util.inspect.custom]: inspect,': comment,
         '[util.inspect.custom]: toStringRepresentationFn,': comment,
         'case util.inspect.custom:': '',
-[`export {
+        [`export {
   type GlobWithOptions,
   type ListModulesOptions,
   type ModuleDescriptor,
@@ -102,6 +103,7 @@ export default [
               declaration: false,
               noUnusedLocals: false,
               module: 'ESNext',
+              moduleResolution: 'bundler',
             },
           },
         }),
