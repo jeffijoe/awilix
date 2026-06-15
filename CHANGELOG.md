@@ -1,3 +1,7 @@
+# v13.0.5
+
+- Fix tokenizer double-slash escaping ([#427](https://github.com/jeffijoe/awilix/pull/427) by [Alexander Kireyev](https://github.com/chatman-media))
+
 # v13.0.4
 
 - Update packages and simplify build ([#428](https://github.com/jeffijoe/awilix/pull/428)))
