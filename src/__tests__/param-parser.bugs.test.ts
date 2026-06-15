@@ -122,3 +122,23 @@ class TestClass  {
     ])
   })
 })
+
+test('string default ending with even backslashes', () => {
+  const doubleBackslash = "class Foo { constructor(a = 'test\\\\', b) {} }"
+  expect(parseParameterList(doubleBackslash)).toEqual([
+    { name: 'a', optional: true },
+    { name: 'b', optional: false },
+  ])
+
+  const quadBackslash = "class Foo { constructor(a = 'test\\\\\\\\', b) {} }"
+  expect(parseParameterList(quadBackslash)).toEqual([
+    { name: 'a', optional: true },
+    { name: 'b', optional: false },
+  ])
+
+  const singleBackslashEscape = "function foo(a = 'don\\'t', b) {}"
+  expect(parseParameterList(singleBackslashEscape)).toEqual([
+    { name: 'a', optional: true },
+    { name: 'b', optional: false },
+  ])
+})

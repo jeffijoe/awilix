@@ -215,9 +215,14 @@ export function createTokenizer(source: string) {
     pos++
     while (pos < source.length) {
       const ch = source.charAt(pos)
-      const prev = source.charAt(pos - 1)
-      // Checks if the quote was escaped.
-      if (ch === quote && prev !== '\\') {
+      // Consume escape sequences entirely (e.g. `\'`, `\\`) so neither an
+      // escaped quote nor a literal backslash can affect string termination.
+      if (ch === '\\') {
+        pos += 2
+        continue
+      }
+
+      if (ch === quote) {
         pos++
         return
       }

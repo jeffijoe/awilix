@@ -162,6 +162,51 @@ exports[`tokenizer can skip object literals 1`] = `
 ]
 `;
 
+exports[`tokenizer can skip strings ending with an even number of backslashes 1`] = `
+[
+  {
+    "type": "function",
+  },
+  {
+    "type": "ident",
+    "value": "rofl",
+  },
+  {
+    "type": "(",
+  },
+  {
+    "type": "ident",
+    "value": "p1",
+  },
+  {
+    "type": "=",
+  },
+  {
+    "type": ",",
+  },
+  {
+    "type": "ident",
+    "value": "p2",
+  },
+  {
+    "type": "=",
+  },
+  {
+    "type": ",",
+  },
+  {
+    "type": "ident",
+    "value": "p3",
+  },
+  {
+    "type": ")",
+  },
+  {
+    "type": "EOF",
+  },
+]
+`;
+
 exports[`tokenizer can skip strings with escape seqs in them 1`] = `
 [
   {
@@ -358,6 +403,56 @@ exports[`tokenizer includes equals token but skips value correctly 2`] = `
   },
   {
     "type": ")",
+  },
+  {
+    "type": "EOF",
+  },
+]
+`;
+
+exports[`tokenizer terminates when an escape sequence dangles at the end 1`] = `
+[
+  {
+    "type": "function",
+  },
+  {
+    "type": "ident",
+    "value": "rofl",
+  },
+  {
+    "type": "(",
+  },
+  {
+    "type": "ident",
+    "value": "p1",
+  },
+  {
+    "type": "=",
+  },
+  {
+    "type": "EOF",
+  },
+]
+`;
+
+exports[`tokenizer terminates when the last character is a backslash 1`] = `
+[
+  {
+    "type": "function",
+  },
+  {
+    "type": "ident",
+    "value": "rofl",
+  },
+  {
+    "type": "(",
+  },
+  {
+    "type": "ident",
+    "value": "p1",
+  },
+  {
+    "type": "=",
   },
   {
     "type": "EOF",
