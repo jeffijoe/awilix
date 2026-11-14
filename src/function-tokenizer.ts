@@ -153,13 +153,25 @@ export function createTokenizer(source: string) {
 
   /**
    * Skips everything until the next comma or the end of the parameter list.
-   * Checks the parenthesis balance so we correctly skip function calls.
+   * Checks the parenthesis balance so we correctly skip function calls,
+   * and the brace/bracket balance so we skip object and array literals.
    */
   function skipExpression() {
+    let bracketDepth = 0
     skipUntil((ch) => {
-      const isAtRoot = parenLeft === parenRight + 1
+      const isAtRoot = parenLeft === parenRight + 1 && bracketDepth === 0
       if (ch === ',' && isAtRoot) {
         return true
+      }
+
+      if (ch === '{' || ch === '[') {
+        bracketDepth++
+        return false
+      }
+
+      if (ch === '}' || ch === ']') {
+        bracketDepth--
+        return false
       }
 
       if (ch === '(') {
