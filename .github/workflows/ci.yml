@@ -11,7 +11,7 @@ on:
 jobs:
   ci:
     name: Lint & Test (Node ${{ matrix.version }})
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: true
       matrix:
@@ -19,6 +19,7 @@ jobs:
           - 20
           - 22
           - 24
+          - 26
           - current
     steps:
       - name: Checkout

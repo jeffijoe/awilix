@@ -192,9 +192,10 @@ describe('register() chaining (type-level)', () => {
         logger: asValue(new Logger()),
       })
       .register({
-        config: asFunction(
-          (): AppConfig => ({ port: 3000, host: 'localhost' }),
-        ),
+        config: asFunction((): AppConfig => ({
+          port: 3000,
+          host: 'localhost',
+        })),
       })
 
     type Cradle = typeof container.cradle

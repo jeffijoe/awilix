@@ -28,8 +28,7 @@ export interface ModuleDescriptor {
  * A glob pattern with associated registration options.
  */
 export type GlobWithOptions =
-  | [string]
-  | [string, BuildResolverOptions<any> | LifetimeType]
+  [string] | [string, BuildResolverOptions<any> | LifetimeType]
 
 // Regex to extract the module name.
 const nameExpr = /(.*)\..*/i
@@ -66,7 +65,7 @@ function _listModules(
   const result = opts.glob!(globPattern, { cwd: opts.cwd })
   const mapped = result.map((p) => ({
     name: nameExpr.exec(path.basename(p))![1],
-    path: path.resolve(opts!.cwd!, p),
+    path: path.resolve(opts.cwd!, p),
     opts: patternOpts,
   }))
   return mapped

@@ -1,3 +1,8 @@
+# v13.0.6
+
+- Fix `CLASSIC` injection parsing commas inside object and array literal default values as additional dependencies ([#438](https://github.com/jeffijoe/awilix/issues/438), [#439](https://github.com/jeffijoe/awilix/pull/439) by [@bardrop-oss](https://github.com/bardrop-oss))
+- Update packages and enable type-checked lint rules
+
 # v13.0.5
 
 - Fix tokenizer double-slash escaping ([#427](https://github.com/jeffijoe/awilix/pull/427) by [Alexander Kireyev](https://github.com/chatman-media))

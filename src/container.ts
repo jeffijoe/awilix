@@ -93,6 +93,7 @@ export interface AwilixContainer<Cradle extends object = {}> {
    * Whatever was resolved.
    */
   resolve<K extends keyof Cradle>(
+    this: void,
     name: K,
     resolveOptions?: ResolveOptions,
   ): Cradle[K]
@@ -105,7 +106,11 @@ export interface AwilixContainer<Cradle extends object = {}> {
    * @return {*}
    * Whatever was resolved.
    */
-  resolve<T>(name: string | symbol, resolveOptions?: ResolveOptions): T
+  resolve<T>(
+    this: void,
+    name: string | symbol,
+    resolveOptions?: ResolveOptions,
+  ): T
   /**
    * Checks if the registration with the given name exists.
    *
@@ -380,7 +385,7 @@ function createContainerInternal<T extends object = {}, U extends object = {}>(
     dispose,
     getRegistration,
     [util.inspect.custom]: inspect,
-    [ROLL_UP_REGISTRATIONS!]: rollUpRegistrations,
+    [ROLL_UP_REGISTRATIONS]: rollUpRegistrations,
     get registrations() {
       return rollUpRegistrations()
     },
@@ -724,7 +729,7 @@ function createContainerInternal<T extends object = {}, U extends object = {}>(
   ): Promise<AwilixContainer<T>> | AwilixContainer<T> {
     const _loadModulesDeps = {
       require:
-        options!.require ||
+        options.require ||
         function (uri) {
           // eslint-disable-next-line @typescript-eslint/no-require-imports
           return require(uri)
@@ -742,7 +747,7 @@ function createContainerInternal<T extends object = {}, U extends object = {}>(
         ) as Promise<LoadModulesResult>
       ).then(() => container)
     } else {
-      realLoadModules(_loadModulesDeps, globPatterns, opts)
+      void realLoadModules(_loadModulesDeps, globPatterns, opts)
       return container
     }
   }

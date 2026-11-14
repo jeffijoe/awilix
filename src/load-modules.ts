@@ -55,7 +55,7 @@ export type NameFormatter = (
 export interface LoadModulesDeps {
   listModules: typeof listModules
   container: AwilixContainer
-  require(path: string): any | Promise<any>
+  require(path: string): any
 }
 
 const nameFormatters: Record<string, NameFormatter> = {
