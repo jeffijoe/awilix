@@ -28,8 +28,7 @@ export interface ModuleDescriptor {
  * A glob pattern with associated registration options.
  */
 export type GlobWithOptions =
-  | [string]
-  | [string, BuildResolverOptions<any> | LifetimeType]
+  [string] | [string, BuildResolverOptions<any> | LifetimeType]
 
 // Regex to extract the module name.
 const nameExpr = /(.*)\..*/i

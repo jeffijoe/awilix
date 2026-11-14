@@ -2,15 +2,7 @@
  * Token type.
  */
 export type TokenType =
-  | 'ident'
-  | '('
-  | ')'
-  | ','
-  | '='
-  | '*'
-  | 'function'
-  | 'class'
-  | 'EOF'
+  'ident' | '(' | ')' | ',' | '=' | '*' | 'function' | 'class' | 'EOF'
 
 /**
  * Lexer Token.
