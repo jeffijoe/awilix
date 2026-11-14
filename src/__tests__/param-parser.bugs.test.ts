@@ -142,3 +142,46 @@ test('string default ending with even backslashes', () => {
     { name: 'b', optional: false },
   ])
 })
+
+// https://github.com/jeffijoe/awilix/issues/438
+//
+// When skipping a default value, the tokenizer only tracked parentheses, so a
+// comma inside an object or array literal ended the default value early and
+// the rest of the literal was parsed as parameters.
+describe('#438', () => {
+  test('object literal default with several keys', () => {
+    const classCode = `
+class Client {
+  constructor(logger, options = { retries: 3, timeout: 1000 }, cache) {}
+}`
+    expect(parseParameterList(classCode)).toEqual([
+      { name: 'logger', optional: false },
+      { name: 'options', optional: true },
+      { name: 'cache', optional: false },
+    ])
+  })
+
+  test('array literal default with several items', () => {
+    const funcCode = `(logger, tags = ['a', 'b'], cache) => {}`
+    expect(parseParameterList(funcCode)).toEqual([
+      { name: 'logger', optional: false },
+      { name: 'tags', optional: true },
+      { name: 'cache', optional: false },
+    ])
+  })
+
+  test('nested literals, calls and strings with brackets', () => {
+    const funcCode = `function make(
+      a = { list: [1, [2, 3]], nested: { x: 1, y: f(1, 2) } },
+      b = [{ k: '}', v: ']' }, { k: "{", v: \`[\${1}, 2\` }],
+      c = () => { return 1, 2 },
+      d
+    ) {}`
+    expect(parseParameterList(funcCode)).toEqual([
+      { name: 'a', optional: true },
+      { name: 'b', optional: true },
+      { name: 'c', optional: true },
+      { name: 'd', optional: false },
+    ])
+  })
+})
