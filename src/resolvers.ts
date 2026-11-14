@@ -70,7 +70,7 @@ export interface DisposableResolver<T>
 /**
  * Disposer function type.
  */
-export type Disposer<T> = (value: T) => any | Promise<any>
+export type Disposer<T> = (value: T) => any
 
 /**
  * The options when registering a class, function or value.
