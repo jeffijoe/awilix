@@ -47,9 +47,13 @@ export function parseParameterList(source: string): Array<Parameter> | null {
         break
       }
       case 'function': {
-        const next = nextToken()
-        if (next.type === 'ident' || next.type === '*') {
-          // This is the function name or a generator star. Skip it.
+        let next = nextToken()
+        if (next.type === '*') {
+          // Generator star. Skip it.
+          next = nextToken()
+        }
+        if (next.type === 'ident') {
+          // This is the function name. Skip it.
           nextToken()
         }
         break
