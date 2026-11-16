@@ -1,3 +1,8 @@
+# v13.0.7
+
+- Fix registration lookups incorrectly matching inherited `Object.prototype` names such as `toString` and `constructor` ([#442](https://github.com/jeffijoe/awilix/issues/442), [#443](https://github.com/jeffijoe/awilix/pull/443) by [@bardrop-oss](https://github.com/bardrop-oss))
+- Fix `CLASSIC` injection parsing named generator function names as dependencies instead of their parameters ([#444](https://github.com/jeffijoe/awilix/issues/444), [#445](https://github.com/jeffijoe/awilix/pull/445) by [@bardrop-oss](https://github.com/bardrop-oss))
+
 # v13.0.6
 
 - Fix `CLASSIC` injection parsing commas inside object and array literal default values as additional dependencies ([#438](https://github.com/jeffijoe/awilix/issues/438), [#439](https://github.com/jeffijoe/awilix/pull/439) by [@bardrop-oss](https://github.com/bardrop-oss))
