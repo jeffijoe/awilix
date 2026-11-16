@@ -989,6 +989,15 @@ describe('memoizing registrations', () => {
       otherContainer.register({ val: asValue(1337) })
       expect(otherContainer.build(fn)).toBe(1337)
     })
+
+    it('injects the parameters of a named generator function', () => {
+      const values = container.build(
+        asFunction(function* makeValues(val: number) {
+          yield val
+        }).classic(),
+      )
+      expect([...values]).toEqual([1337])
+    })
   })
 
   describe('well-known names and symbols', () => {

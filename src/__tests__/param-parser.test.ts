@@ -338,4 +338,27 @@ class UserController {
       },
     ])
   })
+
+  it('skips generator star and name of a named generator', () => {
+    const expected = [
+      { name: 'first', optional: false },
+      { name: 'second', optional: false },
+    ]
+    expect(parseParameterList(`function* gen(first, second) {}`)).toEqual(
+      expected,
+    )
+    expect(parseParameterList(`function *gen(first, second) {}`)).toEqual(
+      expected,
+    )
+    expect(parseParameterList(`async function* gen(first, second) {}`)).toEqual(
+      expected,
+    )
+    expect(
+      parseParameterList(
+        function* gen(first: unknown, second: unknown) {
+          yield [first, second]
+        }.toString(),
+      ),
+    ).toEqual(expected)
+  })
 })
