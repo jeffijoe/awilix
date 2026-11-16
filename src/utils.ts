@@ -80,7 +80,10 @@ export function isClass(
 
   const second = tokenizer.next()
   if (first.type === 'function' && second.value) {
-    if (second.value[0] === second.value[0].toUpperCase()) {
+    // Only a name that starts with an uppercase letter counts. `_` and `$`
+    // have no case, so `function _make() {}` stays a plain function.
+    const firstChar = second.value[0]
+    if (firstChar !== firstChar.toLowerCase()) {
       return true
     }
   }

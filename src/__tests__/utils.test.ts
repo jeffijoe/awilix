@@ -30,6 +30,27 @@ describe('isClass', () => {
     ).toBe(false)
   })
 
+  it('returns false for functions whose name starts with _ or $', () => {
+    expect(
+      isClass(function _stuff() {
+        /**/
+      }),
+    ).toBe(false)
+    expect(
+      isClass(function $stuff() {
+        /**/
+      }),
+    ).toBe(false)
+  })
+
+  it('returns true for functions whose name starts with a non-ASCII capital letter', () => {
+    expect(
+      isClass(function Élan() {
+        /**/
+      }),
+    ).toBe(true)
+  })
+
   it('returns false for other stuff', () => {
     expect(isClass('hello' as any)).toBe(false)
     expect(isClass(123 as any)).toBe(false)

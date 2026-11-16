@@ -982,6 +982,25 @@ describe('memoizing registrations', () => {
       expect(container.build(BuildTest).val).toBe(1337)
     })
 
+    it('calls a function whose name starts with _ or $ as a function', () => {
+      expect(
+        container.build(
+          function _double(val: number) {
+            return val * 2
+          },
+          { injectionMode: InjectionMode.CLASSIC },
+        ),
+      ).toBe(2674)
+      expect(
+        container.build(
+          function $double(val: number) {
+            return val * 2
+          },
+          { injectionMode: InjectionMode.CLASSIC },
+        ),
+      ).toBe(2674)
+    })
+
     it('uses containers injection mode by default', () => {
       const otherContainer = createContainer({
         injectionMode: InjectionMode.CLASSIC,
