@@ -123,6 +123,16 @@ describe('container', () => {
     it('returns false if the registration does not exist', () => {
       expect(createContainer().hasRegistration('theValue')).toBe(false)
     })
+
+    it('returns false for names that exist on Object.prototype', () => {
+      const container = createContainer()
+      const scope = container.createScope()
+      for (const name of ['constructor', 'toString', 'hasOwnProperty']) {
+        expect(container.hasRegistration(name)).toBe(false)
+        expect(scope.hasRegistration(name)).toBe(false)
+        expect(container.getRegistration(name)).toBe(null)
+      }
+    })
   })
 
   describe('resolve', () => {
@@ -151,6 +161,21 @@ describe('container', () => {
       const err = throws(() => container.resolve('nope'))
       expect(err).toBeInstanceOf(AwilixResolutionError)
       expect(err.message).toMatch(/nope/i)
+    })
+
+    it('does not treat names on Object.prototype as registrations', () => {
+      const container = createContainer()
+      const err = throws(() => container.resolve('valueOf'))
+      expect(err).toBeInstanceOf(AwilixResolutionError)
+      expect(err.message).toMatch(/valueOf/)
+      expect(
+        container.resolve('hasOwnProperty', { allowUnregistered: true }),
+      ).toBeUndefined()
+      expect(
+        container
+          .createScope()
+          .resolve('isPrototypeOf', { allowUnregistered: true }),
+      ).toBeUndefined()
     })
 
     it('throws an AwilixResolutionError that supports symbols', () => {
@@ -982,6 +1007,12 @@ describe('memoizing registrations', () => {
     it('Symbol.toStringTag', () => {
       const result = Object.prototype.toString.call(createContainer().cradle)
       expect(result).toBe('[object AwilixContainerCradle]')
+    })
+
+    it('toString() should return [object AwilixContainerCradle]', () => {
+      expect(createContainer().cradle.toString()).toBe(
+        '[object AwilixContainerCradle]',
+      )
     })
   })
 })

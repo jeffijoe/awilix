@@ -306,7 +306,9 @@ function createContainerInternal<T extends object = {}, U extends object = {}>(
   const resolutionStack: ResolutionStack = parentResolutionStack ?? []
 
   // Internal registration store for this container.
-  const registrations: RegistrationHash = {}
+  // No prototype, so names like `toString` or `constructor` are not
+  // mistaken for registrations.
+  const registrations: RegistrationHash = Object.create(null)
 
   /**
    * The `Proxy` that is passed to functions so they can resolve their dependencies without
