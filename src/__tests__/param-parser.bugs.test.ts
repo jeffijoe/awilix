@@ -185,3 +185,90 @@ class Client {
     ])
   })
 })
+
+// Strings in a class body were read as code, so a glob in a class field
+// (`'src/**/*.js'`) opened a block comment that hid the constructor, and
+// `"constructor(x)"` in a string was taken as the constructor.
+describe('strings in class bodies', () => {
+  test('glob string in a class field before the constructor', () => {
+    const classCode = `
+class Loader {
+  pattern = 'src/**/*.js'
+  constructor(fs, logger) {}
+}`
+    expect(parseParameterList(classCode)).toEqual([
+      { name: 'fs', optional: false },
+      { name: 'logger', optional: false },
+    ])
+  })
+
+  test('constructor call text in strings and templates before the constructor', () => {
+    const classCode = `
+class A {
+  m() { return "constructor(x)" }
+  e() { return 'it\\'s constructor(y)' }
+  n() { return \`call constructor(\${1}) first\` }
+  constructor(a, b) {}
+}`
+    expect(parseParameterList(classCode)).toEqual([
+      { name: 'a', optional: false },
+      { name: 'b', optional: false },
+    ])
+  })
+
+  test('class without a constructor whose strings mention one', () => {
+    const classCode = `
+class A extends B {
+  m() { throw new Error("call constructor(opts) first") }
+}`
+    expect(parseParameterList(classCode)).toBeNull()
+  })
+
+  test('URL string on one line with the constructor', () => {
+    const classCode = `class A{static url="http://x";constructor(e,t){this.e=e}}`
+    expect(parseParameterList(classCode)).toEqual([
+      { name: 'e', optional: false },
+      { name: 't', optional: false },
+    ])
+  })
+
+  test('quoted constructor names', () => {
+    expect(
+      parseParameterList(`
+class A {
+  m() { return 'x' }
+  'constructor'(real) {}
+}`),
+    ).toEqual([{ name: 'real', optional: false }])
+    expect(
+      parseParameterList(`
+class A {
+  m() { return 'x' }
+  "constructor"(real) {}
+}`),
+    ).toEqual([{ name: 'real', optional: false }])
+  })
+
+  test('a lone quote in a regex does not hide the constructor', () => {
+    const classCode = `
+class A {
+  quote = /"/
+  m(x) { if (x) /'/.test(x) }
+  tick = /\`/
+  constructor(real) {}
+}`
+    expect(parseParameterList(classCode)).toEqual([
+      { name: 'real', optional: false },
+    ])
+  })
+
+  test('divisions in default values', () => {
+    expect(
+      parseParameterList(`function f(a = x++ / 2, b = 3 / 4, c) {}`),
+    ).toEqual([
+      { name: 'a', optional: true },
+      { name: 'b', optional: true },
+      { name: 'c', optional: false },
+    ])
+  })
+})
