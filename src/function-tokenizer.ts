@@ -112,6 +112,30 @@ export function createTokenizer(source: string) {
           }
           break
         }
+        case "'":
+        case '"':
+        case '`': {
+          // A quote with no closing quote is not a string (e.g. the `"` in
+          // the regex `/"/`), so only skip that one character.
+          if (!isClosedString()) {
+            pos++
+            break
+          }
+          // Skip strings so their contents (e.g. `'src/**/*.js'` or
+          // `"constructor(x)"` in a class body) are not read as code.
+          const start = pos
+          skipString()
+          // A quoted method name like `'constructor'(a) {}` is still the
+          // class constructor.
+          if (
+            ch !== '`' &&
+            source.substring(start + 1, pos - 1) === 'constructor'
+          ) {
+            value = 'constructor'
+            return (type = 'ident')
+          }
+          break
+        }
         default:
           // Scans an identifier.
           if (isIdentifierStart(ch)) {
@@ -209,6 +233,25 @@ export function createTokenizer(source: string) {
       }
       pos++
     }
+  }
+
+  /**
+   * Given the current position is at a string quote, determines whether the
+   * string is closed. Quoted strings must close on the same line.
+   */
+  function isClosedString() {
+    const quote = source.charAt(pos)
+    for (let i = pos + 1; i < end; i++) {
+      const ch = source.charAt(i)
+      if (ch === '\\') {
+        i++
+      } else if (ch === quote) {
+        return true
+      } else if (ch === '\n' && quote !== '`') {
+        return false
+      }
+    }
+    return false
   }
 
   /**
