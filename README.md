@@ -1437,7 +1437,8 @@ resolved. **Only cached values will be disposed, meaning they must have a
 `Lifetime` of `SCOPED` or `SINGLETON`**, or else they are not cached by the
 container and therefore can't be disposed by it.
 
-This also clears the container's cache.
+Each cached value is removed after its disposer finishes, even if it throws or
+rejects. Values without a disposer are also removed.
 
 ```js
 const pg = require('pg')
@@ -1458,6 +1459,58 @@ container.dispose().then(() => {
 })
 ```
 
+Disposers are called in the reverse order they were cached. By default,
+`DisposalMode.CONCURRENT` runs them concurrently, so an asynchronous disposer
+cannot rely on its dependencies remaining available until it finishes.
+
+Use `DisposalMode.SERIAL` to wait for each disposer before calling the next:
+
+```js
+const { DisposalMode } = require('awilix')
+
+await container.dispose({ mode: DisposalMode.SERIAL })
+```
+
+For example, if a service takes a logger in its constructor, the logger is cached
+first, so the service is disposed first. Serial mode lets the service finish
+cleanup using the logger before the logger is disposed.
+
+**Important:** if a dependency is accessed lazily, resolve it before the service
+that needs it during cleanup to get the same disposal order. In serial mode,
+cleanup can resolve that dependency through the cradle while it is still cached.
+Resolving a dependency that has already been removed, or was never cached,
+throws instead of creating an instance that wouldn't be disposed. Transient
+dependencies cannot be resolved during disposal because they aren't cached.
+
+Calling `dispose()` while disposal is running rejects with an error. This includes
+calls from inside a disposer. Once disposal finishes, further calls do nothing,
+even if cleanup failed. The container can no longer resolve dependencies after
+disposal finishes.
+
+**Important:** only values in the container's own cache are disposed. Disposing a
+container does not dispose its scopes or its parent's cached values.
+Singletons belong to the root container, so scopes cannot resolve new singletons
+while the root is disposing. Once the root is disposed, singleton resolution
+through its scopes also throws.
+
+```js
+const root = createContainer().register({
+  db: asFunction(() => ({})).singleton(),
+  request: asFunction(() => ({})).scoped(),
+})
+
+const scope = root.createScope()
+await root.dispose()
+
+scope.resolve('request') // OK, the scope is still active.
+scope.resolve('db') // Throws, the root has been disposed.
+root.resolve('request') // Throws, a disposed container cannot resolve anything.
+```
+
+In both modes, cleanup continues if a disposer throws or rejects. Once all
+disposers have finished, `dispose()` rejects with an `AggregateError` whose
+`errors` array contains the collected errors.
+
 # Universal Module (Browser Support)
 
 **As of v3**, Awilix ships with official support for browser environments!
@@ -1477,13 +1530,14 @@ anything. 😎
 **Important**: the browser builds do not support `loadModules` or `listModules`,
 because they depend on Node-specific packages.
 
-**Also important**: due to using `Proxy` + various `Reflect` methods, Awilix is only _supposed_ to work in:
+**Also important**: Awilix requires the following minimum browser versions:
 
-- Chrome >= 49
-- Firefox >= 18
-- Edge >= 12
-- Opera >= 36
-- Safari >= 10
+- Chrome >= 85
+- Firefox >= 79
+- Edge >= 85
+- Opera >= 71
+- Safari >= 14
+- iOS Safari >= 14
 - Internet Explorer is not supported
 
 # Ecosystem

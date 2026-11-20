@@ -1,5 +1,6 @@
 import * as util from 'util'
 import {
+  AwilixError,
   AwilixRegistrationError,
   AwilixResolutionError,
   AwilixTypeError,
@@ -22,6 +23,7 @@ import {
   asFunction,
 } from './resolvers'
 import { isClass, last, nameValueToObject } from './utils'
+import { DisposalMode, type DisposalModeType } from './disposal-mode'
 
 /**
  * The container returned from createContainer has some methods and properties.
@@ -151,8 +153,10 @@ export interface AwilixContainer<Cradle extends object = {}> {
    * Disposes this container and it's children, calling the disposer
    * on all disposable registrations and clearing the cache.
    * Only applies to registrations with `SCOPED` or `SINGLETON` lifetime.
+   *
+   * @param {DisposeOptions} options
    */
-  dispose(): Promise<void>
+  dispose(options?: DisposeOptions): Promise<void>
 }
 
 /**
@@ -164,6 +168,18 @@ export interface ResolveOptions {
    * returns `undefined` rather than throwing an error.
    */
   allowUnregistered?: boolean
+}
+
+/**
+ * Optional options for disposing a container.
+ */
+export interface DisposeOptions {
+  /**
+   * How to invoke disposers of cached dependencies.
+   *
+   * @default 'CONCURRENT'
+   */
+  mode?: DisposalModeType
 }
 
 /**
@@ -288,10 +304,19 @@ export function createContainer<T extends object = {}>(
   return createContainerInternal(options)
 }
 
+/**
+ * Tracks container disposal state.
+ */
+interface DisposalState {
+  disposing: boolean
+  disposed: boolean
+}
+
 function createContainerInternal<T extends object = {}, U extends object = {}>(
   options: ContainerOptions,
   parentContainer?: AwilixContainer<U>,
   parentResolutionStack?: ResolutionStack,
+  parentRootDisposalState?: DisposalState,
 ): AwilixContainer<T> {
   options = {
     injectionMode: InjectionMode.PROXY,
@@ -309,6 +334,12 @@ function createContainerInternal<T extends object = {}, U extends object = {}>(
   // No prototype, so names like `toString` or `constructor` are not
   // mistaken for registrations.
   const registrations: RegistrationHash = Object.create(null)
+
+  // Track container disposal state so we can reject resolution during and after disposal.
+  const disposalState: DisposalState = { disposing: false, disposed: false }
+
+  // Scopes own their cache, but all singletons belong to the root container.
+  const rootDisposalState = parentRootDisposalState ?? disposalState
 
   /**
    * The `Proxy` that is passed to functions so they can resolve their dependencies without
@@ -457,6 +488,7 @@ function createContainerInternal<T extends object = {}, U extends object = {}>(
       options,
       container as AwilixContainer<T>,
       resolutionStack,
+      rootDisposalState,
     )
   }
 
@@ -526,6 +558,14 @@ function createContainerInternal<T extends object = {}, U extends object = {}>(
    * Whatever was resolved.
    */
   function resolve(name: string | symbol, resolveOpts?: ResolveOptions): any {
+    if (disposalState.disposed) {
+      throw new AwilixResolutionError(
+        name,
+        resolutionStack,
+        'Container has been disposed.',
+      )
+    }
+
     resolveOpts = resolveOpts || {}
 
     try {
@@ -604,6 +644,14 @@ function createContainerInternal<T extends object = {}, U extends object = {}>(
       // Fast path: cached singletons can always be returned immediately
       // since nothing has a longer lifetime.
       if (lifetime === Lifetime.SINGLETON) {
+        if (rootDisposalState.disposed) {
+          throw new AwilixResolutionError(
+            name,
+            resolutionStack,
+            `Cannot resolve new instance of '${name.toString()}' because the root container has been disposed.`,
+          )
+        }
+
         const cached = rootContainer.cache.get(name)
         if (cached) {
           return cached.value
@@ -618,6 +666,18 @@ function createContainerInternal<T extends object = {}, U extends object = {}>(
           throwIfLifetimeLeakage(name, lifetime, resolver)
           return cached.value
         }
+      }
+
+      // A new instance would not be in the disposal snapshot and could leak.
+      if (
+        disposalState.disposing ||
+        (lifetime === Lifetime.SINGLETON && rootDisposalState.disposing)
+      ) {
+        throw new AwilixResolutionError(
+          name,
+          resolutionStack,
+          'Cannot resolve uncached dependencies while disposing.',
+        )
       }
 
       // Slow path: need to invoke the factory.
@@ -757,19 +817,75 @@ function createContainerInternal<T extends object = {}, U extends object = {}>(
   /**
    * Disposes this container and it's children, calling the disposer
    * on all disposable registrations and clearing the cache.
+   *
+   * @param options
    */
-  function dispose(): Promise<void> {
+  async function dispose(options?: DisposeOptions): Promise<void> {
+    if (disposalState.disposed) {
+      return
+    }
+
+    if (disposalState.disposing) {
+      throw new AwilixError('Container disposal already in progress.')
+    }
+
+    // Set `disposalState.disposing` before invoking disposers to reject synchronous re-entrancy too.
+    disposalState.disposing = true
+    try {
+      await disposeEntries(options)
+    } finally {
+      // Failed cleanup is still terminal; another `dispose()` must not run it again.
+      disposalState.disposed = true
+      disposalState.disposing = false
+    }
+  }
+
+  async function disposeEntries(options?: DisposeOptions): Promise<void> {
+    const isSerialDisposalRequested = options?.mode === DisposalMode.SERIAL
     const entries = Array.from(container.cache.entries())
-    container.cache.clear()
-    return Promise.all(
-      entries.map(([, entry]) => {
-        const { resolver, value } = entry
-        const disposable = resolver as DisposableResolver<any>
+
+    // Reverse the order of the entries so we trigger disposal of the dependent before
+    // its' dependencies. For example, if you're injecting a logger into a service, and
+    // both the logger and service have a disposer, the service's disposer is called
+    // before the logger's disposer.
+    entries.reverse()
+
+    // Collected errors from disposers. This gets modified by the `disposeEntry` helper.
+    const errors: unknown[] = []
+
+    if (isSerialDisposalRequested) {
+      // Disposes dependencies one at a time. In the example above, this would ensure that
+      // the service can use the logger in its' disposer, since the logger wouldn't get disposed
+      // until after the service does.
+      for (const entry of entries) {
+        await disposeEntry(entry)
+      }
+    } else {
+      // Disposes dependencies concurrently.
+      await Promise.all(entries.map(disposeEntry))
+    }
+
+    if (errors.length) {
+      throw new AggregateError(errors, 'Failed to dispose dependencies')
+    }
+
+    // Disposes an entry if it has a disposer.
+    async function disposeEntry([name, { resolver, value }]: [
+      string | symbol,
+      CacheEntry<unknown>,
+    ]) {
+      const disposable = resolver as DisposableResolver<any>
+      try {
         if (disposable.dispose) {
-          return Promise.resolve().then(() => disposable.dispose!(value))
+          return await disposable.dispose(value)
         }
-        return Promise.resolve()
-      }),
-    ).then(() => undefined)
+      } catch (error: unknown) {
+        errors.push(error)
+      } finally {
+        // Keep the instance cached until its disposer finishes so cleanup can
+        // resolve it through the `cradle` without creating a replacement.
+        container.cache.delete(name)
+      }
+    }
   }
 }
