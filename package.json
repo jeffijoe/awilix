@@ -80,18 +80,11 @@
   },
   "homepage": "https://github.com/jeffijoe/awilix#readme",
   "devDependencies": {
-    "@babel/core": "^8.1.2",
-    "@babel/plugin-transform-runtime": "^8.1.2",
-    "@babel/preset-env": "^8.0.7",
-    "@babel/runtime": "^8.1.2",
     "@eslint/js": "^10.0.1",
     "@rollup/plugin-replace": "^6.0.3",
-    "@types/jest": "^30.0.0",
     "@types/node": "^26.6.6",
-    "babel-jest": "^30.5.2",
     "eslint": "^10.15.0",
     "husky": "^9.1.7",
-    "jest": "^30.5.2",
     "lint-staged": "^17.6.0",
     "prettier": "^3.10.1",
     "rimraf": "^6.1.4",
@@ -99,7 +92,6 @@
     "rollup-plugin-typescript2": "^0.37.0",
     "smid": "^0.1.1",
     "tinybench": "^6.2.3",
-    "ts-jest": "^29.4.15",
     "tslib": "^2.9.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.2"
@@ -116,58 +108,5 @@
   "prettier": {
     "semi": false,
     "singleQuote": true
-  },
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "targets": {
-            "node": "14.0.0"
-          }
-        }
-      ]
-    ],
-    "plugins": [
-      "@babel/plugin-transform-runtime"
-    ]
-  },
-  "typesync": {
-    "ignorePackages": [
-      "@babel/preset-env",
-      "@babel/core",
-      "@babel/plugin-transform-runtime",
-      "prettier",
-      "rimraf",
-      "istanbul"
-    ]
-  },
-  "jest": {
-    "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
-    "testEnvironment": "node",
-    "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "__tests__",
-      "lib",
-      "src/load-module-native.ts",
-      "src/awilix.ts"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
-    "moduleNameMapper": {
-      "^(\\.{1,2}/.*)\\.js$": "$1"
-    },
-    "transform": {
-      "^.+\\.tsx?$": [
-        "ts-jest",
-        {
-          "useESM": true
-        }
-      ],
-      "^.+\\.m?jsx?$": "babel-jest"
-    }
   }
 }

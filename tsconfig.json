@@ -12,7 +12,7 @@
     "target": "ES2021",
     "esModuleInterop": true,
     "lib": ["ES2021"],
-    "types": ["node", "jest"],
+    "types": ["node"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "isolatedModules": true,
