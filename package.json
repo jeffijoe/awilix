@@ -42,16 +42,17 @@
   "scripts": {
     "build": "rimraf lib && tsc -p tsconfig.build.json && rollup -c",
     "check": "tsc -p tsconfig.json --noEmit --pretty",
-    "test": "npm run check && jest",
+    "test": "npm run check && jest && npm run test:artifacts",
     "lint": "npm run check && eslint --fix \"{src,examples}/**/*.ts\" && prettier --write \"{src,examples}/**/*.{ts,js}\"",
     "bench": "npx tsx benchmarks/run-all.ts",
-    "cover": "npm run test -- --coverage",
+    "cover": "npm run check && jest --coverage && npm run test:artifacts",
     "publish:pre": "npm run lint && npm run build && npm run cover",
     "publish:post": "npm publish && git push --follow-tags",
     "release:prerelease": "npm run publish:pre && npm version prerelease --preid alpha && npm publish --tag alpha && git push --follow-tags",
     "release:patch": "npm run publish:pre && npm version patch && npm run publish:post",
     "release:minor": "npm run publish:pre && npm version minor && npm run publish:post",
-    "release:major": "npm run publish:pre && npm version major && npm run publish:post"
+    "release:major": "npm run publish:pre && npm version major && npm run publish:post",
+    "test:artifacts": "node --test test/artifacts.test.js"
   },
   "files": [
     "lib",
