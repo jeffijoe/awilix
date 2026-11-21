@@ -10,6 +10,7 @@ export {
   type NameAndRegistrationPair,
   type RegistrationHash,
   type ResolveOptions,
+  type DisposeOptions,
   createContainer,
 } from './container'
 export {
@@ -20,6 +21,7 @@ export {
 } from './errors'
 export { InjectionMode, type InjectionModeType } from './injection-mode'
 export { Lifetime, type LifetimeType } from './lifetime'
+export { DisposalMode, type DisposalModeType } from './disposal-mode'
 export {
   type GlobWithOptions,
   type ListModulesOptions,

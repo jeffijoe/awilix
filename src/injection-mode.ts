@@ -4,7 +4,7 @@
 export type InjectionModeType = 'PROXY' | 'CLASSIC'
 
 /**
- * Resolution modes.
+ * Injection modes.
  */
 export const InjectionMode: Record<InjectionModeType, InjectionModeType> = {
   /**

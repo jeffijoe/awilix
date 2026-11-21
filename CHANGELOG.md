@@ -1,3 +1,15 @@
+# v14.0.0
+
+- Add `DisposalMode.SERIAL` to `container.dispose()` to wait for each disposer before calling the next ([#429](https://github.com/jeffijoe/awilix/issues/429), [#450](https://github.com/jeffijoe/awilix/pull/450))
+- **BREAKING**: Call disposers in reverse cache order in both modes
+- **BREAKING**: Wait for all disposers to finish before rejecting with an `AggregateError` containing all disposal errors, instead of rejecting with the first error directly
+- **BREAKING**: Invoke concurrent disposers immediately instead of deferring calls to a microtask
+- **BREAKING**: Reject calls to `container.dispose()` while disposal is already running. Once disposal finishes, further calls do nothing, even if cleanup failed, and resolving dependencies from the container throws
+- **BREAKING**: Reject uncached dependency resolutions during disposal instead of creating instances that would not be disposed
+- Keep cached instances available until their disposers finish so cleanup can resolve dependencies through the cradle without creating replacements
+- **BREAKING**: Bump minimum browser versions to Chrome 85, Firefox 79, Edge 85, Opera 71, Safari 14, and iOS Safari 14 for `AggregateError` support
+- Fix strings and template literals in class bodies confusing `CLASSIC` constructor parameter parsing ([#448](https://github.com/jeffijoe/awilix/issues/448), [#449](https://github.com/jeffijoe/awilix/pull/449) by [@bardrop](https://github.com/bardrop))
+
 # v13.0.7
 
 - Fix registration lookups incorrectly matching inherited `Object.prototype` names such as `toString` and `constructor` ([#442](https://github.com/jeffijoe/awilix/issues/442), [#443](https://github.com/jeffijoe/awilix/pull/443) by [@bardrop-oss](https://github.com/bardrop-oss))
