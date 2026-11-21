@@ -2,7 +2,7 @@ import {
   type Token,
   createTokenizer,
   TokenizerFlags,
-} from './function-tokenizer'
+} from './function-tokenizer.ts'
 
 /**
  * A parameter for a function.
@@ -163,7 +163,7 @@ export function parseParameterList(source: string): Array<Parameter> | null {
   /**
    * Advances the tokenizer and stores the previous token in history
    */
-  function nextToken(flags = TokenizerFlags.None) {
+  function nextToken(flags: TokenizerFlags = TokenizerFlags.None) {
     t = _next(flags)
     return t
   }

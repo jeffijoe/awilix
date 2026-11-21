@@ -7,6 +7,8 @@ const ignoredWarnings = ['UNUSED_EXTERNAL_IMPORT']
 
 const tsOpts = {
   cacheRoot: './node_modules/.rpt2',
+  // The build runs `tsc` before Rollup.
+  check: false,
   typescript: typescriptCompiler,
   tsconfig: 'tsconfig.build.json',
   tsconfigOverride: {
@@ -15,6 +17,8 @@ const tsOpts = {
       declaration: false,
       module: 'ESNext',
       moduleResolution: 'bundler',
+      // Rollup resolves the `.ts` imports itself.
+      rewriteRelativeImportExtensions: false,
     },
   },
 }
@@ -69,18 +73,16 @@ export default [
   type ListModulesOptions,
   type ModuleDescriptor,
   listModules,
-} from './list-modules'`]: comment,
+} from './list-modules.ts'`]: comment,
         "import * as util from 'util'": '',
       }),
       typescript(
         Object.assign({}, tsOpts, {
           tsconfigOverride: {
             compilerOptions: {
+              ...tsOpts.tsconfigOverride.compilerOptions,
               target: 'ES2020',
-              declaration: false,
               noUnusedLocals: false,
-              module: 'ESNext',
-              moduleResolution: 'bundler',
             },
           },
         }),

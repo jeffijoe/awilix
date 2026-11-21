@@ -2,12 +2,12 @@ import type {
   AwilixContainer,
   FunctionReturning,
   ResolveOptions,
-} from './container'
-import { AwilixTypeError } from './errors'
-import { type InjectionModeType, InjectionMode } from './injection-mode'
-import { type LifetimeType, Lifetime } from './lifetime'
-import { type Parameter, parseParameterList } from './param-parser'
-import { isFunction } from './utils'
+} from './container.ts'
+import { AwilixTypeError } from './errors.ts'
+import { type InjectionModeType, InjectionMode } from './injection-mode.ts'
+import { type LifetimeType, Lifetime } from './lifetime.ts'
+import { type Parameter, parseParameterList } from './param-parser.ts'
+import { isFunction } from './utils.ts'
 
 // We parse the signature of any `Function`, so we want to allow `Function` types.
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */

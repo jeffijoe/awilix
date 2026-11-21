@@ -15,13 +15,16 @@ export interface Token {
 /**
  * Flags that can be passed to the tokenizer to toggle certain things.
  */
-export const enum TokenizerFlags {
-  None = 0,
+export const TokenizerFlags = {
+  None: 0,
   /**
    * If this is set, the tokenizer will not attempt to be smart about skipping expressions.
    */
-  Dumb = 1,
-}
+  Dumb: 1,
+} as const
+
+export type TokenizerFlags =
+  (typeof TokenizerFlags)[keyof typeof TokenizerFlags]
 
 /**
  * Creates a tokenizer for the specified source.
@@ -33,7 +36,7 @@ export function createTokenizer(source: string) {
   let pos: number = 0
   let type: TokenType = 'EOF'
   let value: string = ''
-  let flags = TokenizerFlags.None
+  let flags: TokenizerFlags = TokenizerFlags.None
   // These are used to greedily skip as much as possible.
   // Whenever we reach a paren, we increment these.
   let parenLeft = 0
@@ -47,7 +50,7 @@ export function createTokenizer(source: string) {
   /**
    * Advances the tokenizer and returns the next token.
    */
-  function next(nextFlags = TokenizerFlags.None): Token {
+  function next(nextFlags: TokenizerFlags = TokenizerFlags.None): Token {
     flags = nextFlags
     advance()
     return createToken()

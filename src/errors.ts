@@ -1,4 +1,4 @@
-import type { ResolutionStack } from './container'
+import type { ResolutionStack } from './container.ts'
 
 /**
  * Newline.

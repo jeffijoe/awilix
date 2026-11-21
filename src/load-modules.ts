@@ -1,15 +1,15 @@
-import { camelCase } from './camel-case'
+import { camelCase } from './camel-case.ts'
 import { pathToFileURL } from 'url'
-import type { AwilixContainer } from './container'
-import { Lifetime } from './lifetime'
+import type { AwilixContainer } from './container.ts'
+import { Lifetime } from './lifetime.ts'
 import type {
   GlobWithOptions,
   ModuleDescriptor,
   listModules,
-} from './list-modules'
-import type { BuildResolver, BuildResolverOptions } from './resolvers'
-import { RESOLVER, asClass, asFunction } from './resolvers'
-import { isClass, isFunction } from './utils'
+} from './list-modules.ts'
+import type { BuildResolver, BuildResolverOptions } from './resolvers.ts'
+import { RESOLVER, asClass, asFunction } from './resolvers.ts'
+import { isClass, isFunction } from './utils.ts'
 
 /**
  * Metadata of the module as well as the loaded module itself.

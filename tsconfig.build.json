@@ -4,8 +4,6 @@
   "compilerOptions": {
     "forceConsistentCasingInFileNames": false,
     "rootDir": "src",
-    // The base config enables this for ts-jest, but the build keeps it off
-    // so `const enum` values (e.g. TokenizerFlags) are inlined in the output.
     "isolatedModules": false
   }
 }

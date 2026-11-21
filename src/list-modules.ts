@@ -1,8 +1,8 @@
 import glob from 'fast-glob'
 import * as path from 'path'
-import { flatten } from './utils'
-import type { BuildResolverOptions, ResolverOptions } from './resolvers'
-import type { LifetimeType } from './awilix'
+import { flatten } from './utils.ts'
+import type { BuildResolverOptions, ResolverOptions } from './resolvers.ts'
+import type { LifetimeType } from './awilix.ts'
 
 /**
  * The options when invoking listModules().

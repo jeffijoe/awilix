@@ -1,5 +1,5 @@
-import { createTokenizer } from './function-tokenizer'
-import type { Constructor } from './resolvers'
+import { createTokenizer } from './function-tokenizer.ts'
+import type { Constructor } from './resolvers.ts'
 
 /**
  * Quick flatten utility to flatten a 2-dimensional array.
