@@ -1,10 +1,12 @@
-import { createContainer as _createContainer } from '../container'
+import assert from 'node:assert/strict'
+import { describe, it } from 'node:test'
+import { createContainer as _createContainer } from '../container.ts'
 
 // Runtime behavior tests — use `any` cradle.
 const createContainer = (...args: Parameters<typeof _createContainer>) =>
   _createContainer<any>(...args)
-import { asClass, asFunction, asValue } from '../resolvers'
-import { InjectionMode } from '../injection-mode'
+import { asClass, asFunction, asValue } from '../resolvers.ts'
+import { InjectionMode } from '../injection-mode.ts'
 
 class Test {
   value: any
@@ -35,12 +37,13 @@ describe('local injections', () => {
       test2: asClass(Test),
     })
 
-    expect(container.cradle.test.value).toBe(42)
+    assert.strictEqual(container.cradle.test.value, 42)
 
-    expect(container.cradle.testClassic.test).toBeInstanceOf(Test)
-    expect(container.cradle.testClassic.value).toBe(42)
+    assert.ok(container.cradle.testClassic.test instanceof Test)
+    assert.strictEqual(container.cradle.testClassic.value, 42)
 
-    expect(() => container.cradle.test2.value).toThrow(
+    assert.throws(
+      () => container.cradle.test2.value,
       /Could not resolve 'value'/,
     )
   })
@@ -55,11 +58,12 @@ describe('local injections', () => {
       test2: asClass(Test),
     })
 
-    expect(container.cradle.test.value).toBe(42)
+    assert.strictEqual(container.cradle.test.value, 42)
 
-    expect(container.cradle.testClassic.test).toBeInstanceOf(Test)
-    expect(container.cradle.testClassic.value).toBe(42)
-    expect(() => container.cradle.test2.value).toThrow(
+    assert.ok(container.cradle.testClassic.test instanceof Test)
+    assert.strictEqual(container.cradle.testClassic.value, 42)
+    assert.throws(
+      () => container.cradle.test2.value,
       /Could not resolve 'value'/,
     )
   })
@@ -74,11 +78,12 @@ describe('local injections', () => {
       test2: asFunction(makeTest),
     })
 
-    expect(container.cradle.test.value).toBe(42)
+    assert.strictEqual(container.cradle.test.value, 42)
 
-    expect(container.cradle.testClassic.test.isTest).toBe(true)
-    expect(container.cradle.testClassic.value).toBe(42)
-    expect(() => container.cradle.test2.value).toThrow(
+    assert.strictEqual(container.cradle.testClassic.test.isTest, true)
+    assert.strictEqual(container.cradle.testClassic.value, 42)
+    assert.throws(
+      () => container.cradle.test2.value,
       /Could not resolve 'value'/,
     )
   })
@@ -92,7 +97,7 @@ describe('local injections', () => {
         })),
       })
 
-      expect(container.resolve('consumer')).toBe('from-injector')
+      assert.strictEqual(container.resolve('consumer'), 'from-injector')
     })
 
     it('supports symbol keys in both container registrations and injector locals', () => {
@@ -118,11 +123,11 @@ describe('local injections', () => {
 
       const result = container.resolve<any>('consumer')
       // Symbol registered on the container is accessible
-      expect(result.containerSym).toBe('from-container')
+      assert.strictEqual(result.containerSym, 'from-container')
       // Symbol from the injector locals is accessible
-      expect(result.localSym).toBe('from-local')
+      assert.strictEqual(result.localSym, 'from-local')
       // Injector local overrides container registration for symbols
-      expect(result.sharedSym).toBe('overridden')
+      assert.strictEqual(result.sharedSym, 'overridden')
     })
   })
 })

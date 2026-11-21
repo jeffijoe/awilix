@@ -1,17 +1,21 @@
-import { Lifetime } from '../lifetime'
+import assert from 'node:assert/strict'
+import { createRequire } from 'node:module'
+import { describe, it } from 'node:test'
+import { Lifetime } from '../lifetime.ts'
 
+const require = createRequire(import.meta.url)
 const AnotherService =
-  require('./fixture/services/anotherService').AnotherService
-const fixture = require('./fixture')
+  require('./fixture/services/anotherService.js').AnotherService
+const fixture = require('./fixture/index.js')
 
 describe('integration tests', () => {
   it('bootstraps everything so the answer can be resolved', () => {
     const container = fixture()
     const anotherService = container.resolve('anotherService')
-    expect(anotherService).toBeInstanceOf(AnotherService)
-    expect(typeof anotherService.repo).toBe('object')
-    expect(typeof anotherService.repo.getAnswerFor).toBe('function')
-    expect(Object.keys(container.registrations).length).toBe(4)
+    assert.ok(anotherService instanceof AnotherService)
+    assert.strictEqual(typeof anotherService.repo, 'object')
+    assert.strictEqual(typeof anotherService.repo.getAnswerFor, 'function')
+    assert.strictEqual(Object.keys(container.registrations).length, 4)
   })
 
   it('registered all services as scoped', () => {
@@ -19,23 +23,34 @@ describe('integration tests', () => {
     const scope1 = container.createScope()
     const scope2 = container.createScope()
 
-    expect(container.registrations.mainService.lifetime).toBe(Lifetime.SCOPED)
-    expect(container.registrations.anotherService.lifetime).toBe(
+    assert.strictEqual(
+      container.registrations.mainService.lifetime,
       Lifetime.SCOPED,
     )
-    expect(container.registrations.answerRepository.lifetime).toBe(
+    assert.strictEqual(
+      container.registrations.anotherService.lifetime,
+      Lifetime.SCOPED,
+    )
+    assert.strictEqual(
+      container.registrations.answerRepository.lifetime,
       Lifetime.TRANSIENT,
     )
 
-    expect(scope1.resolve('mainService')).toBe(scope1.resolve('mainService'))
-    expect(scope1.resolve('mainService')).not.toBe(
+    assert.strictEqual(
+      scope1.resolve('mainService'),
+      scope1.resolve('mainService'),
+    )
+    assert.notStrictEqual(
+      scope1.resolve('mainService'),
       scope2.resolve('mainService'),
     )
 
-    expect(scope1.resolve('anotherService')).toBe(
+    assert.strictEqual(
+      scope1.resolve('anotherService'),
       scope1.resolve('anotherService'),
     )
-    expect(scope1.resolve('anotherService')).not.toBe(
+    assert.notStrictEqual(
+      scope1.resolve('anotherService'),
       scope2.resolve('anotherService'),
     )
   })

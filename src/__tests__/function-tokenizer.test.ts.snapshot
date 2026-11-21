@@ -1,0 +1,459 @@
+exports[`tokenizer > can skip function calls 1`] = `
+[
+  {
+    "type": "function"
+  },
+  {
+    "value": "funcCalls",
+    "type": "ident"
+  },
+  {
+    "type": "("
+  },
+  {
+    "value": "first",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "other",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ")"
+  },
+  {
+    "type": "EOF"
+  }
+]
+`;
+
+exports[`tokenizer > can skip interpolated strings 1`] = `
+[
+  {
+    "type": "function"
+  },
+  {
+    "value": "intstring1",
+    "type": "ident"
+  },
+  {
+    "type": "("
+  },
+  {
+    "value": "p1",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "p2",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ")"
+  },
+  {
+    "type": "EOF"
+  }
+]
+`;
+
+exports[`tokenizer > can skip interpolated strings 2`] = `
+[
+  {
+    "type": "function"
+  },
+  {
+    "value": "intstring2",
+    "type": "ident"
+  },
+  {
+    "type": "("
+  },
+  {
+    "value": "deep",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "asFuck",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ")"
+  },
+  {
+    "type": "EOF"
+  }
+]
+`;
+
+exports[`tokenizer > can skip object literals 1`] = `
+[
+  {
+    "type": "function"
+  },
+  {
+    "value": "obj",
+    "type": "ident"
+  },
+  {
+    "type": "("
+  },
+  {
+    "value": "p1",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "p2",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "p3",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ")"
+  },
+  {
+    "type": "EOF"
+  }
+]
+`;
+
+exports[`tokenizer > can skip strings ending with an even number of backslashes 1`] = `
+[
+  {
+    "type": "function"
+  },
+  {
+    "value": "rofl",
+    "type": "ident"
+  },
+  {
+    "type": "("
+  },
+  {
+    "value": "p1",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "p2",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "p3",
+    "type": "ident"
+  },
+  {
+    "type": ")"
+  },
+  {
+    "type": "EOF"
+  }
+]
+`;
+
+exports[`tokenizer > can skip strings with escape seqs in them 1`] = `
+[
+  {
+    "type": "function"
+  },
+  {
+    "value": "rofl",
+    "type": "ident"
+  },
+  {
+    "type": "("
+  },
+  {
+    "value": "p1",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "p2",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "p3",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ")"
+  },
+  {
+    "type": "EOF"
+  }
+]
+`;
+
+exports[`tokenizer > can tokenize arrow functions 1`] = `
+[
+  {
+    "type": "("
+  },
+  {
+    "value": "first",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "other",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ")"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": "EOF"
+  }
+]
+`;
+
+exports[`tokenizer > does not require function name 1`] = `
+[
+  {
+    "type": "function"
+  },
+  {
+    "type": "("
+  },
+  {
+    "value": "first",
+    "type": "ident"
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "second",
+    "type": "ident"
+  },
+  {
+    "type": ")"
+  },
+  {
+    "type": "EOF"
+  }
+]
+`;
+
+exports[`tokenizer > includes equals token but skips value correctly 1`] = `
+[
+  {
+    "type": "function"
+  },
+  {
+    "value": "rofl",
+    "type": "ident"
+  },
+  {
+    "type": "("
+  },
+  {
+    "value": "p1",
+    "type": "ident"
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "p2",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "p3",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ")"
+  },
+  {
+    "type": "EOF"
+  }
+]
+`;
+
+exports[`tokenizer > includes equals token but skips value correctly 2`] = `
+[
+  {
+    "type": "function"
+  },
+  {
+    "value": "rofl",
+    "type": "ident"
+  },
+  {
+    "type": "("
+  },
+  {
+    "value": "p1",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "p2",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ","
+  },
+  {
+    "value": "p3",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": ")"
+  },
+  {
+    "type": "EOF"
+  }
+]
+`;
+
+exports[`tokenizer > terminates when an escape sequence dangles at the end 1`] = `
+[
+  {
+    "type": "function"
+  },
+  {
+    "value": "rofl",
+    "type": "ident"
+  },
+  {
+    "type": "("
+  },
+  {
+    "value": "p1",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": "EOF"
+  }
+]
+`;
+
+exports[`tokenizer > terminates when the last character is a backslash 1`] = `
+[
+  {
+    "type": "function"
+  },
+  {
+    "value": "rofl",
+    "type": "ident"
+  },
+  {
+    "type": "("
+  },
+  {
+    "value": "p1",
+    "type": "ident"
+  },
+  {
+    "type": "="
+  },
+  {
+    "type": "EOF"
+  }
+]
+`;

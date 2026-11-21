@@ -1,33 +1,35 @@
-import * as awilix from '../awilix'
-import { createContainer } from '../container'
-import { listModules } from '../list-modules'
-import { AwilixResolutionError } from '../errors'
-import { asValue, asClass, asFunction, aliasTo } from '../resolvers'
+import assert from 'node:assert/strict'
+import { describe, it } from 'node:test'
+import * as awilix from '../awilix.ts'
+import { createContainer } from '../container.ts'
+import { listModules } from '../list-modules.ts'
+import { AwilixResolutionError } from '../errors.ts'
+import { asValue, asClass, asFunction, aliasTo } from '../resolvers.ts'
 
 describe('awilix', () => {
   it('exists', () => {
-    expect(awilix).toBeDefined()
+    assert.notStrictEqual(awilix, undefined)
   })
 
   it('has a createContainer function', () => {
-    expect(awilix).toHaveProperty('createContainer')
-    expect(awilix.createContainer).toBe(createContainer)
+    assert.ok('createContainer' in awilix)
+    assert.strictEqual(awilix.createContainer, createContainer)
   })
 
   it('has a listModules function', () => {
-    expect(awilix).toHaveProperty('listModules')
-    expect(awilix.listModules).toBe(listModules)
+    assert.ok('listModules' in awilix)
+    assert.strictEqual(awilix.listModules, listModules)
   })
 
   it('has an AwilixResolutionError function', () => {
-    expect(awilix).toHaveProperty('AwilixResolutionError')
-    expect(awilix.AwilixResolutionError).toBe(AwilixResolutionError)
+    assert.ok('AwilixResolutionError' in awilix)
+    assert.strictEqual(awilix.AwilixResolutionError, AwilixResolutionError)
   })
 
   it('has the asValue, asClass, asFunction and aliasTo functions', () => {
-    expect(awilix.asValue).toBe(asValue)
-    expect(awilix.asClass).toBe(asClass)
-    expect(awilix.asFunction).toBe(asFunction)
-    expect(awilix.aliasTo).toBe(aliasTo)
+    assert.strictEqual(awilix.asValue, asValue)
+    assert.strictEqual(awilix.asClass, asClass)
+    assert.strictEqual(awilix.asFunction, asFunction)
+    assert.strictEqual(awilix.aliasTo, aliasTo)
   })
 })

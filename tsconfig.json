@@ -16,6 +16,7 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "isolatedModules": true,
+    "erasableSyntaxOnly": true,
     "rewriteRelativeImportExtensions": true,
     "importHelpers": false,
     "sourceMap": true,

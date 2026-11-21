@@ -1,8 +1,10 @@
-import { type AwilixContainer, createContainer } from '../container'
-import { asClass, asFunction } from '../resolvers'
-import { InjectionMode } from '../injection-mode'
-import { DisposalMode } from '../disposal-mode'
-import { Lifetime } from '../lifetime'
+import assert from 'node:assert/strict'
+import { beforeEach, describe, it } from 'node:test'
+import { type AwilixContainer, createContainer } from '../container.ts'
+import { asClass, asFunction } from '../resolvers.ts'
+import { InjectionMode } from '../injection-mode.ts'
+import { DisposalMode } from '../disposal-mode.ts'
+import { Lifetime } from '../lifetime.ts'
 
 describe('disposing container', () => {
   it('disposes dependents before dependencies', async () => {
@@ -25,7 +27,7 @@ describe('disposing container', () => {
     container.resolve('outer')
     await container.dispose()
 
-    expect(disposals).toEqual(['outer', 'inner'])
+    assert.deepStrictEqual(disposals, ['outer', 'inner'])
   })
 
   it('when the scope is disposed directly, disposes scoped instances but does not dispose the root singletons', async () => {
@@ -79,7 +81,7 @@ describe('disposing container', () => {
     scope.resolve('classDisposer')
     scope.resolve('scopedButRegedAtRoot')
     await scope.dispose()
-    expect(order).toEqual([2, 1])
+    assert.deepStrictEqual(order, [2, 1])
   })
 
   describe('disposal modes', () => {
@@ -126,14 +128,14 @@ describe('disposing container', () => {
 
       const disposalPromise = container.dispose()
 
-      expect(disposeStart).toEqual(['outer', 'inner'])
-      expect(disposeFinish).toEqual([])
+      assert.deepStrictEqual(disposeStart, ['outer', 'inner'])
+      assert.deepStrictEqual(disposeFinish, [])
 
       await interceptInner.resolve(undefined)
-      expect(disposeFinish).toEqual(['inner'])
+      assert.deepStrictEqual(disposeFinish, ['inner'])
 
       await interceptOuter.resolve(undefined)
-      expect(disposeFinish).toEqual(['inner', 'outer'])
+      assert.deepStrictEqual(disposeFinish, ['inner', 'outer'])
 
       await disposalPromise
     })
@@ -143,25 +145,24 @@ describe('disposing container', () => {
 
       const disposalPromise = container.dispose({ mode: DisposalMode.SERIAL })
 
-      expect(disposeStart).toEqual(['outer'])
-      expect(disposeFinish).toEqual([])
+      assert.deepStrictEqual(disposeStart, ['outer'])
+      assert.deepStrictEqual(disposeFinish, [])
 
       await interceptOuter.resolve(undefined)
-      expect(disposeFinish).toEqual(['outer'])
+      assert.deepStrictEqual(disposeFinish, ['outer'])
 
       await innerStarted.promise
-      expect(disposeStart).toEqual(['outer', 'inner'])
+      assert.deepStrictEqual(disposeStart, ['outer', 'inner'])
 
       await interceptInner.resolve(undefined)
-      expect(disposeFinish).toEqual(['outer', 'inner'])
+      assert.deepStrictEqual(disposeFinish, ['outer', 'inner'])
 
       await disposalPromise
     })
   })
 
-  it.each([DisposalMode.CONCURRENT, DisposalMode.SERIAL])(
-    'keeps instances cached until their disposers finish in %s mode',
-    async (mode) => {
+  for (const mode of [DisposalMode.CONCURRENT, DisposalMode.SERIAL]) {
+    it(`keeps instances cached until their disposers finish in ${mode} mode`, async () => {
       const loggerDisposal = deferred()
       const log: Array<string> = []
       let made = 0
@@ -192,23 +193,26 @@ describe('disposing container', () => {
       container.resolve('service')
       const disposalPromise = container.dispose({ mode })
 
-      expect(container.cache.has('logger')).toBe(true)
-      expect(container.cache.has('service')).toBe(true)
-      expect(log).toEqual(['service disposing'])
+      assert.strictEqual(container.cache.has('logger'), true)
+      assert.strictEqual(container.cache.has('service'), true)
+      assert.deepStrictEqual(log, ['service disposing'])
 
       await loggerDisposal.resolve(undefined)
       await disposalPromise
 
-      expect(made).toBe(1)
-      expect(log).toEqual(['service disposing', 'close'])
-      expect(container.cache.size).toBe(0)
-    },
-  )
+      assert.strictEqual(made, 1)
+      assert.deepStrictEqual(log, ['service disposing', 'close'])
+      assert.strictEqual(container.cache.size, 0)
+    })
+  }
 
-  it.each([Lifetime.SINGLETON, Lifetime.SCOPED, Lifetime.TRANSIENT])(
-    'rejects uncached %s dependencies during disposal',
-    async (lifetime) => {
-      const factory = jest.fn(() => ({}))
+  for (const lifetime of [
+    Lifetime.SINGLETON,
+    Lifetime.SCOPED,
+    Lifetime.TRANSIENT,
+  ]) {
+    it(`rejects uncached ${lifetime} dependencies during disposal`, async (t) => {
+      const factory = t.mock.fn(() => ({}))
       const container = createContainer().register({
         dependency: asFunction(factory).setLifetime(lifetime),
         service: asFunction(() => ({}))
@@ -220,23 +224,22 @@ describe('disposing container', () => {
       })
 
       container.resolve('service')
-      await expect(container.dispose()).rejects.toMatchObject({
-        name: 'AggregateError',
-        errors: [
-          expect.objectContaining({
-            message: expect.stringContaining(
-              'Cannot resolve uncached dependencies while disposing.',
-            ),
-          }),
-        ],
+      await assert.rejects(container.dispose(), (error) => {
+        assert.ok(error instanceof AggregateError)
+        assert.strictEqual(error.errors.length, 1)
+        assert.match(
+          error.errors[0].message,
+          /Cannot resolve uncached dependencies while disposing\./,
+        )
+        return true
       })
-      expect(factory).not.toHaveBeenCalled()
-      expect(container.cache.size).toBe(0)
-    },
-  )
+      assert.strictEqual(factory.mock.callCount(), 0)
+      assert.strictEqual(container.cache.size, 0)
+    })
+  }
 
-  it('rejects singleton resolutions through scopes after root disposal', async () => {
-    const factory = jest.fn(() => ({}))
+  it('rejects singleton resolutions through scopes after root disposal', async (t) => {
+    const factory = t.mock.fn(() => ({}))
     const root = createContainer().register({
       dependency: asFunction(factory)
         .singleton()
@@ -249,20 +252,21 @@ describe('disposing container', () => {
     root.resolve('dependency')
     await root.dispose()
 
-    expect(() => scope.resolve('dependency')).toThrow(
-      "Cannot resolve new instance of 'dependency' because the root container has been disposed.",
+    assert.throws(
+      () => scope.resolve('dependency'),
+      /Cannot resolve new instance of 'dependency' because the root container has been disposed\./,
     )
-    expect(factory).toHaveBeenCalledTimes(1)
-    expect(root.cache.size).toBe(0)
+    assert.strictEqual(factory.mock.callCount(), 1)
+    assert.strictEqual(root.cache.size, 0)
 
     // The scope is still active and can resolve its own scoped dependencies.
-    expect(scope.resolve('scoped')).toEqual({})
+    assert.deepStrictEqual(scope.resolve('scoped'), {})
     await scope.dispose()
   })
 
-  it('only allows cached singletons through scopes during root disposal', async () => {
+  it('only allows cached singletons through scopes during root disposal', async (t) => {
     const finish = deferred()
-    const factory = jest.fn(() => ({}))
+    const factory = t.mock.fn(() => ({}))
     const root = createContainer().register({
       cached: asFunction(() => ({}))
         .singleton()
@@ -274,15 +278,16 @@ describe('disposing container', () => {
     const disposalPromise = root.dispose()
 
     // Cached instances remain usable, but a scope must not repopulate the root cache.
-    expect(scope.resolve('cached')).toBe(cached)
-    expect(() => scope.resolve('uncached')).toThrow(
-      'Cannot resolve uncached dependencies while disposing.',
+    assert.strictEqual(scope.resolve('cached'), cached)
+    assert.throws(
+      () => scope.resolve('uncached'),
+      /Cannot resolve uncached dependencies while disposing\./,
     )
-    expect(factory).not.toHaveBeenCalled()
+    assert.strictEqual(factory.mock.callCount(), 0)
 
     await finish.resolve(undefined)
     await disposalPromise
-    expect(root.cache.size).toBe(0)
+    assert.strictEqual(root.cache.size, 0)
   })
 
   it('rejects overlapping disposal calls', async () => {
@@ -299,19 +304,21 @@ describe('disposing container', () => {
 
     container.resolve('service')
     const disposalPromise = container.dispose()
-    await expect(container.dispose()).rejects.toThrow(
-      'Container disposal already in progress.',
+    await assert.rejects(
+      container.dispose(),
+      /Container disposal already in progress\./,
     )
-    expect(calls).toBe(1)
+    assert.strictEqual(calls, 1)
 
     await finish.resolve(undefined)
     await disposalPromise
 
     // Completed disposal is a no-op, but the container cannot be reused.
-    await expect(container.dispose()).resolves.toBeUndefined()
-    expect(calls).toBe(1)
-    expect(() => container.resolve('service')).toThrow(
-      'Container has been disposed.',
+    assert.strictEqual(await container.dispose(), undefined)
+    assert.strictEqual(calls, 1)
+    assert.throws(
+      () => container.resolve('service'),
+      /Container has been disposed\./,
     )
   })
 
@@ -326,20 +333,20 @@ describe('disposing container', () => {
     })
 
     container.resolve('service')
-    await expect(container.dispose()).rejects.toMatchObject({
-      name: 'AggregateError',
-      errors: [
-        expect.objectContaining({
-          message: 'Container disposal already in progress.',
-        }),
-      ],
+    await assert.rejects(container.dispose(), (error) => {
+      assert.ok(error instanceof AggregateError)
+      assert.strictEqual(error.errors.length, 1)
+      assert.strictEqual(
+        error.errors[0].message,
+        'Container disposal already in progress.',
+      )
+      return true
     })
-    await expect(container.dispose()).resolves.toBeUndefined()
+    assert.strictEqual(await container.dispose(), undefined)
   })
 
-  it.each([DisposalMode.CONCURRENT, DisposalMode.SERIAL])(
-    'finishes disposal and aggregates errors in %s mode',
-    async (mode) => {
+  for (const mode of [DisposalMode.CONCURRENT, DisposalMode.SERIAL]) {
+    it(`finishes disposal and aggregates errors in ${mode} mode`, async () => {
       const syncError = new Error('sync')
       const asyncError = new Error('async')
       const disposed: Array<string> = []
@@ -378,7 +385,7 @@ describe('disposing container', () => {
         // Asserts that the overall dispose promise doesn't settle until
         // all the disposers have finished. If it settled earlier, then the
         // successful disposer wouldn't have modified the `disposed` array.
-        expect(disposed).toEqual(['success'])
+        assert.deepStrictEqual(disposed, ['success'])
         throw error
       })
 
@@ -387,16 +394,17 @@ describe('disposing container', () => {
       await finishSuccess.resolve(undefined)
 
       // Assert that the errors were aggregated.
-      await expect(disposalPromise).rejects.toMatchObject({
-        name: 'AggregateError',
-        errors: [syncError, asyncError],
+      await assert.rejects(disposalPromise, (error) => {
+        assert.ok(error instanceof AggregateError)
+        assert.deepStrictEqual(error.errors, [syncError, asyncError])
+        return true
       })
-      expect(container.cache.size).toBe(0)
+      assert.strictEqual(container.cache.size, 0)
 
       // Failed disposal is also terminal; subsequent calls are a no-op.
-      await expect(container.dispose({ mode })).resolves.toBeUndefined()
-    },
-  )
+      assert.strictEqual(await container.dispose({ mode }), undefined)
+    })
+  }
 })
 
 /**

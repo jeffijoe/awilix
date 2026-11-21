@@ -31,7 +31,6 @@ export class ExtendableError extends Error {
     })
 
     // Not all browsers have this function.
-    /* istanbul ignore else */
     if ('captureStackTrace' in Error) {
       Error.captureStackTrace(this, this.constructor)
     } else {
@@ -167,7 +166,6 @@ export class AwilixRegistrationError extends AwilixError {
     const stringName = name.toString()
     let msg = `Could not register '${stringName}'.`
 
-    /* istanbul ignore else */
     if (message) {
       msg += ` ${message}`
     }

@@ -1,4 +1,6 @@
-import { parseParameterList } from '../param-parser'
+import assert from 'node:assert/strict'
+import { describe, test } from 'node:test'
+import { parseParameterList } from '../param-parser.ts'
 
 // https://github.com/jeffijoe/awilix/issues/130
 //
@@ -31,7 +33,7 @@ class Service2 {
 }
   `
   const params = parseParameterList(code)
-  expect(params).toEqual([{ name: 'injectedService', optional: false }])
+  assert.deepStrictEqual(params, [{ name: 'injectedService', optional: false }])
 })
 
 // https://github.com/jeffijoe/awilix/issues/164
@@ -48,7 +50,7 @@ test('#164', () => {
   }
     `
 
-  expect(parseParameterList(classCode)).toEqual([
+  assert.deepStrictEqual(parseParameterList(classCode), [
     { name: 'injectedService', optional: false },
   ])
 
@@ -58,7 +60,7 @@ test('#164', () => {
 ) => {}
     `
 
-  expect(parseParameterList(funcCode)).toEqual([])
+  assert.deepStrictEqual(parseParameterList(funcCode), [])
 })
 
 // https://github.com/jeffijoe/awilix/issues/390
@@ -91,7 +93,7 @@ class TestClass  {
   }
 }`
 
-    expect(parseParameterList(classCode)).toEqual(null)
+    assert.deepStrictEqual(parseParameterList(classCode), null)
   })
 
   test('with a constructor', () => {
@@ -114,7 +116,7 @@ class TestClass  {
   constructor(injectedService) {}
 }`
 
-    expect(parseParameterList(classCode)).toEqual([
+    assert.deepStrictEqual(parseParameterList(classCode), [
       {
         name: 'injectedService',
         optional: false,
@@ -125,19 +127,19 @@ class TestClass  {
 
 test('string default ending with even backslashes', () => {
   const doubleBackslash = "class Foo { constructor(a = 'test\\\\', b) {} }"
-  expect(parseParameterList(doubleBackslash)).toEqual([
+  assert.deepStrictEqual(parseParameterList(doubleBackslash), [
     { name: 'a', optional: true },
     { name: 'b', optional: false },
   ])
 
   const quadBackslash = "class Foo { constructor(a = 'test\\\\\\\\', b) {} }"
-  expect(parseParameterList(quadBackslash)).toEqual([
+  assert.deepStrictEqual(parseParameterList(quadBackslash), [
     { name: 'a', optional: true },
     { name: 'b', optional: false },
   ])
 
   const singleBackslashEscape = "function foo(a = 'don\\'t', b) {}"
-  expect(parseParameterList(singleBackslashEscape)).toEqual([
+  assert.deepStrictEqual(parseParameterList(singleBackslashEscape), [
     { name: 'a', optional: true },
     { name: 'b', optional: false },
   ])
@@ -154,7 +156,7 @@ describe('#438', () => {
 class Client {
   constructor(logger, options = { retries: 3, timeout: 1000 }, cache) {}
 }`
-    expect(parseParameterList(classCode)).toEqual([
+    assert.deepStrictEqual(parseParameterList(classCode), [
       { name: 'logger', optional: false },
       { name: 'options', optional: true },
       { name: 'cache', optional: false },
@@ -163,7 +165,7 @@ class Client {
 
   test('array literal default with several items', () => {
     const funcCode = `(logger, tags = ['a', 'b'], cache) => {}`
-    expect(parseParameterList(funcCode)).toEqual([
+    assert.deepStrictEqual(parseParameterList(funcCode), [
       { name: 'logger', optional: false },
       { name: 'tags', optional: true },
       { name: 'cache', optional: false },
@@ -177,7 +179,7 @@ class Client {
       c = () => { return 1, 2 },
       d
     ) {}`
-    expect(parseParameterList(funcCode)).toEqual([
+    assert.deepStrictEqual(parseParameterList(funcCode), [
       { name: 'a', optional: true },
       { name: 'b', optional: true },
       { name: 'c', optional: true },
@@ -196,7 +198,7 @@ class Loader {
   pattern = 'src/**/*.js'
   constructor(fs, logger) {}
 }`
-    expect(parseParameterList(classCode)).toEqual([
+    assert.deepStrictEqual(parseParameterList(classCode), [
       { name: 'fs', optional: false },
       { name: 'logger', optional: false },
     ])
@@ -210,7 +212,7 @@ class A {
   n() { return \`call constructor(\${1}) first\` }
   constructor(a, b) {}
 }`
-    expect(parseParameterList(classCode)).toEqual([
+    assert.deepStrictEqual(parseParameterList(classCode), [
       { name: 'a', optional: false },
       { name: 'b', optional: false },
     ])
@@ -221,32 +223,34 @@ class A {
 class A extends B {
   m() { throw new Error("call constructor(opts) first") }
 }`
-    expect(parseParameterList(classCode)).toBeNull()
+    assert.strictEqual(parseParameterList(classCode), null)
   })
 
   test('URL string on one line with the constructor', () => {
     const classCode = `class A{static url="http://x";constructor(e,t){this.e=e}}`
-    expect(parseParameterList(classCode)).toEqual([
+    assert.deepStrictEqual(parseParameterList(classCode), [
       { name: 'e', optional: false },
       { name: 't', optional: false },
     ])
   })
 
   test('quoted constructor names', () => {
-    expect(
+    assert.deepStrictEqual(
       parseParameterList(`
 class A {
   m() { return 'x' }
   'constructor'(real) {}
 }`),
-    ).toEqual([{ name: 'real', optional: false }])
-    expect(
+      [{ name: 'real', optional: false }],
+    )
+    assert.deepStrictEqual(
       parseParameterList(`
 class A {
   m() { return 'x' }
   "constructor"(real) {}
 }`),
-    ).toEqual([{ name: 'real', optional: false }])
+      [{ name: 'real', optional: false }],
+    )
   })
 
   test('a lone quote in a regex does not hide the constructor', () => {
@@ -257,18 +261,19 @@ class A {
   tick = /\`/
   constructor(real) {}
 }`
-    expect(parseParameterList(classCode)).toEqual([
+    assert.deepStrictEqual(parseParameterList(classCode), [
       { name: 'real', optional: false },
     ])
   })
 
   test('divisions in default values', () => {
-    expect(
+    assert.deepStrictEqual(
       parseParameterList(`function f(a = x++ / 2, b = 3 / 4, c) {}`),
-    ).toEqual([
-      { name: 'a', optional: true },
-      { name: 'b', optional: true },
-      { name: 'c', optional: false },
-    ])
+      [
+        { name: 'a', optional: true },
+        { name: 'b', optional: true },
+        { name: 'c', optional: false },
+      ],
+    )
   })
 })

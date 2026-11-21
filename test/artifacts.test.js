@@ -13,13 +13,15 @@ test('all builds resolve a dependency', async () => {
   for (const pkg of [cjs, await esm, umd, await browser]) {
     const container = pkg.createContainer().register({
       value: pkg.asValue(123),
-      fn: pkg
+      proxy: pkg.asFunction(({ value }) => value),
+      classic: pkg
         .asFunction(function (value) {
           return value
         })
         .classic(),
     })
-    assert.strictEqual(container.resolve('fn'), 123)
+    assert.strictEqual(container.resolve('proxy'), 123)
+    assert.strictEqual(container.resolve('classic'), 123)
   }
 })
 

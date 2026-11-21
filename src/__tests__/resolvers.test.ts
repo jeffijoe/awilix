@@ -1,11 +1,13 @@
+import assert from 'node:assert/strict'
+import { beforeEach, describe, it } from 'node:test'
 import { throws } from 'smid'
-import { asValue, asFunction, asClass } from '../resolvers'
-import type { AwilixContainer } from '../container'
-import { createContainer } from '../container'
-import { Lifetime } from '../lifetime'
-import { InjectionMode } from '../injection-mode'
-import { AwilixTypeError } from '../errors'
-import { aliasTo } from '../awilix'
+import { asValue, asFunction, asClass } from '../resolvers.ts'
+import type { AwilixContainer } from '../container.ts'
+import { createContainer } from '../container.ts'
+import { Lifetime } from '../lifetime.ts'
+import { InjectionMode } from '../injection-mode.ts'
+import { AwilixTypeError } from '../errors.ts'
+import { aliasTo } from '../awilix.ts'
 
 const testFn = () => 1337
 const depsFn = (testClass: any) => testClass
@@ -47,22 +49,22 @@ describe('registrations', () => {
 
   describe('asValue', () => {
     it('creates a registration with a resolve method', () => {
-      expect(typeof asValue(42).resolve).toBe('function')
+      assert.strictEqual(typeof asValue(42).resolve, 'function')
     })
   })
 
   describe('asFunction', () => {
     it('creates a registration with a resolve method', () => {
-      expect(typeof asFunction(testFn).resolve).toBe('function')
+      assert.strictEqual(typeof asFunction(testFn).resolve, 'function')
     })
 
-    it('defaults to transient', () => {
-      const testSpy = jest.fn(testFn)
+    it('defaults to transient', (t) => {
+      const testSpy = t.mock.fn(testFn)
       const reg = asFunction(() => testSpy())
       reg.resolve(container)
       reg.resolve(container)
 
-      expect(testSpy).toHaveBeenCalledTimes(2)
+      assert.strictEqual(testSpy.mock.callCount(), 2)
     })
 
     it('manually resolves function dependencies', () => {
@@ -71,8 +73,8 @@ describe('registrations', () => {
       })
       const reg = asFunction(depsFn).classic()
       const result = reg.resolve(container)
-      expect(typeof reg.resolve).toBe('function')
-      expect(result).toBeInstanceOf(TestClass)
+      assert.strictEqual(typeof reg.resolve, 'function')
+      assert.ok(result instanceof TestClass)
     })
 
     it('manually resolves multiple function dependencies', () => {
@@ -86,9 +88,9 @@ describe('registrations', () => {
         injectionMode: InjectionMode.CLASSIC,
       })
       const result = reg.resolve(container)
-      expect(typeof reg.resolve).toBe('function')
-      expect(result.testClass).toBeInstanceOf(TestClass)
-      expect(result.needsCradle).toBeInstanceOf(NeedsCradle)
+      assert.strictEqual(typeof reg.resolve, 'function')
+      assert.ok(result.testClass instanceof TestClass)
+      assert.ok(result.needsCradle instanceof NeedsCradle)
     })
 
     it('supports arrow functions', () => {
@@ -100,25 +102,25 @@ describe('registrations', () => {
         dep: asValue(42),
       })
 
-      expect(container.resolve('withParen')).toBe(42)
-      expect(container.resolve('withoutParen')).toBe(42)
+      assert.strictEqual(container.resolve('withParen'), 42)
+      assert.strictEqual(container.resolve('withoutParen'), 42)
     })
 
     it('throws AwilixTypeError when given null', () => {
       const err = throws(() => asFunction(null as any))
-      expect(err).toBeInstanceOf(AwilixTypeError)
+      assert.ok(err instanceof AwilixTypeError)
     })
   })
 
   describe('asClass', () => {
     it('creates a registration with a resolve method', () => {
-      expect(typeof asClass(TestClass).resolve).toBe('function')
+      assert.strictEqual(typeof asClass(TestClass).resolve, 'function')
     })
 
     it('resolves the class by newing it up', () => {
       const reg = asClass(TestClass)
       const result = reg.resolve(container)
-      expect(result).toBeInstanceOf(TestClass)
+      assert.ok(result instanceof TestClass)
     })
 
     it('resolves dependencies manually', () => {
@@ -127,8 +129,8 @@ describe('registrations', () => {
       })
       const withDepsReg = asClass(WithDeps).classic()
       const result = withDepsReg.resolve(container)
-      expect(result).toBeInstanceOf(WithDeps)
-      expect(result.testClass).toBeInstanceOf(TestClass)
+      assert.ok(result instanceof WithDeps)
+      assert.ok(result.testClass instanceof TestClass)
     })
 
     it('resolves single dependency as cradle', () => {
@@ -137,8 +139,8 @@ describe('registrations', () => {
       })
       const reg = asClass(NeedsCradle).proxy()
       const result = reg.resolve(container)
-      expect(result).toBeInstanceOf(NeedsCradle)
-      expect(result.testClass).toBeInstanceOf(TestClass)
+      assert.ok(result instanceof NeedsCradle)
+      assert.ok(result.testClass instanceof TestClass)
     })
 
     it('resolves multiple dependencies manually', () => {
@@ -150,14 +152,14 @@ describe('registrations', () => {
         injectionMode: InjectionMode.CLASSIC,
       })
       const result = reg.resolve(container)
-      expect(result).toBeInstanceOf(MultipleDeps)
-      expect(result.testClass).toBeInstanceOf(TestClass)
-      expect(result.needsCradle).toBeInstanceOf(NeedsCradle)
+      assert.ok(result instanceof MultipleDeps)
+      assert.ok(result.testClass instanceof TestClass)
+      assert.ok(result.needsCradle instanceof NeedsCradle)
     })
 
     it('throws an Error when given null', () => {
       const err = throws(() => asClass(null!))
-      expect(err).toBeInstanceOf(AwilixTypeError)
+      assert.ok(err instanceof AwilixTypeError)
     })
   })
 
@@ -172,22 +174,22 @@ describe('registrations', () => {
 
       subjects.forEach((x) => {
         let retVal = x.setLifetime(Lifetime.SCOPED)
-        expect(retVal.lifetime).toBe(Lifetime.SCOPED)
+        assert.strictEqual(retVal.lifetime, Lifetime.SCOPED)
 
         retVal = retVal.transient()
-        expect(retVal.lifetime).toBe(Lifetime.TRANSIENT)
+        assert.strictEqual(retVal.lifetime, Lifetime.TRANSIENT)
 
         retVal = retVal.singleton()
-        expect(retVal.lifetime).toBe(Lifetime.SINGLETON)
+        assert.strictEqual(retVal.lifetime, Lifetime.SINGLETON)
 
         retVal = retVal.scoped()
-        expect(retVal.lifetime).toBe(Lifetime.SCOPED)
+        assert.strictEqual(retVal.lifetime, Lifetime.SCOPED)
 
         const d = (t: TestClass) => {
           return t.dispose()
         }
         retVal = retVal.disposer(d)
-        expect(retVal.dispose).toBe(d)
+        assert.strictEqual(retVal.dispose, d)
       })
     })
 
@@ -201,7 +203,7 @@ describe('registrations', () => {
 
       subjects.forEach((x) => {
         const retVal = x.inject(() => ({ value: 42 }))
-        expect(retVal.injector).toBeDefined()
+        assert.notStrictEqual(retVal.injector, undefined)
       })
     })
   })
@@ -209,13 +211,13 @@ describe('registrations', () => {
   describe('aliasTo', () => {
     it('returns the string aliased dependency', () => {
       container.register({ val: asValue(123), aliasVal: aliasTo('val') })
-      expect(container.resolve('aliasVal')).toBe(123)
+      assert.strictEqual(container.resolve('aliasVal'), 123)
     })
 
     it('returns the symbol aliased dependency', () => {
       const symbol = Symbol()
       container.register({ [symbol]: asValue(123), aliasVal: aliasTo(symbol) })
-      expect(container.resolve('aliasVal')).toBe(123)
+      assert.strictEqual(container.resolve('aliasVal'), 123)
     })
   })
 })

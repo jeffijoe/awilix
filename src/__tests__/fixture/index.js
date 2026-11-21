@@ -1,9 +1,9 @@
-const awilix = require('../../awilix')
+const awilix = require('../../awilix.ts')
 
 module.exports = function () {
   const opts = { cwd: __dirname }
   return awilix
-    .createContainer()
+    .createContainer({ require })
     .register({
       conn: awilix.asValue({}),
     })

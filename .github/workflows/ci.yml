@@ -16,7 +16,6 @@ jobs:
       fail-fast: true
       matrix:
         version:
-          - 20
           - 22
           - 24
           - 26
@@ -41,7 +40,7 @@ jobs:
         name: Lint
         run: npm run lint
 
-      - name: Test
+      - name: Test and check coverage
         run: npm run cover
 
       - if: ${{ matrix.version == 'current' }}

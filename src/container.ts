@@ -8,7 +8,6 @@ import {
 import { type InjectionModeType, InjectionMode } from './injection-mode.ts'
 import { type LifetimeType, Lifetime, isLifetimeLonger } from './lifetime.ts'
 import { type GlobWithOptions, listModules } from './list-modules.ts'
-import { importModule } from './load-module-native.ts'
 import {
   type LoadModulesOptions,
   type LoadModulesResult,
@@ -800,7 +799,7 @@ function createContainerInternal<T extends object = {}, U extends object = {}>(
       container,
     }
     if (opts?.esModules) {
-      _loadModulesDeps.require = importModule
+      _loadModulesDeps.require = (uri) => import(uri)
       return (
         realLoadModules(
           _loadModulesDeps,
