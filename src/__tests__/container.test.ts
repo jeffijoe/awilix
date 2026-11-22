@@ -1,11 +1,13 @@
+import assert from 'node:assert/strict'
+import { beforeEach, describe, it } from 'node:test'
 import { throws } from 'smid'
 import * as util from 'util'
-import type { AwilixContainer } from '../container'
-import { createContainer as _createContainer } from '../container'
-import { Lifetime } from '../lifetime'
-import { AwilixResolutionError } from '../errors'
-import { aliasTo, asClass, asFunction, asValue } from '../resolvers'
-import { InjectionMode } from '../injection-mode'
+import type { AwilixContainer } from '../container.ts'
+import { createContainer as _createContainer } from '../container.ts'
+import { Lifetime } from '../lifetime.ts'
+import { AwilixResolutionError } from '../errors.ts'
+import { aliasTo, asClass, asFunction, asValue } from '../resolvers.ts'
+import { InjectionMode } from '../injection-mode.ts'
 
 // This file tests runtime behavior; type inference is tested in type-inference.test.ts.
 // Use `any` cradle to avoid type errors on untyped property access.
@@ -42,7 +44,7 @@ class ManualTest {
 describe('createContainer', () => {
   it('returns an object', () => {
     const container = createContainer()
-    expect(typeof container).toBe('object')
+    assert.strictEqual(typeof container, 'object')
   })
 })
 
@@ -59,8 +61,8 @@ describe('container', () => {
     })
 
     const test = container.cradle.test
-    expect(test).toBeTruthy()
-    expect(test.someValue).toBe(42)
+    assert.ok(test)
+    assert.strictEqual(test.someValue, 42)
   })
 
   it('lets me register something and resolve it via classic injection mode', () => {
@@ -73,8 +75,8 @@ describe('container', () => {
     })
 
     const test = container.cradle.manual
-    expect(test).toBeTruthy()
-    expect(test.repo).toBeTruthy()
+    assert.ok(test)
+    assert.ok(test.repo)
   })
 
   describe('register', () => {
@@ -94,9 +96,10 @@ describe('container', () => {
         ),
       })
 
-      expect(Object.keys(container.registrations).length).toBe(4)
+      assert.strictEqual(Object.keys(container.registrations).length, 4)
 
-      expect(container.resolve<any>('service').method()).toBe(
+      assert.strictEqual(
+        container.resolve<any>('service').method(),
         'Hello world, the answer is 42',
       )
     })
@@ -108,7 +111,7 @@ describe('container', () => {
         repo: asClass(Repo),
       })
 
-      expect(container.resolve<Test>('test').stuff()).toBe('stuff')
+      assert.strictEqual(container.resolve<Test>('test').stuff(), 'stuff')
     })
   })
 
@@ -117,26 +120,26 @@ describe('container', () => {
       const container = createContainer()
       container.register({ theValue: asValue('theValue') })
 
-      expect(container.hasRegistration('theValue')).toBe(true)
+      assert.strictEqual(container.hasRegistration('theValue'), true)
     })
 
     it('returns false if the registration does not exist', () => {
-      expect(createContainer().hasRegistration('theValue')).toBe(false)
+      assert.strictEqual(createContainer().hasRegistration('theValue'), false)
     })
 
     it('returns false for names that exist on Object.prototype', () => {
       const container = createContainer()
       const scope = container.createScope()
       for (const name of ['constructor', 'toString', 'hasOwnProperty']) {
-        expect(container.hasRegistration(name)).toBe(false)
-        expect(scope.hasRegistration(name)).toBe(false)
-        expect(container.getRegistration(name)).toBe(null)
+        assert.strictEqual(container.hasRegistration(name), false)
+        assert.strictEqual(scope.hasRegistration(name), false)
+        assert.strictEqual(container.getRegistration(name), null)
       }
     })
   })
 
   describe('resolve', () => {
-    it('resolves the dependency graph and supports all resolvers', () => {
+    it('resolves the dependency graph and supports all resolvers', (t) => {
       class TestClass {
         factoryResult: any
         constructor({ factory }: any) {
@@ -144,7 +147,7 @@ describe('container', () => {
         }
       }
 
-      const factorySpy = jest.fn((cradle) => 'factory ' + cradle.value)
+      const factorySpy = t.mock.fn((cradle) => 'factory ' + cradle.value)
       const container = createContainer()
       container.register({ value: asValue(42) })
       container.register({
@@ -153,37 +156,39 @@ describe('container', () => {
       container.register({ theClass: asClass(TestClass) })
 
       const root = container.resolve<TestClass>('theClass')
-      expect(root.factoryResult).toBe('factory 42')
+      assert.strictEqual(root.factoryResult, 'factory 42')
     })
 
     it('throws an AwilixResolutionError when there are unregistered dependencies', () => {
       const container = createContainer()
       const err = throws(() => container.resolve('nope'))
-      expect(err).toBeInstanceOf(AwilixResolutionError)
-      expect(err.message).toMatch(/nope/i)
+      assert.ok(err instanceof AwilixResolutionError)
+      assert.match(err.message, /nope/i)
     })
 
     it('does not treat names on Object.prototype as registrations', () => {
       const container = createContainer()
       const err = throws(() => container.resolve('valueOf'))
-      expect(err).toBeInstanceOf(AwilixResolutionError)
-      expect(err.message).toMatch(/valueOf/)
-      expect(
+      assert.ok(err instanceof AwilixResolutionError)
+      assert.match(err.message, /valueOf/)
+      assert.strictEqual(
         container.resolve('hasOwnProperty', { allowUnregistered: true }),
-      ).toBeUndefined()
-      expect(
+        undefined,
+      )
+      assert.strictEqual(
         container
           .createScope()
           .resolve('isPrototypeOf', { allowUnregistered: true }),
-      ).toBeUndefined()
+        undefined,
+      )
     })
 
     it('throws an AwilixResolutionError that supports symbols', () => {
       const container = createContainer()
       const S = Symbol('i am the derg')
       const err = throws(() => container.resolve(S))
-      expect(err).toBeInstanceOf(AwilixResolutionError)
-      expect(err.message).toMatch(/i am the derg/i)
+      assert.ok(err instanceof AwilixResolutionError)
+      assert.match(err.message, /i am the derg/i)
     })
 
     it('throws an AwilixResolutionError that supports symbols on multiple levels', () => {
@@ -192,8 +197,8 @@ describe('container', () => {
       const S2 = Symbol('i am not the derg')
       container.register({ [S2]: asFunction(({ [S1]: theDerg }) => theDerg) })
       const err = throws(() => container.resolve(S2))
-      expect(err).toBeInstanceOf(AwilixResolutionError)
-      expect(err.message).toMatch(/i am the derg/i)
+      assert.ok(err instanceof AwilixResolutionError)
+      assert.match(err.message, /i am the derg/i)
     })
 
     it('throws an AwilixResolutionError with a resolution path when resolving an unregistered dependency', () => {
@@ -205,7 +210,7 @@ describe('container', () => {
       })
 
       const err = throws(() => container.resolve('first'))
-      expect(err.message).toContain('first -> second -> third')
+      assert.ok(err.message.includes('first -> second -> third'))
     })
 
     it('does not screw up the resolution stack when called twice', () => {
@@ -219,8 +224,8 @@ describe('container', () => {
 
       const err1 = throws(() => container.resolve('first'))
       const err2 = throws(() => container.resolve('otherFirst'))
-      expect(err1.message).toContain('first -> second -> third')
-      expect(err2.message).toContain('otherFirst -> second -> third')
+      assert.ok(err1.message.includes('first -> second -> third'))
+      assert.ok(err2.message.includes('otherFirst -> second -> third'))
     })
 
     it('supports transient lifetime', () => {
@@ -230,8 +235,8 @@ describe('container', () => {
         hehe: asFunction(() => counter++).transient(),
       })
 
-      expect(container.cradle.hehe).toBe(1)
-      expect(container.cradle.hehe).toBe(2)
+      assert.strictEqual(container.cradle.hehe, 1)
+      assert.strictEqual(container.cradle.hehe, 2)
     })
 
     it('supports singleton lifetime', () => {
@@ -241,8 +246,8 @@ describe('container', () => {
         hehe: asFunction(() => counter++).singleton(),
       })
 
-      expect(container.cradle.hehe).toBe(1)
-      expect(container.cradle.hehe).toBe(1)
+      assert.strictEqual(container.cradle.hehe, 1)
+      assert.strictEqual(container.cradle.hehe, 1)
     })
 
     it('supports scoped lifetime', () => {
@@ -253,12 +258,12 @@ describe('container', () => {
       })
 
       const scope1 = container.createScope()
-      expect(scope1.cradle.scoped).toBe(1)
-      expect(scope1.cradle.scoped).toBe(1)
+      assert.strictEqual(scope1.cradle.scoped, 1)
+      assert.strictEqual(scope1.cradle.scoped, 1)
 
       const scope2 = container.createScope()
-      expect(scope2.cradle.scoped).toBe(2)
-      expect(scope2.cradle.scoped).toBe(2)
+      assert.strictEqual(scope2.cradle.scoped, 2)
+      assert.strictEqual(scope2.cradle.scoped, 2)
     })
 
     it('caches singletons regardless of scope', () => {
@@ -269,12 +274,12 @@ describe('container', () => {
       })
 
       const scope1 = container.createScope()
-      expect(scope1.cradle.singleton).toBe(1)
-      expect(scope1.cradle.singleton).toBe(1)
+      assert.strictEqual(scope1.cradle.singleton, 1)
+      assert.strictEqual(scope1.cradle.singleton, 1)
 
       const scope2 = container.createScope()
-      expect(scope2.cradle.singleton).toBe(1)
-      expect(scope2.cradle.singleton).toBe(1)
+      assert.strictEqual(scope2.cradle.singleton, 1)
+      assert.strictEqual(scope2.cradle.singleton, 1)
     })
 
     it('resolves transients regardless of scope', () => {
@@ -285,12 +290,12 @@ describe('container', () => {
       })
 
       const scope1 = container.createScope()
-      expect(scope1.cradle.transient).toBe(1)
-      expect(scope1.cradle.transient).toBe(2)
+      assert.strictEqual(scope1.cradle.transient, 1)
+      assert.strictEqual(scope1.cradle.transient, 2)
 
       const scope2 = container.createScope()
-      expect(scope2.cradle.transient).toBe(3)
-      expect(scope2.cradle.transient).toBe(4)
+      assert.strictEqual(scope2.cradle.transient, 3)
+      assert.strictEqual(scope2.cradle.transient, 4)
     })
 
     it('does not use parents cache when scoped', () => {
@@ -301,17 +306,17 @@ describe('container', () => {
       })
 
       const scope1 = container.createScope()
-      expect(scope1.cradle.scoped).toBe(1)
-      expect(scope1.cradle.scoped).toBe(1)
+      assert.strictEqual(scope1.cradle.scoped, 1)
+      assert.strictEqual(scope1.cradle.scoped, 1)
 
       const scope2 = scope1.createScope()
-      expect(scope2.cradle.scoped).toBe(2)
-      expect(scope2.cradle.scoped).toBe(2)
+      assert.strictEqual(scope2.cradle.scoped, 2)
+      assert.strictEqual(scope2.cradle.scoped, 2)
 
-      expect(container.cradle.scoped).toBe(3)
-      expect(container.cradle.scoped).toBe(3)
-      expect(scope2.cradle.scoped).toBe(2)
-      expect(scope1.cradle.scoped).toBe(1)
+      assert.strictEqual(container.cradle.scoped, 3)
+      assert.strictEqual(container.cradle.scoped, 3)
+      assert.strictEqual(scope2.cradle.scoped, 2)
+      assert.strictEqual(scope1.cradle.scoped, 1)
     })
 
     it('supports the readme example of scopes', () => {
@@ -326,14 +331,14 @@ describe('container', () => {
 
       const scope1Child = scope1.createScope()
 
-      expect(scope1.cradle.counterValue === 1).toBe(true)
-      expect(scope1.cradle.counterValue === 1).toBe(true)
-      expect(scope2.cradle.counterValue === 2).toBe(true)
-      expect(scope2.cradle.counterValue === 2).toBe(true)
+      assert.strictEqual(scope1.cradle.counterValue === 1, true)
+      assert.strictEqual(scope1.cradle.counterValue === 1, true)
+      assert.strictEqual(scope2.cradle.counterValue === 2, true)
+      assert.strictEqual(scope2.cradle.counterValue === 2, true)
 
-      expect(scope1Child.cradle.counterValue === 3).toBe(true)
+      assert.strictEqual(scope1Child.cradle.counterValue === 3, true)
       // assert that the parent scope was not affected
-      expect(scope1.cradle.counterValue === 1).toBe(true)
+      assert.strictEqual(scope1.cradle.counterValue === 1, true)
     })
 
     it('supports nested scopes', () => {
@@ -349,11 +354,11 @@ describe('container', () => {
 
       const scope1Child = scope1.createScope()
 
-      expect(scope1.cradle.counterValue).toBe(1)
-      expect(scope1.cradle.counterValue).toBe(1)
-      expect(scope2.cradle.counterValue).toBe(2)
-      expect(scope2.cradle.counterValue).toBe(2)
-      expect(scope1Child.cradle.counterValue).toBe(3)
+      assert.strictEqual(scope1.cradle.counterValue, 1)
+      assert.strictEqual(scope1.cradle.counterValue, 1)
+      assert.strictEqual(scope2.cradle.counterValue, 2)
+      assert.strictEqual(scope2.cradle.counterValue, 2)
+      assert.strictEqual(scope1Child.cradle.counterValue, 3)
     })
 
     it('resolves dependencies in scope', () => {
@@ -371,7 +376,7 @@ describe('container', () => {
         someValue: asValue('scope'),
       })
 
-      expect(scope.cradle.scopedValue).toBe('Hello scope')
+      assert.strictEqual(scope.cradle.scopedValue, 'Hello scope')
     })
 
     it('cannot find a scope-registered value when resolved from root', () => {
@@ -389,7 +394,7 @@ describe('container', () => {
         someValue: asValue('scope'),
       })
 
-      expect(() => container.cradle.scopedValue).toThrow(AwilixResolutionError)
+      assert.throws(() => container.cradle.scopedValue, AwilixResolutionError)
     })
 
     it('supports overwriting values in a scope', () => {
@@ -408,8 +413,8 @@ describe('container', () => {
         value: asValue('scope'),
       })
 
-      expect(container.cradle.usedValue).toBe('root')
-      expect(scope.cradle.usedValue).toBe('scope')
+      assert.strictEqual(container.cradle.usedValue, 'root')
+      assert.strictEqual(scope.cradle.usedValue, 'scope')
     })
 
     it('supports default parameters in CLASSIC mode', () => {
@@ -422,11 +427,12 @@ describe('container', () => {
           /**/
         }
 
-        constructor(
-          public val: any,
-          public fn: any,
-        ) {
-          /**/
+        val: any
+        fn: any
+
+        constructor(val: any, fn: any) {
+          this.val = val
+          this.fn = fn
         }
       }
 
@@ -441,8 +447,9 @@ describe('container', () => {
         fn: asFunction(fnWithDefaults),
       })
 
-      expect(container.resolve<ClassWithDefaults>('cls').val).toBe(123)
-      expect(container.resolve<ClassWithDefaults>('cls').fn('yep')).toBe(
+      assert.strictEqual(container.resolve<ClassWithDefaults>('cls').val, 123)
+      assert.strictEqual(
+        container.resolve<ClassWithDefaults>('cls').fn('yep'),
         'yepnope123',
       )
     })
@@ -456,7 +463,7 @@ describe('container', () => {
       })
 
       const err = throws(() => container.resolve('first'))
-      expect(err.message).toContain('first -> second -> third -> second')
+      assert.ok(err.message.includes('first -> second -> third -> second'))
     })
 
     it('throws an AwilixResolutionError when the lifetime is unknown', () => {
@@ -467,8 +474,8 @@ describe('container', () => {
       })
 
       const err = throws(() => container.resolve('first'))
-      expect(err.message).toContain('first -> second')
-      expect(err.message).toContain('lol')
+      assert.ok(err.message.includes('first -> second'))
+      assert.ok(err.message.includes('lol'))
     })
 
     it('behaves properly when the cradle is returned from an async function', async () => {
@@ -481,7 +488,7 @@ describe('container', () => {
 
       const { value } = await example()
 
-      expect(value).toBe(42)
+      assert.strictEqual(value, 42)
     })
   })
 
@@ -492,21 +499,32 @@ describe('container', () => {
     })
 
     it('returns the container', () => {
-      expect(container.loadModules([])).toBe(container)
+      assert.strictEqual(container.loadModules([]), container)
     })
 
-    it('returns a Promise of the container if used with esModules true', async () => {
-      expect(await container.loadModules([], { esModules: true })).toBe(
-        container,
+    it('requires a loader for synchronous loading from native ESM', () => {
+      assert.throws(
+        () => container.loadModules(['src/__tests__/fixture/services/*.js']),
+        { name: 'ReferenceError', message: /require is not defined/ },
       )
+    })
+
+    it('imports modules and returns the container if used with esModules true', async () => {
+      const loaded = await container.loadModules(
+        ['src/__tests__/fixture/services/mainService.js'],
+        { esModules: true },
+      )
+
+      assert.strictEqual(loaded, container)
+      assert.ok(loaded.hasRegistration('mainService'))
     })
   })
 
   describe('setting a property on the cradle', () => {
     it('should fail', () => {
-      expect(() => {
+      assert.throws(() => {
         createContainer().cradle.lol = 'nope'
-      }).toThrow(Error)
+      }, Error)
     })
   })
 
@@ -519,15 +537,17 @@ describe('container', () => {
         c1: asClass(Repo),
       })
 
-      expect(util.inspect(container)).toBe(
+      assert.strictEqual(
+        util.inspect(container),
         '[AwilixContainer (registrations: 4)]',
       )
-      expect(
+      assert.strictEqual(
         util.inspect(container.createScope().register({ val3: asValue(3) })),
-      ).toBe('[AwilixContainer (scoped, registrations: 5)]')
+        '[AwilixContainer (scoped, registrations: 5)]',
+      )
 
-      expect(container.resolve('inspect')).toBeInstanceOf(Function)
-      expect(container.resolve(util.inspect.custom)).toBeInstanceOf(Function)
+      assert.ok(container.resolve('inspect') instanceof Function)
+      assert.ok(container.resolve(util.inspect.custom) instanceof Function)
     })
   })
 
@@ -540,7 +560,8 @@ describe('container', () => {
         c1: asClass(Repo),
       })
 
-      expect(util.inspect(container.cradle)).toBe(
+      assert.strictEqual(
+        util.inspect(container.cradle),
         '[object AwilixContainerCradle]',
       )
     })
@@ -549,7 +570,7 @@ describe('container', () => {
   describe('resolving reserved names', () => {
     it('returns the createContainer function for constructor', () => {
       const container = createContainer()
-      expect(container.resolve('constructor')).toBe(_createContainer)
+      assert.strictEqual(container.resolve('constructor'), _createContainer)
     })
   })
 
@@ -562,7 +583,7 @@ describe('container', () => {
         c1: asClass(Repo),
       })
 
-      expect(Array.from(container.cradle)).toEqual([
+      assert.deepStrictEqual(Array.from(container.cradle), [
         'val1',
         'val2',
         'fn1',
@@ -584,7 +605,7 @@ describe('container', () => {
       })
 
       const result = container.resolve<KeysTest>('test')
-      expect(result.keys).toEqual(['val1', 'val2', 'test', 'injected'])
+      assert.deepStrictEqual(result.keys, ['val1', 'val2', 'test', 'injected'])
     })
   })
 
@@ -602,7 +623,7 @@ describe('container', () => {
       })
 
       const theAnswer = container.resolve<() => number>('theAnswer')
-      expect(theAnswer()).toBe(42)
+      assert.strictEqual(theAnswer(), 42)
     })
 
     it('should default to PROXY injection mode when unknown', () => {
@@ -618,7 +639,7 @@ describe('container', () => {
       })
 
       const theAnswer = container.resolve<() => number>('theAnswer')
-      expect(theAnswer()).toBe(42)
+      assert.strictEqual(theAnswer(), 42)
     })
   })
 
@@ -633,7 +654,7 @@ describe('container', () => {
           second: asFunction(() => 'hah'),
         })
 
-        expect(container.resolve('first')).toBe('hah')
+        assert.strictEqual(container.resolve('first'), 'hah')
       })
 
       it('throws an AwilixResolutionError when longer lifetime modules depend on shorter lifetime dependencies and strict is set', () => {
@@ -648,9 +669,11 @@ describe('container', () => {
         })
 
         const err = throws(() => container.resolve('first'))
-        expect(err.message).toContain('first -> second')
-        expect(err.message).toContain(
-          "Dependency 'second' has a shorter lifetime than its ancestor: 'first'",
+        assert.ok(err.message.includes('first -> second'))
+        assert.ok(
+          err.message.includes(
+            "Dependency 'second' has a shorter lifetime than its ancestor: 'first'",
+          ),
         )
       })
 
@@ -665,7 +688,7 @@ describe('container', () => {
           injected: asFunction(() => 'foobar'),
         })
 
-        expect(container.resolve('first')).toBe('hah')
+        assert.strictEqual(container.resolve('first'), 'hah')
       })
 
       it('allows for asValue() to be used when strict is set', () => {
@@ -683,8 +706,8 @@ describe('container', () => {
           secondVal: asValue('foobar'),
         })
 
-        expect(container.resolve('first')).toBe('hah')
-        expect(container.resolve('second')).toBe('foobar')
+        assert.strictEqual(container.resolve('first'), 'hah')
+        assert.strictEqual(container.resolve('second'), 'foobar')
       })
 
       it('allows aliasTo to be used when strict is set', () => {
@@ -699,7 +722,7 @@ describe('container', () => {
           val: asValue('hah'),
         })
 
-        expect(container.resolve('first')).toBe('hah')
+        assert.strictEqual(container.resolve('first'), 'hah')
       })
 
       it('detects when an aliasTo resolution violates lifetime constraints', () => {
@@ -719,9 +742,11 @@ describe('container', () => {
         })
 
         const err = throws(() => scope.resolve('first'))
-        expect(err.message).toContain('first -> second -> val')
-        expect(err.message).toContain(
-          "Dependency 'val' has a shorter lifetime than its ancestor: 'first'",
+        assert.ok(err.message.includes('first -> second -> val'))
+        assert.ok(
+          err.message.includes(
+            "Dependency 'val' has a shorter lifetime than its ancestor: 'first'",
+          ),
         )
       })
     })
@@ -742,24 +767,24 @@ describe('container', () => {
         const scope = container.createScope()
 
         let err = throws(() => scope.resolve('scoped'))
-        expect(err).toBeInstanceOf(AwilixResolutionError)
-        expect(err.message).toContain('scoped -> val')
+        assert.ok(err instanceof AwilixResolutionError)
+        assert.ok(err.message.includes('scoped -> val'))
 
         scope.register({
           val: asValue('foobar'),
         })
 
-        expect(scope.resolve('scoped')).toBe('foobar')
+        assert.strictEqual(scope.resolve('scoped'), 'foobar')
 
         err = throws(() => scope.resolve('singleton'))
-        expect(err).toBeInstanceOf(AwilixResolutionError)
-        expect(err.message).toContain('singleton -> val')
+        assert.ok(err instanceof AwilixResolutionError)
+        assert.ok(err.message.includes('singleton -> val'))
 
         container.register({
           val: asValue('hah'),
         })
 
-        expect(scope.resolve('singleton')).toBe('hah')
+        assert.strictEqual(scope.resolve('singleton'), 'hah')
       })
 
       it('preserves the resolution stack when resolving a singleton using a parent container, from a scope', () => {
@@ -777,8 +802,8 @@ describe('container', () => {
         const scope = container.createScope()
 
         const err = throws(() => scope.resolve('scoped'))
-        expect(err).toBeInstanceOf(AwilixResolutionError)
-        expect(err.message).toContain('scoped -> singleton -> val')
+        assert.ok(err instanceof AwilixResolutionError)
+        assert.ok(err.message.includes('scoped -> singleton -> val'))
       })
     })
 
@@ -793,9 +818,11 @@ describe('container', () => {
             test: asFunction(() => 42, { lifetime: Lifetime.SINGLETON }),
           }),
         )
-        expect(err.message).toContain("Could not register 'test'")
-        expect(err.message).toContain(
-          'Cannot register a singleton on a scoped container',
+        assert.ok(err.message.includes("Could not register 'test'"))
+        assert.ok(
+          err.message.includes(
+            'Cannot register a singleton on a scoped container',
+          ),
         )
       })
     })
@@ -808,8 +835,8 @@ describe('setting a name on the registration options', () => {
       test: asFunction(() => 42, { lifetime: Lifetime.SCOPED, name: 'lol' }),
     })
 
-    expect(container.resolve('test')).toBe(42)
-    expect(container.registrations.lol).toBe(undefined)
+    assert.strictEqual(container.resolve('test'), 42)
+    assert.strictEqual(container.registrations.lol, undefined)
   })
 })
 
@@ -823,11 +850,11 @@ describe('registering and resolving symbols', () => {
       })
       .register(S2, asValue(24))
 
-    expect(container.resolve(S1)).toBe(42)
-    expect(container.cradle[S1]).toBe(42)
+    assert.strictEqual(container.resolve(S1), 42)
+    assert.strictEqual(container.cradle[S1], 42)
 
-    expect(container.resolve(S2)).toBe(24)
-    expect(container.cradle[S2]).toBe(24)
+    assert.strictEqual(container.resolve(S2), 24)
+    assert.strictEqual(container.cradle[S2], 24)
   })
 })
 
@@ -837,7 +864,7 @@ describe('spreading the cradle', () => {
       val1: asValue(1),
       val2: asValue(2),
     })
-    expect([...container.cradle]).toEqual(['val1', 'val2'])
+    assert.deepStrictEqual([...container.cradle], ['val1', 'val2'])
   })
 })
 
@@ -847,7 +874,7 @@ describe('using Object.keys() on the cradle', () => {
       val1: asValue(1),
       val2: asValue(2),
     })
-    expect(Object.keys(container.cradle)).toEqual(['val1', 'val2'])
+    assert.deepStrictEqual(Object.keys(container.cradle), ['val1', 'val2'])
   })
 
   it('should return injector keys', () => {
@@ -864,7 +891,7 @@ describe('using Object.keys() on the cradle', () => {
     })
 
     const result = container.resolve<KeysTest>('test')
-    expect(result.keys).toEqual(['val1', 'val2', 'test', 'injected'])
+    assert.deepStrictEqual(result.keys, ['val1', 'val2', 'test', 'injected'])
   })
 })
 
@@ -888,8 +915,8 @@ describe('using Object.getOwnPropertyDescriptor with injector proxy', () => {
       })
 
     const result = container.resolve<KeysTest>('test')
-    expect(result.testProp).toBeDefined()
-    expect(result.nonexistentProp).toBeFalsy()
+    assert.notStrictEqual(result.testProp, undefined)
+    assert.ok(!result.nonexistentProp)
   })
 })
 
@@ -913,8 +940,8 @@ describe('using Object.getOwnPropertyDescriptor with container cradle', () => {
       })
 
     const result = container.resolve<KeysTest>('test')
-    expect(result.testProp).toBeDefined()
-    expect(result.nonexistentProp).toBeFalsy()
+    assert.notStrictEqual(result.testProp, undefined)
+    assert.ok(!result.nonexistentProp)
   })
 })
 
@@ -925,19 +952,19 @@ describe('memoizing registrations', () => {
     const scope1 = container.createScope()
     const scope2 = scope1.createScope()
 
-    expect(scope1.resolve('val1')).toBe(123)
-    expect(scope2.resolve('val1')).toBe(123)
+    assert.strictEqual(scope1.resolve('val1'), 123)
+    assert.strictEqual(scope2.resolve('val1'), 123)
 
     container.register({ val2: asValue(321) })
-    expect(scope2.resolve('val2')).toBe(321)
-    expect(scope1.resolve('val2')).toBe(321)
+    assert.strictEqual(scope2.resolve('val2'), 321)
+    assert.strictEqual(scope1.resolve('val2'), 321)
 
     container.register({ val3: asValue(1337) }).register({
       keys: asFunction((cradle: any) => Object.keys(cradle)).inject(() => ({
         injected: true,
       })),
     })
-    expect(scope2.resolve('keys')).toEqual([
+    assert.deepStrictEqual(scope2.resolve('keys'), [
       'val1',
       'val2',
       'val3',
@@ -958,28 +985,29 @@ describe('memoizing registrations', () => {
     }
 
     it('throws when the target is falsy', () => {
-      expect(() => createContainer().build(null!)).toThrow(/null/)
-      expect(() => createContainer().build(undefined!)).toThrow(/undefined/)
-      expect(() => createContainer().build({} as any)).toThrow(/object/)
+      assert.throws(() => createContainer().build(null!), /null/)
+      assert.throws(() => createContainer().build(undefined!), /undefined/)
+      assert.throws(() => createContainer().build({} as any), /object/)
     })
 
     it('returns resolved value when passed a resolver', () => {
-      expect(container.build(asFunction(fn).classic())).toBe(1337)
-      expect(container.build(asClass(BuildTest).proxy())).toBeInstanceOf(
-        BuildTest,
+      assert.strictEqual(container.build(asFunction(fn).classic()), 1337)
+      assert.ok(
+        container.build(asClass(BuildTest).proxy()) instanceof BuildTest,
       )
-      expect(container.build(asClass(BuildTest).proxy()).val).toBe(1337)
+      assert.strictEqual(container.build(asClass(BuildTest).proxy()).val, 1337)
     })
 
     it('returns resolved value when passed a function', () => {
-      expect(
+      assert.strictEqual(
         container.build(fn, { injectionMode: InjectionMode.CLASSIC }),
-      ).toBe(1337)
+        1337,
+      )
     })
 
     it('returns resolved value when passed a class', () => {
-      expect(container.build(BuildTest)).toBeInstanceOf(BuildTest)
-      expect(container.build(BuildTest).val).toBe(1337)
+      assert.ok(container.build(BuildTest) instanceof BuildTest)
+      assert.strictEqual(container.build(BuildTest).val, 1337)
     })
 
     it('uses containers injection mode by default', () => {
@@ -987,7 +1015,7 @@ describe('memoizing registrations', () => {
         injectionMode: InjectionMode.CLASSIC,
       })
       otherContainer.register({ val: asValue(1337) })
-      expect(otherContainer.build(fn)).toBe(1337)
+      assert.strictEqual(otherContainer.build(fn), 1337)
     })
 
     it('injects the parameters of a named generator function', () => {
@@ -996,30 +1024,33 @@ describe('memoizing registrations', () => {
           yield val
         }).classic(),
       )
-      expect([...values]).toEqual([1337])
+      assert.deepStrictEqual([...values], [1337])
     })
   })
 
   describe('well-known names and symbols', () => {
     it('should have toJSON() return [object AwilixContainerCradle]', () => {
-      expect(createContainer().cradle.toJSON()).toBe(
+      assert.strictEqual(
+        createContainer().cradle.toJSON(),
         '[object AwilixContainerCradle]',
       )
     })
 
     it('JSON.stringify() should return [object AwilixContainerCradle]', () => {
-      expect(JSON.stringify(createContainer().cradle)).toBe(
+      assert.strictEqual(
+        JSON.stringify(createContainer().cradle),
         '"[object AwilixContainerCradle]"',
       )
     })
 
     it('Symbol.toStringTag', () => {
       const result = Object.prototype.toString.call(createContainer().cradle)
-      expect(result).toBe('[object AwilixContainerCradle]')
+      assert.strictEqual(result, '[object AwilixContainerCradle]')
     })
 
     it('toString() should return [object AwilixContainerCradle]', () => {
-      expect(createContainer().cradle.toString()).toBe(
+      assert.strictEqual(
+        createContainer().cradle.toString(),
         '[object AwilixContainerCradle]',
       )
     })
@@ -1034,8 +1065,8 @@ describe('cycle detection edge cases', () => {
     })
 
     const err = throws(() => container.resolve('selfRef'))
-    expect(err).toBeInstanceOf(AwilixResolutionError)
-    expect(err.message).toContain('selfRef -> selfRef')
+    assert.ok(err instanceof AwilixResolutionError)
+    assert.ok(err.message.includes('selfRef -> selfRef'))
   })
 
   it('detects a cycle across scopes', () => {
@@ -1049,8 +1080,8 @@ describe('cycle detection edge cases', () => {
     })
 
     const err = throws(() => child.resolve('a'))
-    expect(err).toBeInstanceOf(AwilixResolutionError)
-    expect(err.message).toContain('a -> b -> a')
+    assert.ok(err instanceof AwilixResolutionError)
+    assert.ok(err.message.includes('a -> b -> a'))
   })
 
   it('detects a cycle with Symbol keys', () => {
@@ -1063,9 +1094,9 @@ describe('cycle detection edge cases', () => {
     })
 
     const err = throws(() => container.resolve(SA))
-    expect(err).toBeInstanceOf(AwilixResolutionError)
-    expect(err.message).toContain('Symbol(symA)')
-    expect(err.message).toContain('Symbol(symB)')
+    assert.ok(err instanceof AwilixResolutionError)
+    assert.ok(err.message.includes('Symbol(symA)'))
+    assert.ok(err.message.includes('Symbol(symB)'))
   })
 })
 
@@ -1083,9 +1114,9 @@ describe('resolution stack integrity', () => {
     })
 
     const err = throws(() => container.resolve('faulty'))
-    expect(err).toBeInstanceOf(AwilixResolutionError)
-    expect(err.message).toContain('faulty -> missing')
-    expect(err.message).not.toContain('good')
+    assert.ok(err instanceof AwilixResolutionError)
+    assert.ok(err.message.includes('faulty -> missing'))
+    assert.strictEqual(err.message.includes('good'), false)
   })
 })
 
@@ -1111,7 +1142,7 @@ describe('strict mode deep chains', () => {
     })
 
     const scope = container.createScope()
-    expect(scope.resolve('s1')).toBe('deep-scoped-value')
+    assert.strictEqual(scope.resolve('s1'), 'deep-scoped-value')
   })
 
   it('detects lifetime violation on cached scoped value resolved through a longer-lived ancestor', () => {
@@ -1126,13 +1157,15 @@ describe('strict mode deep chains', () => {
     })
 
     // First: resolve the scoped value so it gets cached on the root container.
-    expect(container.resolve('scopedVal')).toBe('scoped-result')
+    assert.strictEqual(container.resolve('scopedVal'), 'scoped-result')
     // Now resolve a singleton that depends on it — the cached scoped value
     // must still be checked for lifetime leakage.
     const err = throws(() => container.resolve('singletonDep'))
-    expect(err).toBeInstanceOf(AwilixResolutionError)
-    expect(err.message).toContain(
-      "Dependency 'scopedVal' has a shorter lifetime than its ancestor: 'singletonDep'",
+    assert.ok(err instanceof AwilixResolutionError)
+    assert.ok(
+      err.message.includes(
+        "Dependency 'scopedVal' has a shorter lifetime than its ancestor: 'singletonDep'",
+      ),
     )
   })
 })
@@ -1147,7 +1180,7 @@ describe('registration lookup and cache invalidation', () => {
       current = current.createScope()
     }
 
-    expect(current.resolve('deepVal')).toBe('from-root')
+    assert.strictEqual(current.resolve('deepVal'), 'from-root')
   })
 
   it('child resolves updated parent registration (transient)', () => {
@@ -1155,10 +1188,10 @@ describe('registration lookup and cache invalidation', () => {
     parent.register({ val: asFunction(() => 'original') })
 
     const child = parent.createScope()
-    expect(child.resolve('val')).toBe('original')
+    assert.strictEqual(child.resolve('val'), 'original')
 
     parent.register({ val: asFunction(() => 'updated') })
-    expect(child.resolve('val')).toBe('updated')
+    assert.strictEqual(child.resolve('val'), 'updated')
   })
 
   it('local registration shadows parent even after parent re-registers', () => {
@@ -1168,9 +1201,9 @@ describe('registration lookup and cache invalidation', () => {
     const child = parent.createScope()
     child.register({ val: asFunction(() => 'child-local') })
 
-    expect(child.resolve('val')).toBe('child-local')
+    assert.strictEqual(child.resolve('val'), 'child-local')
 
     parent.register({ val: asFunction(() => 'parent-v2') })
-    expect(child.resolve('val')).toBe('child-local')
+    assert.strictEqual(child.resolve('val'), 'child-local')
   })
 })

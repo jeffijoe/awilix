@@ -1,6 +1,8 @@
-import { createContainer } from '../container'
-import { InjectionMode } from '../injection-mode'
-import { asClass, asValue } from '../resolvers'
+import assert from 'node:assert/strict'
+import { test } from 'node:test'
+import { createContainer } from '../container.ts'
+import { InjectionMode } from '../injection-mode.ts'
+import { asClass, asValue } from '../resolvers.ts'
 
 // NOTE: this test is in JS because TS won't allow the super(...arguments) trick.
 
@@ -31,24 +33,18 @@ test('parses parent classes if there are no declared parameters', () => {
     level3: asClass(Level3),
   })
 
-  expect(container.resolve('level1')).toEqual(
-    expect.objectContaining({
-      arg1: 1,
-      arg2: 2,
-    }),
-  )
+  assert.partialDeepStrictEqual(container.resolve('level1'), {
+    arg1: 1,
+    arg2: 2,
+  })
 
-  expect(container.resolve('level2')).toEqual(
-    expect.objectContaining({
-      arg1: 1,
-      arg2: 2,
-    }),
-  )
+  assert.partialDeepStrictEqual(container.resolve('level2'), {
+    arg1: 1,
+    arg2: 2,
+  })
 
-  expect(container.resolve('level3')).toEqual(
-    expect.objectContaining({
-      arg1: 4,
-      arg2: undefined,
-    }),
-  )
+  assert.partialDeepStrictEqual(container.resolve('level3'), {
+    arg1: 4,
+    arg2: undefined,
+  })
 })

@@ -12,22 +12,22 @@ export {
   type ResolveOptions,
   type DisposeOptions,
   createContainer,
-} from './container'
+} from './container.ts'
 export {
   AwilixError,
   AwilixRegistrationError,
   AwilixResolutionError,
   AwilixTypeError,
-} from './errors'
-export { InjectionMode, type InjectionModeType } from './injection-mode'
-export { Lifetime, type LifetimeType } from './lifetime'
-export { DisposalMode, type DisposalModeType } from './disposal-mode'
+} from './errors.ts'
+export { InjectionMode, type InjectionModeType } from './injection-mode.ts'
+export { Lifetime, type LifetimeType } from './lifetime.ts'
+export { DisposalMode, type DisposalModeType } from './disposal-mode.ts'
 export {
   type GlobWithOptions,
   type ListModulesOptions,
   type ModuleDescriptor,
   listModules,
-} from './list-modules'
+} from './list-modules.ts'
 export {
   type BuildResolverOptions,
   type Disposer,
@@ -45,5 +45,5 @@ export {
   asValue,
   createBuildResolver,
   createDisposableResolver,
-} from './resolvers'
-export { isClass, isFunction } from './utils'
+} from './resolvers.ts'
+export { isClass, isFunction } from './utils.ts'

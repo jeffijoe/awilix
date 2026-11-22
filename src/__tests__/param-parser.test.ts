@@ -1,60 +1,72 @@
-import { parseParameterList } from '../param-parser'
+import assert from 'node:assert/strict'
+import { describe, it } from 'node:test'
+import { parseParameterList } from '../param-parser.ts'
 
 describe('parseParameterList', () => {
+  it('reports unexpected tokens at the start of a signature and in its parameters', () => {
+    assert.throws(() => parseParameterList('*'), SyntaxError)
+    assert.throws(() => parseParameterList('(*)'), SyntaxError)
+  })
+
   it('returns an empty array when invalid input is given', () => {
-    expect(parseParameterList('')).toEqual([])
+    assert.deepStrictEqual(parseParameterList(''), [])
   })
 
   it('supports regular functions', () => {
-    expect(
+    assert.deepStrictEqual(
       parseParameterList(
         function hello(dep1: any, dep2: any) {
           /**/
         }.toString(),
       ),
-    ).toEqual([
-      { name: 'dep1', optional: false },
-      { name: 'dep2', optional: false },
-    ])
-    expect(
+      [
+        { name: 'dep1', optional: false },
+        { name: 'dep2', optional: false },
+      ],
+    )
+    assert.deepStrictEqual(
       parseParameterList(
         function (dep1: any, dep2: any) {
           /**/
         }.toString(),
       ),
-    ).toEqual([
-      { name: 'dep1', optional: false },
-      { name: 'dep2', optional: false },
-    ])
-    expect(
+      [
+        { name: 'dep1', optional: false },
+        { name: 'dep2', optional: false },
+      ],
+    )
+    assert.deepStrictEqual(
       parseParameterList(
         function (dep1: any, dep2: any, dep3: any) {
           /**/
         }.toString(),
       ),
-    ).toEqual([
-      { name: 'dep1', optional: false },
-      { name: 'dep2', optional: false },
-      { name: 'dep3', optional: false },
-    ])
-    expect(
+      [
+        { name: 'dep1', optional: false },
+        { name: 'dep2', optional: false },
+        { name: 'dep3', optional: false },
+      ],
+    )
+    assert.deepStrictEqual(
       parseParameterList(
         function hello() {
           /**/
         }.toString(),
       ),
-    ).toEqual([])
-    expect(
+      [],
+    )
+    assert.deepStrictEqual(
       parseParameterList(
         function () {
           /**/
         }.toString(),
       ),
-    ).toEqual([])
+      [],
+    )
   })
 
   it('supports regular functions with default params', () => {
-    expect(
+    assert.deepStrictEqual(
       parseParameterList(
         `function hello(
           dep1 = 'frick off ricky',
@@ -62,70 +74,77 @@ describe('parseParameterList', () => {
         ) {
         }`,
       ),
-    ).toEqual([
-      { name: 'dep1', optional: true },
-      { name: 'dep2', optional: true },
-    ])
+      [
+        { name: 'dep1', optional: true },
+        { name: 'dep2', optional: true },
+      ],
+    )
   })
 
   it('supports arrow functions', () => {
-    expect(
+    assert.deepStrictEqual(
       parseParameterList(
         ((dep1: any, dep2: any) => {
           /**/
         }).toString(),
       ),
-    ).toEqual([
-      { name: 'dep1', optional: false },
-      { name: 'dep2', optional: false },
-    ])
-    expect(
+      [
+        { name: 'dep1', optional: false },
+        { name: 'dep2', optional: false },
+      ],
+    )
+    assert.deepStrictEqual(
       parseParameterList(((dep1: any, dep2: any) => 42).toString()),
-    ).toEqual([
-      { name: 'dep1', optional: false },
-      { name: 'dep2', optional: false },
-    ])
-    expect(
+      [
+        { name: 'dep1', optional: false },
+        { name: 'dep2', optional: false },
+      ],
+    )
+    assert.deepStrictEqual(
       parseParameterList(
         ((dep1: any, dep2: any, dep3: any) => {
           /**/
         }).toString(),
       ),
-    ).toEqual([
-      { name: 'dep1', optional: false },
-      { name: 'dep2', optional: false },
-      { name: 'dep3', optional: false },
-    ])
-    expect(
+      [
+        { name: 'dep1', optional: false },
+        { name: 'dep2', optional: false },
+        { name: 'dep3', optional: false },
+      ],
+    )
+    assert.deepStrictEqual(
       parseParameterList(
         (() => {
           /**/
         }).toString(),
       ),
-    ).toEqual([])
-    expect(parseParameterList((() => 42).toString())).toEqual([])
-    expect(parseParameterList(`dep1 => lol`)).toEqual([
+      [],
+    )
+    assert.deepStrictEqual(parseParameterList((() => 42).toString()), [])
+    assert.deepStrictEqual(parseParameterList(`dep1 => lol`), [
       { name: 'dep1', optional: false },
     ])
   })
 
   it('supports arrow function with default params', () => {
-    expect(
+    assert.deepStrictEqual(
       parseParameterList(
         ((dep1 = 123, dep2 = 456) => {
           /**/
         }).toString(),
       ),
-    ).toEqual([
-      { name: 'dep1', optional: true },
-      { name: 'dep2', optional: true },
-    ])
-    expect(
+      [
+        { name: 'dep1', optional: true },
+        { name: 'dep2', optional: true },
+      ],
+    )
+    assert.deepStrictEqual(
       parseParameterList(((dep1 = 123, dep2 = 456) => 789).toString()),
-    ).toEqual([
-      { name: 'dep1', optional: true },
-      { name: 'dep2', optional: true },
-    ])
+      [
+        { name: 'dep1', optional: true },
+        { name: 'dep2', optional: true },
+      ],
+    )
   })
 
   it('supports class constructors', () => {
@@ -140,10 +159,13 @@ describe('parseParameterList', () => {
       }
     }
 
-    expect(parseParameterList(Test.prototype.constructor.toString())).toEqual([
-      { name: 'dep1', optional: false },
-      { name: 'dep2', optional: false },
-    ])
+    assert.deepStrictEqual(
+      parseParameterList(Test.prototype.constructor.toString()),
+      [
+        { name: 'dep1', optional: false },
+        { name: 'dep2', optional: false },
+      ],
+    )
   })
 
   it('supports class constructors with a bunch of other shit before it', () => {
@@ -163,7 +185,7 @@ describe('parseParameterList', () => {
       }
     }
     `
-    expect(parseParameterList(cls)).toEqual([
+    assert.deepStrictEqual(parseParameterList(cls), [
       { name: 'dep1', optional: false },
       { name: 'dep2', optional: true },
     ])
@@ -178,25 +200,32 @@ describe('parseParameterList', () => {
       }
     }
 
-    expect(parseParameterList(Test.prototype.constructor.toString())).toBe(null)
+    assert.strictEqual(
+      parseParameterList(Test.prototype.constructor.toString()),
+      null,
+    )
 
-    expect(parseParameterList('class Lol extends Wee {}')).toBe(null)
+    assert.strictEqual(parseParameterList('class Lol extends Wee {}'), null)
   })
 
   it('supports carriage return in function signature', () => {
-    expect(parseParameterList(`function (\r\ndep1,\r\ndep2\r\n) {}`)).toEqual([
-      { name: 'dep1', optional: false },
-      { name: 'dep2', optional: false },
-    ])
+    assert.deepStrictEqual(
+      parseParameterList(`function (\r\ndep1,\r\ndep2\r\n) {}`),
+      [
+        { name: 'dep1', optional: false },
+        { name: 'dep2', optional: false },
+      ],
+    )
   })
 
   it('supports weird formatting', () => {
-    expect(
+    assert.deepStrictEqual(
       parseParameterList(`function(  dep1    \n,\r\n  dep2 = 123 \r\n) {}`),
-    ).toEqual([
-      { name: 'dep1', optional: false },
-      { name: 'dep2', optional: true },
-    ])
+      [
+        { name: 'dep1', optional: false },
+        { name: 'dep2', optional: true },
+      ],
+    )
   })
 
   it('supports the problem posted in issue #30', () => {
@@ -208,10 +237,10 @@ describe('parseParameterList', () => {
       return {}
     }
 
-    expect(parseParameterList(fn.toString())).toEqual([
+    assert.deepStrictEqual(parseParameterList(fn.toString()), [
       { name: 'a', optional: false },
     ])
-    expect(parseParameterList(fn2.toString())).toEqual([
+    assert.deepStrictEqual(parseParameterList(fn2.toString()), [
       { name: 'a', optional: false },
     ])
   })
@@ -232,7 +261,7 @@ class UserController {
 }
     `
 
-    expect(parseParameterList(cls)).toEqual([
+    assert.deepStrictEqual(parseParameterList(cls), [
       { name: 'userService', optional: false },
     ])
   })
@@ -255,7 +284,7 @@ class UserController {
 }
     `
 
-    expect(parseParameterList(cls)).toEqual([
+    assert.deepStrictEqual(parseParameterList(cls), [
       { name: 'userService', optional: false },
     ])
   })
@@ -281,13 +310,26 @@ class UserController {
     }
         `
 
-    expect(parseParameterList(cls)).toEqual([
+    assert.deepStrictEqual(parseParameterList(cls), [
       { name: 'userService', optional: false },
     ])
   })
 
   it('skips async keyword', () => {
-    expect(parseParameterList(`async function (first, second) {}`)).toEqual([
+    assert.deepStrictEqual(
+      parseParameterList(`async function (first, second) {}`),
+      [
+        {
+          name: 'first',
+          optional: false,
+        },
+        {
+          name: 'second',
+          optional: false,
+        },
+      ],
+    )
+    assert.deepStrictEqual(parseParameterList(`async (first, second) => {}`), [
       {
         name: 'first',
         optional: false,
@@ -297,18 +339,8 @@ class UserController {
         optional: false,
       },
     ])
-    expect(parseParameterList(`async (first, second) => {}`)).toEqual([
-      {
-        name: 'first',
-        optional: false,
-      },
-      {
-        name: 'second',
-        optional: false,
-      },
-    ])
-    expect(parseParameterList(`async () => {}`)).toEqual([])
-    expect(parseParameterList(`async => {}`)).toEqual([
+    assert.deepStrictEqual(parseParameterList(`async () => {}`), [])
+    assert.deepStrictEqual(parseParameterList(`async => {}`), [
       {
         name: 'async',
         optional: false,
@@ -317,26 +349,32 @@ class UserController {
   })
 
   it('skips generator star', () => {
-    expect(parseParameterList(`async function* (first, second) {}`)).toEqual([
-      {
-        name: 'first',
-        optional: false,
-      },
-      {
-        name: 'second',
-        optional: false,
-      },
-    ])
-    expect(parseParameterList(`async function *(first, second) {}`)).toEqual([
-      {
-        name: 'first',
-        optional: false,
-      },
-      {
-        name: 'second',
-        optional: false,
-      },
-    ])
+    assert.deepStrictEqual(
+      parseParameterList(`async function* (first, second) {}`),
+      [
+        {
+          name: 'first',
+          optional: false,
+        },
+        {
+          name: 'second',
+          optional: false,
+        },
+      ],
+    )
+    assert.deepStrictEqual(
+      parseParameterList(`async function *(first, second) {}`),
+      [
+        {
+          name: 'first',
+          optional: false,
+        },
+        {
+          name: 'second',
+          optional: false,
+        },
+      ],
+    )
   })
 
   it('skips generator star and name of a named generator', () => {
@@ -344,21 +382,25 @@ class UserController {
       { name: 'first', optional: false },
       { name: 'second', optional: false },
     ]
-    expect(parseParameterList(`function* gen(first, second) {}`)).toEqual(
+    assert.deepStrictEqual(
+      parseParameterList(`function* gen(first, second) {}`),
       expected,
     )
-    expect(parseParameterList(`function *gen(first, second) {}`)).toEqual(
+    assert.deepStrictEqual(
+      parseParameterList(`function *gen(first, second) {}`),
       expected,
     )
-    expect(parseParameterList(`async function* gen(first, second) {}`)).toEqual(
+    assert.deepStrictEqual(
+      parseParameterList(`async function* gen(first, second) {}`),
       expected,
     )
-    expect(
+    assert.deepStrictEqual(
       parseParameterList(
         function* gen(first: unknown, second: unknown) {
           yield [first, second]
         }.toString(),
       ),
-    ).toEqual(expected)
+      expected,
+    )
   })
 })

@@ -1,7 +1,10 @@
-import { camelCase } from '../camel-case'
+import assert from 'node:assert/strict'
+import { describe, it } from 'node:test'
+import { format } from 'node:util'
+import { camelCase } from '../camel-case.ts'
 
 describe('camelCase', () => {
-  it.each([
+  for (const [input, expected] of [
     // Basic separators
     ['my-cool-service', 'myCoolService'],
     ['my_cool_service', 'myCoolService'],
@@ -67,7 +70,9 @@ describe('camelCase', () => {
     // Short words at case boundaries
     ['iPhone', 'iPhone'],
     ['eBay', 'eBay'],
-  ])('converts %j to %j', (input, expected) => {
-    expect(camelCase(input)).toBe(expected)
-  })
+  ]) {
+    it(format('converts %j to %j', input, expected), () => {
+      assert.strictEqual(camelCase(input), expected)
+    })
+  }
 })

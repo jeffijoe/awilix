@@ -1,17 +1,19 @@
+import assert from 'node:assert/strict'
+import { describe, it } from 'node:test'
 import {
   type AwilixContainer,
   type InferCradleFromContainer,
   type InferCradleFromResolvers,
   type InferResolverType,
   createContainer,
-} from '../container'
+} from '../container.ts'
 import {
   type Resolver,
   asValue,
   asFunction,
   asClass,
   aliasTo,
-} from '../resolvers'
+} from '../resolvers.ts'
 
 type IsExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false
 
@@ -228,10 +230,10 @@ describe('register() chaining (type-level)', () => {
 
     const root = scope.resolve('root')
     assertType<IsExact<typeof root, 'rootValue'>>(true)
-    expect(root).toBe('rootValue')
+    assert.strictEqual(root, 'rootValue')
 
     const scoped = scope.resolve('scoped')
     assertType<IsExact<typeof scoped, string>>(true)
-    expect(scoped).toBe('scopedValue')
+    assert.strictEqual(scoped, 'scopedValue')
   })
 })

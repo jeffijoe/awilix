@@ -1,9 +1,11 @@
-import { type Token, createTokenizer } from '../function-tokenizer'
+import assert from 'node:assert/strict'
+import { describe, it } from 'node:test'
+import { type Token, createTokenizer } from '../function-tokenizer.ts'
 
 describe('tokenizer', () => {
   it('returns the expected tokens for a function', () => {
     const tokens = getTokens('function lol(p1)')
-    expect(tokens).toEqual([
+    assert.deepStrictEqual(tokens, [
       { type: 'function' },
       { type: 'ident', value: 'lol' },
       { type: '(' },
@@ -15,7 +17,7 @@ describe('tokenizer', () => {
 
   it('returns the expected tokens for a class', () => {
     const tokens = getTokens('class Hah { constructor(p1, p2) {}}')
-    expect(tokens).toEqual([
+    assert.deepStrictEqual(tokens, [
       { type: 'class' },
       { type: 'ident', value: 'Hah' },
       { type: 'ident', value: 'constructor' },
@@ -32,82 +34,82 @@ describe('tokenizer', () => {
     const tokens = getTokens(
       'class Hah { wee = "propinit"; method(lol, haha = 123, p = "i shall constructor your jimmies") {} constructor(p1, p2) {}}',
     )
-    expect(tokens).toContainEqual({ type: 'ident', value: 'constructor' })
-    expect(tokens).toContainEqual({ type: 'ident', value: 'p1' })
-    expect(tokens).toContainEqual({ type: 'ident', value: 'p2' })
+    assert.partialDeepStrictEqual(tokens, [
+      { type: 'ident', value: 'constructor' },
+      { type: 'ident', value: 'p1' },
+      { type: 'ident', value: 'p2' },
+    ])
   })
 
-  it('includes equals token but skips value correctly', () => {
-    expect(
-      getTokens('function rofl(p1, p2 = hah, p3 = 123.45)'),
-    ).toMatchSnapshot()
+  it('includes equals token but skips value correctly', (t) => {
+    t.assert.snapshot(getTokens('function rofl(p1, p2 = hah, p3 = 123.45)'))
 
-    expect(
+    t.assert.snapshot(
       getTokens(
         `function rofl(p1 = 'wee', p2 = "woo", p3 = \`haha "lol" 'dude'\`)`,
       ),
-    ).toMatchSnapshot()
+    )
   })
 
-  it('can skip strings with escape seqs in them', () => {
-    expect(
+  it('can skip strings with escape seqs in them', (t) => {
+    t.assert.snapshot(
       getTokens(
         `function rofl(p1 = 'we\\'e', p2 = "wo\\"o", p3 = \`haha \\\`lol" 'dude'\`)`,
       ),
-    ).toMatchSnapshot()
+    )
   })
 
-  it('can skip strings ending with an even number of backslashes', () => {
-    expect(
+  it('can skip strings ending with an even number of backslashes', (t) => {
+    t.assert.snapshot(
       getTokens(`function rofl(p1 = 'test\\\\', p2 = "test\\\\\\\\", p3)`),
-    ).toMatchSnapshot()
+    )
   })
 
-  it('terminates when the last character is a backslash', () => {
-    expect(getTokens(`function rofl(p1 = 'test\\`)).toMatchSnapshot()
+  it('terminates when the last character is a backslash', (t) => {
+    t.assert.snapshot(getTokens(`function rofl(p1 = 'test\\`))
   })
 
-  it('terminates when an escape sequence dangles at the end', () => {
-    expect(getTokens(`function rofl(p1 = 'test\\\\`)).toMatchSnapshot()
+  it('terminates when an escape sequence dangles at the end', (t) => {
+    t.assert.snapshot(getTokens(`function rofl(p1 = 'test\\\\`))
   })
 
-  it('can skip interpolated strings', () => {
-    expect(
+  it('can skip interpolated strings', (t) => {
+    t.assert.snapshot(
       getTokens(`function intstring1(p1 = \`Hello \${world}\`, p2 = 123)`),
-    ).toMatchSnapshot()
-    expect(
+    )
+    t.assert.snapshot(
       getTokens(
         `function intstring2(deep = \`Hello$ \${stuff && \`another $\{func(\`"haha"\`, man = 123)}\`}\`, asFuck = 123)`,
       ),
-    ).toMatchSnapshot()
+    )
   })
 
-  it('can skip object literals', () => {
-    expect(
+  it('can skip object literals', (t) => {
+    t.assert.snapshot(
       getTokens(
         `function obj(p1 = {waddup: 'homie'}, p2 = ({ you: gotThis('dawg:)', \`$\{bruh("hah" && fn(1,2,3))}\`) }), p3 = 123)`,
       ),
-    ).toMatchSnapshot()
+    )
   })
 
-  it('can skip function calls', () => {
-    expect(
+  it('can skip function calls', (t) => {
+    t.assert.snapshot(
       getTokens(
         `function funcCalls(first = require('path'), other = require(\`some-$\{module && "yeah"}\`))`,
       ),
-    ).toMatchSnapshot()
+    )
   })
 
-  it('can tokenize arrow functions', () => {
-    expect(
+  it('can tokenize arrow functions', (t) => {
+    t.assert.snapshot(
       getTokens(
         `(first = require('path'), other = require(\`some-$\{module && "yeah"}\`)) => {}`,
       ),
-    ).toMatchSnapshot()
+    )
   })
 
-  it('does not require function name', () => {
-    expect(getTokens(`function (first, second)`)).toMatchSnapshot()
+  it('does not require function name', (t) => {
+    t.assert.snapshot(getTokens(`function (first, second)`))
   })
 })
 

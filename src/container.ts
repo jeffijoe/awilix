@@ -4,16 +4,15 @@ import {
   AwilixRegistrationError,
   AwilixResolutionError,
   AwilixTypeError,
-} from './errors'
-import { type InjectionModeType, InjectionMode } from './injection-mode'
-import { type LifetimeType, Lifetime, isLifetimeLonger } from './lifetime'
-import { type GlobWithOptions, listModules } from './list-modules'
-import { importModule } from './load-module-native.js'
+} from './errors.ts'
+import { type InjectionModeType, InjectionMode } from './injection-mode.ts'
+import { type LifetimeType, Lifetime, isLifetimeLonger } from './lifetime.ts'
+import { type GlobWithOptions, listModules } from './list-modules.ts'
 import {
   type LoadModulesOptions,
   type LoadModulesResult,
   loadModules as realLoadModules,
-} from './load-modules'
+} from './load-modules.ts'
 import {
   type BuildResolverOptions,
   type Constructor,
@@ -21,9 +20,9 @@ import {
   type Resolver,
   asClass,
   asFunction,
-} from './resolvers'
-import { isClass, last, nameValueToObject } from './utils'
-import { DisposalMode, type DisposalModeType } from './disposal-mode'
+} from './resolvers.ts'
+import { isClass, last, nameValueToObject } from './utils.ts'
+import { DisposalMode, type DisposalModeType } from './disposal-mode.ts'
 
 /**
  * The container returned from createContainer has some methods and properties.
@@ -800,7 +799,7 @@ function createContainerInternal<T extends object = {}, U extends object = {}>(
       container,
     }
     if (opts?.esModules) {
-      _loadModulesDeps.require = importModule
+      _loadModulesDeps.require = (uri) => import(uri)
       return (
         realLoadModules(
           _loadModulesDeps,
