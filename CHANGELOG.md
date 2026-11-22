@@ -9,6 +9,7 @@
 - Keep cached instances available until their disposers finish so cleanup can resolve dependencies through the cradle without creating replacements
 - **BREAKING**: Bump minimum browser versions to Chrome 85, Firefox 79, Edge 85, Opera 71, Safari 14, and iOS Safari 14 for `AggregateError` support
 - Fix strings and template literals in class bodies confusing `CLASSIC` constructor parameter parsing ([#448](https://github.com/jeffijoe/awilix/issues/448), [#449](https://github.com/jeffijoe/awilix/pull/449) by [@bardrop](https://github.com/bardrop))
+- Update packages and replace Jest with Node's built-in test runner ([#451](https://github.com/jeffijoe/awilix/pull/451))
 
 # v13.0.7
 
