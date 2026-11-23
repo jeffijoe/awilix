@@ -188,6 +188,33 @@ class Client {
   })
 })
 
+// https://github.com/jeffijoe/awilix/issues/452
+// A closing destructuring bracket belongs to the parameter pattern, not to
+// its last default value. Skipping it ran past the end of the parameter list.
+describe('#452', () => {
+  for (const value of ['1', '[]', '{ count: 1, items: [2, 3] }']) {
+    test(`ends a destructured object default at its closing brace: ${value}`, () => {
+      const classCode = `
+class Repo {
+  constructor({ db, options = ${value} }) { this.db = db }
+  find(id, opts) { return query(id, opts) }
+}`
+      assert.deepStrictEqual(parseParameterList(classCode), [
+        { name: 'db', optional: false },
+        { name: 'options', optional: true },
+      ])
+    })
+  }
+
+  test('continues after a destructured array with a final default', () => {
+    assert.deepStrictEqual(parseParameterList('function f([a, b = 1], c) {}'), [
+      { name: 'a', optional: false },
+      { name: 'b', optional: true },
+      { name: 'c', optional: false },
+    ])
+  })
+})
+
 // Strings in a class body were read as code, so a glob in a class field
 // (`'src/**/*.js'`) opened a block comment that hid the constructor, and
 // `"constructor(x)"` in a string was taken as the constructor.

@@ -189,6 +189,10 @@ export function createTokenizer(source: string) {
       }
 
       if (ch === '}' || ch === ']') {
+        if (bracketDepth === 0) {
+          // This closes the enclosing destructuring pattern, not the default.
+          return true
+        }
         bracketDepth--
         return false
       }

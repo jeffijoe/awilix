@@ -143,6 +143,29 @@ describe('registrations', () => {
       assert.ok(result.testClass instanceof TestClass)
     })
 
+    it('resolves a destructured constructor with a final default value', () => {
+      class Repo {
+        db: object
+        initializers: unknown[]
+
+        constructor({ db, initializers = [] }: any) {
+          this.db = db
+          this.initializers = initializers
+        }
+      }
+
+      const db = {}
+      container.register({
+        db: asValue(db),
+        initializers: asValue(undefined),
+        repo: asClass(Repo),
+      })
+
+      const repo = container.resolve<Repo>('repo')
+      assert.strictEqual(repo.db, db)
+      assert.deepStrictEqual(repo.initializers, [])
+    })
+
     it('resolves multiple dependencies manually', () => {
       container.register({
         testClass: asClass(TestClass),
