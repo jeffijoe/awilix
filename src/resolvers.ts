@@ -3,10 +3,14 @@ import type {
   FunctionReturning,
   ResolveOptions,
 } from './container.ts'
-import { AwilixTypeError } from './errors.ts'
+import { AwilixError, AwilixTypeError } from './errors.ts'
 import { type InjectionModeType, InjectionMode } from './injection-mode.ts'
 import { type LifetimeType, Lifetime } from './lifetime.ts'
-import { type Parameter, parseParameterList } from './param-parser.ts'
+import {
+  DESTRUCTURED_PARAMETER,
+  type Parameter,
+  parseParameterList,
+} from './param-parser.ts'
 import { isFunction } from './utils.ts'
 
 // We parse the signature of any `Function`, so we want to allow `Function` types.
@@ -462,10 +466,7 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
     dependencyParseTarget = fn
   }
 
-  // Parse out the dependencies
-  // NOTE: we do this regardless of whether PROXY is used or not,
-  // because if this fails, we want it to fail early (at startup) rather
-  // than at resolution time.
+  // Parse once at resolver creation. Only CLASSIC requires named parameters.
   const dependencies = parseDependencies(dependencyParseTarget)
 
   // Use a regular function instead of an arrow function to facilitate binding to the resolver.
@@ -490,6 +491,12 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
       return fn(cradle)
     }
 
+    if (dependencies === DESTRUCTURED_PARAMETER) {
+      throw new AwilixError(
+        'CLASSIC injection does not support destructured parameters. Use PROXY injection instead.',
+      )
+    }
+
     // We have dependencies so we need to resolve them manually
     if (dependencies.length > 0) {
       const resolve = this.injector
@@ -511,7 +518,9 @@ function generateResolve(fn: Function, dependencyParseTarget?: Function) {
  * If it's a class that extends another class, and it does
  * not have a defined constructor, attempt to parse it's super constructor.
  */
-function parseDependencies(fn: Function): Array<Parameter> {
+function parseDependencies(
+  fn: Function,
+): Array<Parameter> | typeof DESTRUCTURED_PARAMETER {
   const result = parseParameterList(fn.toString())
   if (!result) {
     // No defined constructor for a class, check if there is a parent

@@ -2,7 +2,16 @@
  * Token type.
  */
 export type TokenType =
-  'ident' | '(' | ')' | ',' | '=' | '*' | 'function' | 'class' | 'EOF'
+  | 'ident'
+  | '('
+  | ')'
+  | ','
+  | '='
+  | '*'
+  | 'function'
+  | 'class'
+  | 'destructuring'
+  | 'EOF'
 
 /**
  * Lexer Token.
@@ -21,6 +30,10 @@ export const TokenizerFlags = {
    * If this is set, the tokenizer will not attempt to be smart about skipping expressions.
    */
   Dumb: 1,
+  /**
+   * If this is set, the tokenizer will report an opening brace or bracket at the start of a parameter.
+   */
+  ParameterStart: 2,
 } as const
 
 export type TokenizerFlags =
@@ -90,6 +103,15 @@ export function createTokenizer(source: string) {
         case ',':
           pos++
           return (type = ch)
+        case '{':
+        case '[':
+          pos++
+          // If we're currently parsing the start of a parameter,
+          // any brace or bracket indicates a destructuring pattern.
+          if ((flags & TokenizerFlags.ParameterStart) !== 0) {
+            return (type = 'destructuring')
+          }
+          break
         case '=':
           pos++
           if ((flags & TokenizerFlags.Dumb) === 0) {
