@@ -5,6 +5,12 @@ import {
 } from './function-tokenizer.ts'
 
 /**
+ * Return value used for detecting a destructured parameter which
+ * `CLASSIC` mode disallows.
+ */
+export const DESTRUCTURED_PARAMETER = Symbol('Destructured parameter')
+
+/**
  * A parameter for a function.
  */
 export interface Parameter {
@@ -24,11 +30,12 @@ export interface Parameter {
  * @param {string} source
  * The source of a function to extract the parameter list from
  *
- * @return {Array<Parameter> | null}
- * Returns an array of parameters, or `null` if no
- * constructor was found for a class.
+ * Returns the parameters, `null` for a class without a constructor, or
+ * `DESTRUCTURED_PARAMETER` when the signature uses a binding pattern.
  */
-export function parseParameterList(source: string): Array<Parameter> | null {
+export function parseParameterList(
+  source: string,
+): Array<Parameter> | typeof DESTRUCTURED_PARAMETER | null {
   const { next: _next, done } = createTokenizer(source)
   const params: Array<Parameter> = []
 
@@ -58,10 +65,13 @@ export function parseParameterList(source: string): Array<Parameter> | null {
         }
         break
       }
-      case '(':
-        // Start parsing parameter names.
-        parseParams()
+      case '(': {
+        const result = parseParams()
+        if (result === DESTRUCTURED_PARAMETER) {
+          return result
+        }
         break
+      }
       case ')':
         // We're now out of the parameter list.
         return params
@@ -100,11 +110,17 @@ export function parseParameterList(source: string): Array<Parameter> | null {
   function parseParams() {
     // Current token is a left-paren
     let param: Parameter = { name: '', optional: false }
-    while (!done()) {
-      nextToken()
-      switch (t.type) {
+    while (true) {
+      const token = nextToken(
+        t.type === '(' || t.type === ','
+          ? TokenizerFlags.ParameterStart
+          : TokenizerFlags.None,
+      )
+      switch (token.type) {
+        case 'destructuring':
+          return DESTRUCTURED_PARAMETER
         case 'ident':
-          param.name = t.value!
+          param.name = token.value!
           break
         case '=':
           param.optional = true

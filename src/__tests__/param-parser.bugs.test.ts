@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
-import { parseParameterList } from '../param-parser.ts'
+import { DESTRUCTURED_PARAMETER, parseParameterList } from '../param-parser.ts'
 
 // https://github.com/jeffijoe/awilix/issues/130
 //
@@ -276,4 +276,49 @@ class A {
       ],
     )
   })
+})
+
+// https://github.com/jeffijoe/awilix/issues/452
+//
+// When the last property of a destructured parameter had a default, the
+// tokenizer could scan past the parameter list. Detect the binding pattern
+// before scanning its default.
+describe('#452', () => {
+  const cases = [
+    {
+      name: 'object pattern ending in a scalar default',
+      source: 'class A { constructor({ db, n = 1 }) {} m(a, b) { f(a, b) } }',
+    },
+    {
+      name: 'object pattern ending in an array default',
+      source: 'class A { constructor({ db, xs = [] }) {} m(a, b) { f(a, b) } }',
+    },
+    {
+      name: 'object pattern ending in an object default',
+      source:
+        'class A { constructor({ db, opts = { a: 1, b: 2 } }) {} m(a, b) {} }',
+    },
+    {
+      name: 'object pattern with a trailing comma',
+      source: 'class A { constructor({ db, n = 1, }) {} m(a, b) {} }',
+    },
+    {
+      name: 'object pattern with a default before the last property',
+      source: 'function f({ xs = [], db }) {}',
+    },
+    {
+      name: 'array pattern followed by a named parameter',
+      source: 'function f([a, b = 1], c) {}',
+    },
+    {
+      name: 'object pattern between named parameters',
+      source: 'function f(a = { x: 1, y: 2 }, { b = [] }, c) {}',
+    },
+  ]
+
+  for (const { name, source } of cases) {
+    test(name, () => {
+      assert.strictEqual(parseParameterList(source), DESTRUCTURED_PARAMETER)
+    })
+  }
 })

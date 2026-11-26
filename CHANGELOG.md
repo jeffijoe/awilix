@@ -1,3 +1,7 @@
+# v14.0.1
+
+- Fix `PROXY` resolver creation for destructured parameters with default values and report an error when resolving destructured parameters with `CLASSIC` injection ([#452](https://github.com/jeffijoe/awilix/issues/452), [#454](https://github.com/jeffijoe/awilix/pull/454))
+
 # v14.0.0
 
 - Add `DisposalMode.SERIAL` to `container.dispose()` to wait for each disposer before calling the next ([#429](https://github.com/jeffijoe/awilix/issues/429), [#450](https://github.com/jeffijoe/awilix/pull/450))

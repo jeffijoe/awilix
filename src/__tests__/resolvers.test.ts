@@ -9,6 +9,53 @@ import { InjectionMode } from '../injection-mode.ts'
 import { AwilixTypeError } from '../errors.ts'
 import { aliasTo } from '../awilix.ts'
 
+it('resolves destructured constructors and factories with PROXY injection', () => {
+  type Cradle = {
+    db: string
+    initializers?: unknown[]
+  }
+
+  class Repo {
+    value: string
+
+    constructor({ db, initializers = [] }: Cradle) {
+      this.value = db + initializers.length
+    }
+
+    find(id: string, fallback: string) {
+      return id || fallback
+    }
+  }
+
+  const container = createContainer().register({
+    db: asValue('db'),
+    initializers: asValue(undefined),
+    repo: asClass(Repo),
+    factory: asFunction(
+      ({ db, initializers = [] }: Cradle) => db + initializers.length,
+    ),
+  })
+
+  assert.strictEqual(container.resolve('repo').value, 'db0')
+  assert.strictEqual(container.resolve('factory'), 'db0')
+})
+
+it('rejects mixed signatures when resolving with CLASSIC injection', () => {
+  const container = createContainer().register({
+    factory: asFunction(function factory(
+      db: string,
+      { initializers = [] }: { initializers?: unknown[] },
+    ) {
+      return db + initializers.length
+    }).classic(),
+  })
+
+  assert.throws(
+    () => container.resolve('factory'),
+    /CLASSIC injection does not support destructured parameters/,
+  )
+})
+
 const testFn = () => 1337
 const depsFn = (testClass: any) => testClass
 const multiDeps = (testClass: any, needsCradle: any) => {
